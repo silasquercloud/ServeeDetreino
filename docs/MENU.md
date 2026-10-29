@@ -15,9 +15,10 @@ Se estiver com uma cópia antiga, primeiro use `git pull`. O comando antigo `bas
 | Opção | Como funciona |
 | --- | --- |
 | **1 — Configurar Playit** | Instala o agente oficial, apresenta o link para vincular sua conta e cadastra host/porta do túnel. |
-| **2 — Instalar / atualizar servidor** | Exige etapa 1 concluída; compila Spigot 1.8.8 e TreinoHub, instala o plugin completo e configura `server.properties`. |
+| **2 — Instalar servidor completo** | Exige etapa 1 concluída; compila Spigot 1.8.8 e TreinoHub, instala o plugin completo e configura `server.properties`. |
 | **3 — Ligar e mostrar IP/porta** | Exige as etapas anteriores; pede aceite da EULA na primeira vez, inicia Playit + Minecraft e mostra os dados da conexão. |
 | **4 — Ver endereço salvo** | Exibe o host, a porta e o endereço cadastrado sem iniciar os processos. |
+| **5 — Atualizar servidor** | Com o servidor parado, busca o código por fast-forward, compila/testa e substitui o plugin com backup; preserva configurações e Playit. |
 | **0 — Sair** | Encerra o menu. |
 
 O estado de cada etapa aparece na tela. Uma falha não é marcada como conclusão; o erro é mostrado e você pode tentar de novo. Usar `stop` no console Minecraft encerra os dois processos e retorna ao menu.
@@ -65,3 +66,18 @@ O menu não aceita a EULA sozinho. Na primeira inicialização, exibe o link ofi
 Alvo: **Linux x64, Spigot 1.8.8, Java 8 e clientes Minecraft Java 1.8.9**. Java 17 é usado para compilar o plugin. O Playit portátil também tem binário ARM64, mas o conjunto Java/Spigot ARM64 não foi validado.
 
 Testes automatizados cobrem ordem das etapas, recusa da EULA, migração com backup, preservação de propriedades e distinção entre porta pública/local. A vinculação da sua conta e uma partida real com jogadores continuam dependendo do teste no seu ambiente.
+
+## Atualizar pela opção 5
+
+1. Se o servidor estiver ligado, digite `stop` no console e aguarde voltar ao menu.
+2. Escolha **5 — Atualizar servidor**.
+3. Aguarde a atualização do GitHub, os testes e a compilação.
+4. Escolha **3** para iniciar o plugin novo.
+
+Também funciona por `bash scripts/update.sh`. O atualizador mantém **Spigot 1.8.8**, troca o JAR TreinoHub e inclui as mudanças de mapas e comandos. Não muda automaticamente a versão do Minecraft.
+
+Playit, `server.properties`, EULA, mundos e configurações dos plugins são preservados. A versão anterior do JAR fica em `server/backups/`. Esta opção difere da instalação da opção 2, que reaplica as propriedades padrão do projeto.
+
+O atualizador bloqueia atualização enquanto o launcher estiver ativo e detecta o agente das versões anteriores. Faz `git pull --ff-only`; se houver código modificado localmente ou histórico divergente, informa o problema sem `reset`, sem apagar alterações e sem fazer stash automático. Uma compilação que falha mantém o plugin instalado; o código fonte pode já ter recebido o fast-forward.
+
+Parties e convites são temporários e precisam ser recriados depois que o servidor reiniciar.

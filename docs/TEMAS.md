@@ -47,4 +47,4 @@ Os testes verificam os materiais contra a API real da 1.8.8, espaço livre no sp
 
 **Ainda falta testar estas novas construções dentro de uma partida multiplayer real.** As prévias não certificam desempenho ou jogabilidade no cliente.
 
-Ao atualizar, pare com `stop`, execute `git pull`, abra `bash menu.sh`, escolha **2** para atualizar e **3** para iniciar. O setup Playit anterior é reaproveitado. O lobby novo usa um mundo próprio, sem modificar mapas pessoais da host.
+Ao atualizar, pare com `stop`, execute `git pull`, abra `bash menu.sh`, escolha **5** para atualizar e **3** para iniciar. O setup Playit anterior é reaproveitado. O lobby novo usa um mundo próprio, sem modificar mapas pessoais da host.

@@ -34,10 +34,11 @@ def dashboard():
     print(paint('  RYUEX TREINO  •  INSTALAÇÃO E CONTROLE', '1;35'))
     print('  Minecraft Java 1.8.9 | original + não original')
     print(paint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
-    print(f'  1  Configurar Playit                  [{configured}]')
-    print(f'  2  Instalar / atualizar servidor      [{available}]')
+    print(f"  1  {'Configurar Playit':<35}[{configured}]")
+    print(f"  2  {'Instalar servidor completo':<35}[{available}]")
     print('  3  Ligar servidor e mostrar IP/porta')
     print('  4  Ver endereço salvo e configuração')
+    print('  5  Atualizar servidor (preservar dados)')
     print('  0  Sair')
     print(paint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
     if ready:
@@ -68,6 +69,15 @@ def install():
     print('Inclui Spigot 1.8.8, TreinoHub, mapas, lobby, salas e server.properties.')
     print('A primeira compilação pode demorar vários minutos. Aguarde o resultado.\n')
     call(['bash', str(ROOT/'scripts/install.sh')])
+
+
+def update_server():
+    if not installed():
+        print('Instale primeiro pela opção 2.')
+        return
+    print('\nATUALIZAR SERVIDOR — pare com stop antes de continuar.')
+    print('A atualização preserva Playit, configurações e mundos; mantém Spigot 1.8.8.\n')
+    call(['bash', str(ROOT/'scripts/update.sh')])
 
 
 def ensure_eula():
@@ -120,7 +130,7 @@ def details():
 
 
 def main():
-    actions = {'1': configure, '2': install, '3': start, '4': details}
+    actions = {'1': configure, '2': install, '3': start, '4': details, '5': update_server}
     while True:
         try:
             dashboard()
@@ -129,7 +139,7 @@ def main():
                 print('Menu encerrado.')
                 return 0
             if choice not in actions:
-                print('Opção inválida. Use 1, 2, 3, 4 ou 0.')
+                print('Opção inválida. Use 1, 2, 3, 4, 5 ou 0.')
                 continue
             actions[choice]()
         except EOFError:

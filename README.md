@@ -4,7 +4,7 @@ BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Po
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-**[Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
+**[Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
 ![Lobby misto com quatro universos](docs/images/lobby.png)
 
@@ -24,6 +24,7 @@ bash menu.sh
 | **2 — Instalar servidor completo** | Compila Spigot 1.8.8 e TreinoHub, inclui mapas/lobby/salas e prepara `server.properties`. |
 | **3 — Ligar servidor e mostrar IP/porta** | Inicia Playit + Minecraft, exibe os dados para conectar e abre o console. |
 | **4 — Ver endereço salvo** | Consulta os dados sem iniciar o servidor. |
+| **5 — Atualizar servidor** | Busca as alterações do GitHub, compila/testa e atualiza o plugin com backup, preservando seus dados. |
 | **0 — Sair** | Fecha o menu. |
 
 A ordem da primeira instalação é **1 → 2 → 3**. O menu bloqueia etapas que dependem de uma anterior. Ao digitar `stop` no console do servidor, os processos são encerrados e você volta ao menu.
@@ -50,6 +51,26 @@ A tela mostra **host público, porta pública, endereço completo para colar no 
 [**Veja o guia detalhado do menu →**](docs/MENU.md)
 
 **O Playit fornece o túnel/endereço; a máquina onde você executa o projeto hospeda o servidor.** Ele não mantém uma máquina desligada online. Codespaces deve ser usado para desenvolvimento/testes do projeto, conforme os [termos do GitHub](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces).
+
+## Party com aceite clicável
+
+Convide seu amigo:
+
+```text
+/party NICK_DO_AMIGO
+```
+
+Ele recebe **[ACEITAR] [RECUSAR]** no chat e pode clicar. O convite expira em 60 segundos. Depois, o líder pode abrir o x1 para os dois:
+
+```text
+/party jogar bedfight onepiece
+```
+
+Ou reunir o grupo em uma sala em espera com `/party puxar <sala>`. Quando o líder cria ou entra numa sala pelo menu normal, a party inteira acompanha se houver vagas. A verificação é feita antes de mover alguém; jogadores em partidas em andamento não são retirados à força.
+
+**[Todos os comandos e regras de Party →](docs/PARTY.md)**
+
+Para receber estas alterações numa instalação existente: pare com `stop`, abra `bash menu.sh` e escolha **5 — Atualizar servidor**. Na primeira vez em uma cópia ainda sem essa opção, execute `git pull` para obter o novo menu.
 
 ## Escolha o modo, o tema e as vagas
 
@@ -92,12 +113,14 @@ BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméti
 | --- | --- |
 | [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, conectar amigos, comandos e teste em jogo. |
 | [docs/MENU.md](docs/MENU.md) | Opções do menu, etapas e endereço/porta. |
+| [docs/PARTY.md](docs/PARTY.md) | Convites clicáveis, comandos e entrada em grupo. |
 | [docs/PLAYIT.md](docs/PLAYIT.md) | Conta, túnel, endereço público e diagnóstico. |
 | [docs/GALERIA.md](docs/GALERIA.md) | Prévias visuais e instruções para screenshots reais. |
 | [docs/TEMAS.md](docs/TEMAS.md) | Temas, construções, seleção e compatibilidade dos mapas. |
 | [menu.sh](menu.sh) | Abre o menu com as etapas 1, 2 e 3. |
 | [scripts/setup.sh](scripts/setup.sh) | Entrada alternativa para o mesmo menu. |
 | [scripts/start.sh](scripts/start.sh) | Inicia os dois processos juntos. |
+| [scripts/update.sh](scripts/update.sh) | Atualiza com backup sem reconfigurar os dados locais. |
 | [config/server.properties](config/server.properties) | Configuração padrão do servidor. |
 | [src/main/java](src/main/java) | Código do plugin. |
 

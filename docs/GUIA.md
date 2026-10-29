@@ -107,4 +107,6 @@ Preserve IP/porta definidos pela host. Não copie essas propriedades sem conferi
 
 ## Atualizar
 
-Pare com `stop`, atualize os arquivos do repositório, abra `bash menu.sh`, escolha **2** para atualizar e **3** para ligar. Suas credenciais Playit ficam locais e não entram no GitHub. Não use `/reload` para atualizar o plugin.
+Pare com `stop`, atualize os arquivos do repositório, abra `bash menu.sh`, escolha **5** para atualizar e **3** para ligar. Suas credenciais Playit ficam locais e não entram no GitHub. Não use `/reload` para atualizar o plugin.
+
+Para jogar em grupo, veja [Party e convites clicáveis](PARTY.md). O líder pode usar `/party jogar bedfight onepiece` para abrir um x1 com a party de dois jogadores.

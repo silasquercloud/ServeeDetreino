@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Compilação reproduzível, inclusive sem Maven/JDK completo: Java 17+ e Python 3."""
 import hashlib
+import os
 import pathlib
 import shutil
 import subprocess
@@ -35,10 +36,10 @@ def main():
     sources = sorted((ROOT / 'src/main/java').rglob('*.java'))
     subprocess.run(['java', '-jar', str(CACHE/'ecj.jar'), '-1.8', '-proc:none', '-encoding', 'UTF-8', '-cp', str(CACHE/'spigot-api.jar'), '-d', str(classes), *map(str, sources)], check=True)
     tests = sorted((ROOT / 'src/test/java').rglob('*.java'))
-    subprocess.run(['java', '-jar', str(CACHE/'ecj.jar'), '-1.8', '-proc:none', '-encoding', 'UTF-8', '-cp', str(classes), '-d', str(TARGET/'test-classes'), *map(str, tests)], check=True)
-    import os
+    subprocess.run(['java', '-jar', str(CACHE/'ecj.jar'), '-1.8', '-proc:none', '-encoding', 'UTF-8', '-cp', str(classes)+os.pathsep+str(CACHE/'spigot-api.jar'), '-d', str(TARGET/'test-classes'), *map(str, tests)], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes'])), 'br.ryuex.treino.RulesTest'], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.MapArtTest'], check=True)
+    subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.PartyBookTest'], check=True)
     artifact = TARGET/'TreinoHub-1.0.0.jar' 
     with zipfile.ZipFile(artifact, 'w', zipfile.ZIP_DEFLATED) as out:
         for base in (classes, ROOT/'src/main/resources'):

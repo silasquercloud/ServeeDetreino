@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from runtime_lock import server_lock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PRIVATE = ROOT / '.private'
@@ -222,6 +223,11 @@ def setup():
 
 
 def run():
+    with server_lock(ROOT):
+        _run_locked()
+
+
+def _run_locked():
     data = check_ready()
     ensure_tools()
     agent = server = None

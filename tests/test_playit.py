@@ -3,9 +3,11 @@ import json
 import pathlib
 import tempfile
 import unittest
+import sys
 from unittest.mock import Mock, patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT/'scripts'))
 spec = importlib.util.spec_from_file_location('treino_playit', ROOT/'scripts/playit.py')
 playit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(playit)
@@ -15,7 +17,7 @@ class SetupTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.directory = pathlib.Path(self.temporary.name)
-        self.patcher = patch.multiple(playit, PRIVATE=self.directory, SECRET=self.directory/'secret', READY=self.directory/'ready.json', SOCKET=self.directory/'agent.sock')
+        self.patcher = patch.multiple(playit, ROOT=self.directory, PRIVATE=self.directory, SECRET=self.directory/'secret', READY=self.directory/'ready.json', SOCKET=self.directory/'agent.sock')
         self.patcher.start()
 
     def tearDown(self):

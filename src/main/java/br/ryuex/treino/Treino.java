@@ -19,6 +19,7 @@ import org.bukkit.generator.ChunkGenerator;
 /** One world per room. All state changes run on Bukkit's main thread. */
 public final class Treino extends JavaPlugin implements Listener {
     private final Map<Integer, Room> rooms = new LinkedHashMap<>();
+    private final PartyBook parties = new PartyBook();
     private final Map<UUID, Room> membership = new HashMap<>();
     private final Map<UUID, Mode> choosing = new HashMap<>();
     private final Map<UUID, MapArt.Theme> themes = new HashMap<>();
@@ -116,10 +117,11 @@ public final class Treino extends JavaPlugin implements Listener {
         if(!(sender instanceof Player)) { sender.sendMessage("Use este comando dentro do jogo."); return true; }
         Player p=(Player)sender;
         try {
+            if(cmd.getName().equalsIgnoreCase("party")) {partyCommand(p,args);return true;}
             if(args.length==0) menu(p);
             else if(args[0].equalsIgnoreCase("criar") && (args.length==3 || args.length==4)) {
                 Mode m=Mode.valueOf(args[1].toUpperCase(Locale.ROOT)); int n=Integer.parseInt(args[2]); create(p,m,n,args.length==4?MapArt.Theme.parse(args[3]):MapArt.Theme.POKEMON);
-            } else if(args[0].equalsIgnoreCase("entrar") && args.length==2) join(p,rooms.get(Integer.parseInt(args[1])));
+            } else if(args[0].equalsIgnoreCase("entrar") && args.length==2) enter(p,rooms.get(Integer.parseInt(args[1])));
             else if(args[0].equalsIgnoreCase("sair")) { leave(p); hub(p); }
             else if(args[0].equalsIgnoreCase("salas")) list(p);
             else if(args[0].equalsIgnoreCase("loja")) shop(p);
@@ -128,14 +130,87 @@ public final class Treino extends JavaPlugin implements Listener {
                 if(r!=null && r.owner.equals(p.getUniqueId()) && r.phase==Phase.WAITING && Rules.canStart(r.mode.name(),r.players.size())) { r.phase=Phase.COUNTDOWN; r.countdown=5; }
                 else msg(p,"Só o dono pode iniciar; precisa de 2 jogadores e número par no BedFight.");
             } else msg(p,"/treino criar <bedwars|bedfight|skywars> <vagas> [pokemon|evangelion|sonic|onepiece] | entrar <sala> | sair | salas | iniciar | loja");
-        } catch(IllegalArgumentException e) { msg(p,"Confira o modo, número de sala e vagas. Ex.: /treino criar skywars 6"); }
+        } catch(IllegalArgumentException e) { msg(p,e instanceof NumberFormatException?"Número inválido. Confira o ID da sala ou as vagas.":e.getMessage()!=null && e.getMessage().startsWith("No enum constant")?"Modo/tema inválido. Use bedwars, bedfight ou skywars; pokemon, evangelion, sonic ou onepiece.":e.getMessage()); }
         return true;
     }
+    private String playerName(UUID id) { Player p=Bukkit.getPlayer(id);return p==null?"desconectado":p.getName(); }
+    private void partySay(UUID member,String text) { for(UUID id:parties.members(member)) { Player p=Bukkit.getPlayer(id);if(p!=null)msg(p,"§d[PARTY] §f"+text); } }
+    private Player partyTarget(String value) {
+        Player target=Bukkit.getPlayerExact(value);
+        if(target==null)try {target=Bukkit.getPlayer(UUID.fromString(value));}catch(IllegalArgumentException ignored) { }
+        if(target==null)throw new IllegalArgumentException("Jogador não encontrado ou desconectado.");
+        return target;
+    }
+    private void partyCommand(Player p,String[] args) {
+        UUID me=p.getUniqueId();
+        if(args.length==0) {
+            msg(p,"§d/party <nick> §fconvida • §d/party aceitar <nick> §f• §d/party lista");
+            msg(p,"§d/party puxar [sala] §f• §d/party jogar <modo> [tema] §f• §d/party sair");
+            msg(p,"§d/party expulsar <nick> §f• §d/party lider <nick> §f• §d/party dissolver §f• §d/party chat <texto>");return;
+        }
+        String action=args[0].toLowerCase(Locale.ROOT);
+        if((action.equals("aceitar") || action.equals("accept")) && args.length==2) {
+            Player leader=partyTarget(args[1]);parties.accept(me,leader.getUniqueId(),System.currentTimeMillis());partySay(me,p.getName()+" entrou na party!");return;
+        }
+        if((action.equals("recusar") || action.equals("deny")) && args.length==2) { Player leader=partyTarget(args[1]);parties.decline(me,leader.getUniqueId());msg(p,"Convite recusado.");return; }
+        if(action.equals("lista") || action.equals("list")) {
+            if(parties.get(me)==null) {msg(p,"Você ainda não está em uma party. Use /party <nick>.");return;}
+            msg(p,"§dParty ("+parties.members(me).size()+"/12) §f• líder: "+playerName(parties.get(me).leader));
+            for(UUID id:parties.members(me))msg(p,"§7• §f"+playerName(id));return;
+        }
+        if(action.equals("sair") || action.equals("leave")) { partySay(me,p.getName()+" saiu da party.");parties.leave(me);return; }
+        if(action.equals("dissolver") || action.equals("disband")) {parties.requireLeader(me);partySay(me,"A party foi encerrada.");parties.disband(me);return;}
+        if((action.equals("expulsar") || action.equals("kick")) && args.length==2) {Player target=partyTarget(args[1]);parties.kick(me,target.getUniqueId());msg(target,"Você foi removido da party.");partySay(me,target.getName()+" foi removido.");return;}
+        if((action.equals("lider") || action.equals("promover")) && args.length==2) {Player target=partyTarget(args[1]);parties.promote(me,target.getUniqueId());partySay(me,target.getName()+" é o novo líder.");return;}
+        if(action.equals("chat") && args.length>=2) {if(parties.get(me)==null)throw new IllegalArgumentException("Você não está em uma party.");partySay(me,p.getName()+": "+String.join(" ",Arrays.copyOfRange(args,1,args.length)));return;}
+        if(action.equals("puxar") || action.equals("warp")) {
+            parties.requireLeader(me);Room target=args.length==2?rooms.get(Integer.parseInt(args[1])):membership.get(me);
+            gather(p,target,parties.members(me));return;
+        }
+        if(action.equals("jogar") && (args.length==2 || args.length==3)) {
+            parties.requireLeader(me);int n=parties.members(me).size();
+            if(n<2)throw new IllegalArgumentException("Convide pelo menos um amigo e aguarde ele aceitar.");
+            create(p,Mode.valueOf(args[1].toUpperCase(Locale.ROOT)),n,args.length==3?MapArt.Theme.parse(args[2]):MapArt.Theme.POKEMON);return;
+        }
+        String nick=(action.equals("convidar") || action.equals("invite")) && args.length==2?args[1]:args.length==1?args[0]:null;
+        if(nick==null)throw new IllegalArgumentException("Use /party para ver os comandos.");
+        Player target=partyTarget(nick);parties.invite(me,target.getUniqueId(),System.currentTimeMillis());
+        msg(p,"Convite enviado para §d"+target.getName()+"§f. Expira em 60 segundos.");
+        msg(target,"§d"+p.getName()+"§f convidou você para uma party. Clique para responder:");
+        target.spigot().sendMessage(PartyChat.invitation(me,p.getName()));
+    }
+    private List<UUID> travelling(Player leader) {
+        PartyBook.Party party=parties.get(leader.getUniqueId());
+        if(party==null)return Collections.singletonList(leader.getUniqueId());
+        parties.requireLeader(leader.getUniqueId());return parties.members(leader.getUniqueId());
+    }
+    private void canGather(Room target,List<UUID> group,int capacity) {
+        if(target!=null && target.phase!=Phase.WAITING && target.phase!=Phase.COUNTDOWN)throw new IllegalArgumentException("A sala já iniciou. Escolha uma sala em espera.");
+        int present=0;
+        for(UUID id:group) {
+            if(Bukkit.getPlayer(id)==null)throw new IllegalArgumentException("Todos da party precisam estar conectados.");
+            Room source=membership.get(id);
+            if(source!=null && source!=target && source.phase!=Phase.WAITING && source.phase!=Phase.COUNTDOWN)throw new IllegalArgumentException(playerName(id)+" ainda está em uma partida. Aguarde o término.");
+            if(source!=null && source==target)present++;
+        }
+        if(!PartyBook.fits(target==null?0:target.players.size(),present,group.size(),capacity))throw new IllegalArgumentException("Não há vagas para a party inteira. Ninguém foi movido.");
+    }
+    private void gather(Player leader,Room target,List<UUID> group) {
+        if(target==null)throw new IllegalArgumentException("Entre numa sala em espera ou use /party puxar <sala>.");
+        canGather(target,group,target.capacity);
+        for(UUID id:group) {
+            if(membership.get(id)==target)continue;
+            Player member=Bukkit.getPlayer(id);leave(member);join(member,target);
+        }
+        if(parties.get(leader.getUniqueId())!=null)partySay(leader.getUniqueId(),"Grupo reunido na sala #"+target.id+". §7"+target.mode+" / "+target.theme.title);
+    }
+    private void enter(Player p,Room target) { gather(p,target,travelling(p)); }
     private void create(Player p,Mode mode,int n,MapArt.Theme theme) {
-        if(membership.containsKey(p.getUniqueId())) { msg(p,"Saia da sala atual primeiro: /treino sair"); return; }
+        List<UUID> group=travelling(p);
+        canGather(null,group,n);
         if(!Rules.validCapacity(mode.name(),n)) { msg(p,"Vagas: SkyWars 2–12, BedWars 2–8, BedFight 2/4/6/8."); return; }
         if(rooms.size()>=getConfig().getInt("max-rooms",4)) { msg(p,"Limite de salas atingido. Aguarde uma terminar."); return; }
-        int id=nextId++; Room r=new Room(id,mode,n,p.getUniqueId(),theme); rooms.put(id,r); join(p,r);
+        int id=nextId++; Room r=new Room(id,mode,n,p.getUniqueId(),theme); rooms.put(id,r); gather(p,r,group);
         msg(p,"Sala §d#"+id+"§f criada. Amigos: §d/treino entrar "+id);
     }
     private void join(Player p,Room r) {
@@ -166,6 +241,7 @@ public final class Treino extends JavaPlugin implements Listener {
         }}.runTaskLater(this,80);
     }
     private void tick() {
+        parties.prune(System.currentTimeMillis());
         for(Room r:new ArrayList<>(rooms.values())) {
             if(r.phase==Phase.COUNTDOWN) { if(r.countdown<=0) r.start(); else { r.say("§eIniciando em "+r.countdown+"s"); r.countdown--; } }
             if(r.phase!=Phase.PLAYING) continue;
@@ -285,6 +361,11 @@ public final class Treino extends JavaPlugin implements Listener {
         inv.setItem(21,item(Material.SHEARS,1,"§fTesoura §7• 20 ferros")); inv.setItem(22,item(Material.IRON_PICKAXE,1,"§fPicareta §7• 20 ferros")); p.openInventory(inv);
     }
     @EventHandler public void click(InventoryClickEvent e) {
+        try {handleClick(e);}catch(IllegalArgumentException error) {
+            if(e.getWhoClicked() instanceof Player)msg((Player)e.getWhoClicked(),error.getMessage());
+        }
+    }
+    private void handleClick(InventoryClickEvent e) {
         if(!(e.getWhoClicked() instanceof Player)) return;
         Player p=(Player)e.getWhoClicked(); String title=e.getView().getTitle();
         if(!Arrays.asList(MENU,THEME,SIZE,LIST,SHOP).contains(title)) return;
@@ -297,7 +378,7 @@ public final class Treino extends JavaPlugin implements Listener {
             if(t!=null) { themes.put(p.getUniqueId(),t); sizeMenu(p,m); }
         }
         else if(title.equals(SIZE)) { Mode m=choosing.remove(p.getUniqueId()); MapArt.Theme t=themes.remove(p.getUniqueId()); if(m!=null && t!=null) { p.closeInventory(); create(p,m,i.getAmount(),t); } }
-        else if(title.equals(LIST)) join(p,rooms.get(Integer.parseInt(ChatColor.stripColor(i.getItemMeta().getDisplayName()).split(" ")[0].substring(1))));
+        else if(title.equals(LIST)) enter(p,rooms.get(Integer.parseInt(ChatColor.stripColor(i.getItemMeta().getDisplayName()).split(" ")[0].substring(1))));
         else {
             Room r=membership.get(p.getUniqueId()); if(r==null || r.phase!=Phase.PLAYING || r.mode!=Mode.BEDWARS || !r.alive(p.getUniqueId()) || r.respawning.contains(p.getUniqueId())) return;
             int slot=e.getRawSlot(),cost; Material currency;
@@ -351,7 +432,11 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @EventHandler public void death(PlayerDeathEvent e) { Room r=membership.get(e.getEntity().getUniqueId()); if(r!=null) { e.getDrops().clear(); e.setDroppedExp(0); } }
     @EventHandler public void respawn(PlayerRespawnEvent e) { Room r=membership.get(e.getPlayer().getUniqueId()); e.setRespawnLocation(r==null?lobby:r.waiting()); if(r!=null) new BukkitRunnable(){public void run(){knockOut(e.getPlayer(),r);}}.runTaskLater(this,1); }
-    @EventHandler public void quit(PlayerQuitEvent e) { leave(e.getPlayer()); }
+    @EventHandler public void quit(PlayerQuitEvent e) {
+        UUID id=e.getPlayer().getUniqueId();
+        if(parties.get(id)!=null)partySay(id,e.getPlayer().getName()+" desconectou e saiu da party.");
+        parties.leave(id);leave(e.getPlayer());
+    }
     @EventHandler public void join(PlayerJoinEvent e) { hub(e.getPlayer()); }
     @EventHandler public void food(FoodLevelChangeEvent e) { if(e.getEntity() instanceof Player && e.getEntity().getWorld().getName().startsWith("treino_")) e.setCancelled(true); }
     @EventHandler public void explosion(EntityExplodeEvent e) { if(e.getLocation().getWorld().getName().startsWith("treino_")) e.setCancelled(true); }

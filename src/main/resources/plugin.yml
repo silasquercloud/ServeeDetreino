@@ -9,3 +9,7 @@ commands:
     description: Abre o menu de modos e salas.
     aliases: [jogar, sala, hubtreino]
     usage: /treino
+  party:
+    description: Party com convites clicáveis e entrada em grupo nas salas.
+    aliases: [p]
+    usage: /party

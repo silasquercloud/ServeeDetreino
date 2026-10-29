@@ -47,16 +47,17 @@ final class BedwarsItems {
         add(6,"WATER_BUCKET",1,0,3,"GOLD_INGOT","Balde de água","item");
         add(7,"IRON_SWORD",1,0,4,"DIAMOND","Afiação I permanente","sharpness");
         add(7,"IRON_CHESTPLATE",1,0,2,"DIAMOND","Proteção I permanente","protection");
-        add(7,"FURNACE",1,0,4,"DIAMOND","Forja II • ferro a cada segundo","forge");
+        add(7,"FURNACE",1,0,4,"DIAMOND","Forja II • 2 ferros/s e ouro mais rápido","forge");
     }
     static List<Entry> category(int category) { List<Entry> result=new ArrayList<>(); for(Entry e:ALL)if(e.category==category)result.add(e);return result; }
     static String currencyName(String currency) {return currency.equals("IRON_INGOT")?"ferros":currency.equals("GOLD_INGOT")?"ouros":currency.equals("DIAMOND")?"diamantes":"esmeraldas";}
     static String key(Entry entry) {return entry.action+":"+entry.material;}
     static int tier(String material) { return material.startsWith("DIAMOND")?3:material.startsWith("IRON")?2:1; }
+    static int ironAmount(boolean forge) {return forge?2:1;}
     static int interval(String resource,int elapsed,boolean forge) {
         int tier=elapsed>=480?3:elapsed>=240?2:1;
-        if(resource.equals("IRON_INGOT"))return forge?1:2;
-        if(resource.equals("GOLD_INGOT"))return forge?4:8;
+        if(resource.equals("IRON_INGOT"))return 1;
+        if(resource.equals("GOLD_INGOT"))return forge?3:5;
         if(resource.equals("DIAMOND"))return tier==3?15:tier==2?20:30;
         return tier==3?30:tier==2?40:60;
     }

@@ -2,3 +2,7 @@
 max-rooms: 4
 # Após esse tempo, camas somem e jogadores longe do centro recebem dano.
 sudden-death-seconds: 600
+
+# Administradores autorizados pelo dono. Em modo offline, proteja esses nicks.
+administrators:
+  - Salabim_zz

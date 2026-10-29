@@ -2,7 +2,7 @@
 
 [← Início](../README.md) · [Ver galeria](GALERIA.md) · [Instalação](GUIA.md)
 
-Os quatro temas podem ser usados em **BedWars, BedFight e SkyWars**. Escolha pelo menu: **modo → tema → vagas**. Pelo comando, informe o tema depois das vagas.
+Os quatro temas podem ser usados em **BedWars, BedFight e SkyWars**. O menu usa **modo → solo/duplas → vagas**. O tema é sorteado por partida. Administradores podem indicar um tema no comando para testar; para jogadores comuns, o sorteio é obrigatório.
 
 | Tema | Identificador | Construções |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ São construções próprias inspiradas nesses universos, feitas com materiais n
 /treino criar skywars 8 sonic
 ```
 
-Vagas continuam obedecendo às regras: SkyWars 2–12; BedWars 2–8; BedFight 2/4/6/8. As ilhas ficam com centros a 42 blocos do centro da arena. A base normal tem raio de 8 blocos, com construções e camadas inferiores; o centro tem raio de 13. Não há pontes prontas nas partidas: construí-las faz parte do treino.
+Vagas continuam obedecendo às regras: SkyWars 2–12; BedWars 2–8; BedFight 2/4/6/8. As ilhas ficam com centros a 42 blocos do centro da arena. As bases têm contorno orgânico em torno de 8 blocos de raio, com construções e camadas inferiores; o centro tem raio de 13. Não há pontes prontas nas partidas: construí-las faz parte do treino.
 
 ## Lobby misto
 
@@ -48,3 +48,11 @@ Os testes verificam os materiais contra a API real da 1.8.8, espaço livre no sp
 **Ainda falta testar estas novas construções dentro de uma partida multiplayer real.** As prévias não certificam desempenho ou jogabilidade no cliente.
 
 Ao atualizar, pare com `stop`, execute `git pull`, abra `bash menu.sh`, escolha **5** para atualizar e **3** para iniciar. O setup Playit anterior é reaproveitado. O lobby novo usa um mundo próprio, sem modificar mapas pessoais da host.
+
+## Direção visual 1.2
+
+Ilhas com contorno orgânico, corpo rochoso mais profundo, caminhos iluminados e praças. Pokémon ganhou jardins/entrada; Green Hill, cascata decorativa de vidro azul, flores e relevos quadriculados; Evangelion, sinalização industrial e luzes vermelhas; One Piece, cais e postes de lanterna. BedWars/BedFight incluem forja coberta e balcão temático. As decorações usam blocos nativos 1.8.8; a cascata é vidro, sem simular fluido.
+
+Referências públicas encontradas para a direção visual: [Greenhill / Tails Workshop](https://www.planetminecraft.com/project/tails-workshop/), [Simple Pokecenter](https://www.planetminecraft.com/project/simple-pokecenter-pokemon-center/) e [PokéIsland](https://www.planetminecraft.com/project/pokisland/). São referências de composição e linguagem visual; nenhum mapa, schematic ou imagem desses autores foi incorporado ao projeto. Não se alega que este layout seja o mais popular ou uma cópia desses trabalhos.
+
+A galeria é regenerada com os mesmos blocos do código sempre que esta geometria muda. As imagens continuam sendo prévias técnicas; aparência final, textura e iluminação precisam ser vistas no cliente.

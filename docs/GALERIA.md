@@ -4,6 +4,14 @@
 
 **Prévias técnicas das construções implementadas; não são screenshots do Minecraft.** As posições e materiais são exportados diretamente de `MapArt.java`, o mesmo gerador usado pelo plugin. O render usa cores e faces simplificadas, sem reproduzir texturas, transparências, HUD ou formas especiais de itens/cercas.
 
+## Forja e arena • versão 1.2
+
+Forja coberta e iluminada, presente em BedWars e BedFight. Os contadores flutuantes e o vendedor são entidades adicionadas no jogo; as projeções abaixo mostram a geometria em blocos.
+
+![Forja temática implementada](images/forge.png)
+
+![BedWars Green Hill com forjas](images/bedwars-sonic.png)
+
 ## Lobby misto • quatro universos
 
 Praça central, quatro alas decoradas, pontes iluminadas com bordas e arcos nas cores de cada tema. Explore tudo a pé e use a bússola para jogar.
@@ -58,9 +66,9 @@ Navio pirata, mastro, vela com caveira em blocos, monumento do chapéu de palha 
 
 </details>
 
-## Menu de temas
+## Menu de equipes
 
-A sequência agora é **modo → tema → vagas**. As siglas da prévia representam os itens usados no inventário real: redstone, olho do Ender, ouro e barco.
+A sequência agora é **modo → solo/duplas → vagas**. O tema é sorteado por sala. Na prévia, as etiquetas representam os itens reais de espada/cama.
 
 ![Disposição do menu de temas](images/menu.png)
 

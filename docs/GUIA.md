@@ -73,7 +73,7 @@ Ao atualizar uma instalação anterior, a opção **2** faz backup do arquivo ex
 
 ## 5. Criar e jogar
 
-Use a bússola ou `/treino`. Escolha modo → tema → vagas. Passe o ID da sala aos amigos.
+Use a bússola ou `/treino`. Escolha modo → solo/duplas → vagas (tema sorteado). Passe o ID da sala aos amigos.
 
 | Comando | Função |
 | --- | --- |

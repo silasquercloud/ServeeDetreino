@@ -16,6 +16,11 @@ public final class RulesTest {
             check(!Rules.sameDuel(team,(team+2)%8),"Não permitir dano entre duelos diferentes");
         }
         check(!Rules.validCapacity("OUTRO",2),"Modo desconhecido rejeitado");
+        check(Rules.validCapacity("BEDWARS",4,2),"duplas de BedWars com 4 vagas");
+        check(!Rules.validCapacity("BEDWARS",2,2),"duplas precisam de dois times completos");
+        check(!Rules.validCapacity("BEDFIGHT",6,2),"BedFight 2v2 não deixa um time sem adversário");
+        check(Rules.canStart("BEDFIGHT",8,2),"dois duelos 2v2 completos");
+        check(Rules.team(0,2)==Rules.team(1,2) && Rules.team(1,2)!=Rules.team(2,2),"parceiros na mesma base");
         System.out.println("RulesTest: OK — vagas, início e isolamento de duelos");
     }
 }

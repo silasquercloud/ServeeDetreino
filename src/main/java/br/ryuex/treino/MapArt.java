@@ -9,7 +9,8 @@ public final class MapArt {
         POKEMON("Pokémon",14), EVANGELION("Evangelion",10), SONIC("Sonic",11), ONEPIECE("One Piece",1);
         public final String title; public final int color;
         Theme(String title,int color) { this.title=title; this.color=color; }
-        public static Theme parse(String text) { return valueOf(text.toUpperCase(Locale.ROOT).replace("_", "").replace("-", "")); }
+        public static Theme random() {return values()[java.util.concurrent.ThreadLocalRandom.current().nextInt(values().length)];}
+        public static Theme parse(String text) {if(text.equalsIgnoreCase("aleatorio") || text.equalsIgnoreCase("random"))return random();return valueOf(text.toUpperCase(Locale.ROOT).replace("_", "").replace("-", "")); }
     }
     public static final class Cell {
         public final int x,y,z,data; public final String material;
@@ -118,9 +119,12 @@ public final class MapArt {
     }
     public static Scene island(Theme theme,int radius) {
         Scene s=new Scene();
-        for(int depth=0;depth<=6;depth++) {
-            int r=depth==0?radius:Math.max(1,radius-(depth-1)*2);
-            s.disk(0,-depth,0,r,depth==0?"GRASS":depth<3?"DIRT":"STONE",0);
+        for(int depth=0;depth<=8;depth++) {
+            double base=Math.max(1,radius-depth*0.85);
+            for(int x=-radius-1;x<=radius+1;x++)for(int z=-radius-1;z<=radius+1;z++) {
+                double angle=Math.atan2(z,x),edge=base+0.65*Math.sin(angle*3)+0.4*Math.cos(angle*5);
+                if(x*x+z*z<=edge*edge)s.set(x,-depth,z,depth==0?"GRASS":depth<3?"DIRT":"STONE");
+            }
         }
         if(theme==Theme.SONIC) {
             for(Cell b:new ArrayList<>(s.cells())) if(b.y<0) s.set(b.x,b.y,b.z,"STAINED_CLAY",(Math.floorMod(b.x,4)/2+Math.floorMod(b.z,4)/2+Math.floorMod(b.y,4)/2)%2==0?12:1);
@@ -131,17 +135,59 @@ public final class MapArt {
             s.disk(0,0,0,radius,"SANDSTONE",0);
             for(int x=-radius;x<=radius;x++) for(int z=-radius;z<=radius;z++) if(x*x+z*z<=radius*radius && x*x+z*z>(radius-1)*(radius-1)) s.set(x,0,z,"STAINED_GLASS",3);
         }
+        // Walkable approach and a framed plaza; all furniture/bed lanes stay clear.
+        String paving=theme==Theme.ONEPIECE?"WOOD":theme==Theme.EVANGELION?"STAINED_CLAY":"SMOOTH_BRICK";
+        for(int z=-radius+1;z<=2;z++)for(int x=-1;x<=1;x++)s.set(x,0,z,paving,theme==Theme.EVANGELION?15:0);
+        for(int z=-radius+2;z<=1;z+=3)for(int x:new int[]{-2,2})s.set(x,0,z,"SEA_LANTERN");
+        if(theme==Theme.POKEMON) {
+            for(int x:new int[]{-6,6}) {s.box(x,1,-2,x,1,2,"LEAVES",4);s.set(x,2,0,"RED_ROSE");}
+            s.box(-4,0,1,4,0,1,"QUARTZ_BLOCK",0);
+        } else if(theme==Theme.SONIC) {
+            // Sculpted ledges, classic checker cliff, sunflowers and a decorative blue-glass cascade.
+            for(int y=-7;y<=1;y++)s.set(7,y,0,"STAINED_GLASS",3);
+            for(int x:new int[]{-6,6}){s.set(x,1,-4,"FENCE");s.set(x,2,-4,"FENCE");s.set(x,3,-4,"WOOL",4);s.set(x,3,-5,"STAINED_CLAY",12);}
+            s.box(4,1,2,7,1,4,"STAINED_CLAY",12);s.box(4,2,2,7,2,4,"GRASS",0);
+        } else if(theme==Theme.EVANGELION) {
+            for(int x:new int[]{-7,7}){s.box(x,1,0,x,4,1,"SMOOTH_BRICK",0);s.set(x,5,0,"REDSTONE_BLOCK");}
+            for(int z=-radius+2;z<-4;z++)s.set(0,0,z,z%2==0?"WOOL":"STAINED_CLAY",z%2==0?4:15);
+        } else {
+            for(int x:new int[]{-6,6})for(int z=-4;z<=1;z++)s.set(x,0,z,"WOOD",1);
+            for(int x:new int[]{-6,6}){s.set(x,1,-4,"FENCE");s.set(x,2,-4,"SEA_LANTERN");}
+        }
         decorate(s,theme,radius>=13?4:0);
+        if(radius>=13) {
+            for(int x:new int[]{-10,10})for(int z:new int[]{-5,5}){s.box(x,1,z,x,3,z,"QUARTZ_BLOCK",0);s.set(x,4,z,"SEA_LANTERN");}
+            for(int x=-9;x<=9;x++)s.set(x,0,-8,theme==Theme.SONIC?"GOLD_BLOCK":"QUARTZ_BLOCK");
+        }
         return s;
+    }
+    /** Open-front forge: safe pickup lane, solid floor and a lit canopy. */
+    public static Scene forge(Theme theme) {
+        Scene s=new Scene();
+        for(int x=-2;x<=2;x++)for(int z=-5;z<=-1;z++)s.set(x,0,z,"SMOOTH_BRICK");
+        s.set(-1,0,-3,"IRON_BLOCK");s.set(1,0,-3,"GOLD_BLOCK");s.set(0,0,-3,"SEA_LANTERN");
+        for(int x:new int[]{-2,2}) {s.box(x,1,-5,x,3,-5,"QUARTZ_BLOCK",0);s.box(x,1,-2,x,3,-2,"QUARTZ_BLOCK",0);}
+        s.box(-2,1,-5,2,2,-5,"SMOOTH_BRICK",0);s.set(0,1,-5,"FURNACE");
+        s.box(-2,4,-5,2,4,-2,"STAINED_CLAY",theme.color);s.set(0,3,-5,"SEA_LANTERN");
+        return s;
+    }
+    public static Scene shopKiosk(Theme theme) {
+        Scene s=new Scene();s.set(-2,1,0,"WORKBENCH");
+        for(int x:new int[]{-3,-1})s.box(x,1,1,x,3,1,"FENCE",0);
+        s.box(-3,4,-1,-1,4,1,"WOOL",theme.color);s.set(-2,4,0,"SEA_LANTERN");return s;
+    }
+    public static Scene emeraldOutpost() {
+        Scene s=new Scene();s.disk(0,0,0,2,"QUARTZ_BLOCK",0);s.set(0,0,0,"EMERALD_BLOCK");
+        for(int x:new int[]{-2,2})s.set(x,0,0,"SEA_LANTERN");return s;
     }
     public static int[] diamondPosition(int index) {double angle=Math.PI/4+index*Math.PI/2;return new int[]{(int)Math.round(Math.cos(angle)*24),(int)Math.round(Math.sin(angle)*24)};}
     public static Scene diamondOutpost(Theme theme) {
         Scene s=new Scene();s.disk(0,0,0,4,"SMOOTH_BRICK",0);s.disk(0,-1,0,3,"STONE",0);s.disk(0,-2,0,2,"STONE",0);
-        s.set(0,0,0,"DIAMOND_BLOCK");for(int x:new int[]{-3,3})for(int z:new int[]{-1,1})s.set(x,0,z,"WOOL",theme.color);
+        s.set(0,0,0,"DIAMOND_BLOCK");for(int x:new int[]{-3,3})for(int z:new int[]{-2,2}){s.set(x,1,z,"QUARTZ_BLOCK");s.set(x,2,z,"SEA_LANTERN");}for(int x:new int[]{-3,3})for(int z:new int[]{-1,1})s.set(x,0,z,"WOOL",theme.color);
         return s;
     }
     public static Scene bedwarsArena(Theme theme,int count) {
-        Scene s=arena(theme,count,true);for(int i=0;i<4;i++){int[] p=diamondPosition(i);s.add(diamondOutpost(theme),p[0],0,p[1]);}return s;
+        Scene s=arena(theme,count,true);s.add(emeraldOutpost(),0,0,0);for(int i=0;i<4;i++){int[] p=diamondPosition(i);s.add(diamondOutpost(theme),p[0],0,p[1]);}return s;
     }
     public static Scene center(Theme theme) { return island(theme,13); }
     public static Scene lobby() {
@@ -186,7 +232,7 @@ public final class MapArt {
             double angle=2*Math.PI*i/count;int x=(int)Math.round(Math.cos(angle)*42),z=(int)Math.round(Math.sin(angle)*42);
             s.add(island(theme,8),x,0,z);
             if(beds) {
-                s.set(x+2,1,z,"BED_BLOCK",0);s.set(x+2,1,z+1,"BED_BLOCK",8);s.set(x-2,1,z,"WORKBENCH");
+                s.set(x+2,1,z,"BED_BLOCK",0);s.set(x+2,1,z+1,"BED_BLOCK",8);s.add(forge(theme),x,0,z);s.add(shopKiosk(theme),x,0,z);
             } else { s.set(x+2,1,z,"CHEST");s.set(x-2,1,z,"CHEST"); }
         }
         if(!beds) {s.set(0,1,0,"CHEST");s.set(3,1,3,"CHEST");s.set(-3,1,-3,"CHEST");}
@@ -201,7 +247,7 @@ public final class MapArt {
     }
     public static void main(String[] args) throws IOException {
         File dir=new File(args.length==0?".cache/scenes":args[0]);dir.mkdirs();
-        export(lobby(),new File(dir,"lobby.json"));
+        export(lobby(),new File(dir,"lobby.json"));export(forge(Theme.SONIC),new File(dir,"forge.json"));export(bedwarsArena(Theme.SONIC,4),new File(dir,"bedwars-sonic.json"));
         export(bedwarsArena(Theme.POKEMON,4),new File(dir,"bedwars.json"));
         export(arena(Theme.ONEPIECE,2,true),new File(dir,"bedfight.json"));
         for(Theme t:Theme.values()) { export(island(t,8),new File(dir,t.name().toLowerCase(Locale.ROOT)+".json"));export(arena(t,6,false),new File(dir,"arena-"+t.name().toLowerCase(Locale.ROOT)+".json")); }

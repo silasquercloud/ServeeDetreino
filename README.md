@@ -10,9 +10,9 @@ BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Po
 
 > As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
 
-## Atualização: BedWars, party e correções
+## Atualização 1.2: forjas, duplas e bots
 
-Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
+Forjas cobertas com hologramas, loja em BedWars **e BedFight**, solo/duplas, bots básicos de treino e OP configurado para **Salabim_zz**. Temas sorteados por partida. Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
 
 Para quem já está jogando: digite `stop` no console atual, espere encerrar, execute `git pull` e `bash menu.sh`, escolha **5** e depois **3**. Nas próximas sessões, a opção **6** ou `bash scripts/stop.sh` permite parar de outro terminal.
 
@@ -83,18 +83,18 @@ Ou reunir o grupo em uma sala em espera com `/party puxar <sala>`. Quando o líd
 
 Para receber estas alterações numa instalação existente: pare com `stop`, abra `bash menu.sh` e escolha **5 — Atualizar servidor**. Na primeira vez em uma cópia ainda sem essa opção, execute `git pull` para obter o novo menu.
 
-## Escolha o modo, o tema e as vagas
+## Escolha o modo, solo/duplas e as vagas
 
 | Modo | Vagas | O que está implementado |
 | --- | --- | --- |
 | **BedWars** | 2–8 | Solo, camas, loja por categorias/favoritos, bola de fogo, estilingue, golem, TNT, armaduras/melhorias permanentes e geradores de quatro recursos. |
-| **BedFight** | 2/4/6/8 | Pares de duelos 1x1, kit pronto, blocos, cama e respawn. Seis vagas = três duelos. |
+| **BedFight** | Solo 2/4/6/8; duplas 4/8 | Duelos 1x1 ou 2v2, kit inicial, cama, forja, loja e respawn. |
 | **SkyWars** | 2–12 | Uma ilha por jogador, baús nas bases e no centro, espectador, vitória e reposição aos 3 minutos. |
 
-Use a bússola ou `/treino`: **modo → tema → vagas**. Todos os quatro temas estão disponíveis nos três modos. [Veja os mapas e comandos de cada tema](docs/TEMAS.md). Exemplo para seis amigos em One Piece:
+Use a bússola ou `/treino`: **modo → solo/duplas → vagas**, com tema aleatório. Todos os quatro temas estão disponíveis nos três modos. [Veja os mapas e comandos de cada tema](docs/TEMAS.md). Exemplo para seis amigos com tema aleatório:
 
 ```text
-/treino criar skywars 6 onepiece
+/treino criar skywars 6
 /treino entrar 1
 ```
 

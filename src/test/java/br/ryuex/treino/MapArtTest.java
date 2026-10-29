@@ -3,6 +3,10 @@ import java.util.*;
 public final class MapArtTest {
     static void check(boolean value,String message) { if(!value) throw new AssertionError(message); }
     public static void main(String[] args) throws Exception {
+        MapArt.Scene forge=MapArt.forge(MapArt.Theme.SONIC);
+        check(forge.at(0,0,-3).material.equals("SEA_LANTERN"),"forja tem ponto iluminado de coleta");
+        check(forge.at(0,1,-3)==null && forge.at(0,2,-3)==null,"jogador consegue entrar na forja");
+        check(forge.at(0,4,-3)!=null,"forja tem cobertura");
         Set<String> signatures=new HashSet<>();
         for(MapArt.Theme theme:MapArt.Theme.values()) {
             MapArt.Scene island=MapArt.island(theme,8);
@@ -19,7 +23,7 @@ public final class MapArtTest {
             for(int[] chest:new int[][]{{0,0},{3,3},{-3,-3}}) check(center.at(chest[0],2,chest[1])==null,"Center chest must open: "+theme);
             Set<String> palette=new HashSet<>();
             for(MapArt.Cell b:island.cells()) {
-                check(b.y>=-6 && b.y<=19,"Playable height envelope");
+                check(b.y>=-8 && b.y<=19,"Playable height envelope");
                 palette.add(b.material+":"+b.data);
                 // Use the actual 1.8.8 API without coupling the geometry source to Bukkit.
                 Class.forName("org.bukkit.Material").getMethod("valueOf",String.class).invoke(null,b.material);

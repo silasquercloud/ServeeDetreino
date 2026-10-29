@@ -47,7 +47,7 @@ Com dois membros, isso cria uma sala BedFight 1x1 com duas vagas, entra com os d
 
 ## Escolher pelo menu normal
 
-O líder também pode usar a bússola ou `/treino`, escolher modo, tema e vagas. Ao criar ou entrar em uma sala em espera, a party toda acompanha. `/treino entrar ID` também acompanha esse comportamento.
+O líder também pode usar a bússola ou `/treino`, escolher modo, solo/duplas e vagas (tema sorteado). Ao criar ou entrar em uma sala em espera, a party toda acompanha. `/treino entrar ID` também acompanha esse comportamento.
 
 Membros que não são líderes devem aguardar o líder para criar/entrar em grupo. A party tem até **12 membros**, mas o modo continua com seus limites:
 

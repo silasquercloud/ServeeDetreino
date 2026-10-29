@@ -10,7 +10,7 @@ public final class BedwarsItemsTest {
         for(int category=0;category<8;category++)check(BedwarsItems.category(category).size()>0 && BedwarsItems.category(category).size()<=36,"categorias cabem na loja");
         for(BedwarsItems.Entry e:BedwarsItems.ALL)check(e.cost>0 && e.amount>0 && e.amount<=64,"quantidades válidas");
         check(BedwarsItems.interval("DIAMOND",480,false)<BedwarsItems.interval("DIAMOND",0,false),"diamantes evoluem");
-        check(BedwarsItems.interval("IRON_INGOT",0,true)<BedwarsItems.interval("IRON_INGOT",0,false),"forja melhora ferro");
+        check(BedwarsItems.ironAmount(true)>BedwarsItems.ironAmount(false),"forja melhora ferro");
         System.out.println("BedwarsItemsTest: OK — camas, catálogo, evolução e forja");
     }
 }

@@ -2,7 +2,7 @@
 
 [← Início](../README.md) · [Menu de controle](MENU.md) · [Party](PARTY.md) · [Galeria](GALERIA.md)
 
-Versão interna dos plugins: **1.1.0**. Os nomes dos arquivos JAR permanecem estáveis para substituir a instalação anterior sem carregar duas cópias.
+TreinoHub **1.2.0**; TreinoAntiLag **1.1.0**. Os nomes dos arquivos JAR permanecem estáveis para substituir a instalação anterior sem carregar duas cópias.
 
 ## Aplicar em uma instalação existente
 
@@ -23,6 +23,46 @@ bash scripts/stop.sh
 
 O launcher encaminha `stop` ao console Minecraft, aguarda seu encerramento e fecha o Playit. A solicitação pertence à execução atual; pedidos antigos não param uma nova sessão. Não abre RCON na internet, não usa `kill -9` e não atualiza o servidor enquanto o launcher estiver ativo. Se o salvamento demorar mais de dois minutos, a ferramenta informa o atraso e deixa o processo terminar; confira o console. O script de parada não instala dependências nem faz downloads.
 
+## Forjas, duplas, bots e administração • 1.2.0
+
+O gerador da base agora é uma construção: piso de ferro/ouro iluminado, bancada de fornalha, colunas e cobertura temática. O holograma mostra ferro por segundo e contagem do ouro. O balcão tem um manequim vendedor clicável; é uma entidade ArmorStand estática, não um NPC humano. O BedFight usa a mesma loja e forja, com diamante a cada 30 segundos (limite 4) e esmeralda a cada 45 segundos (limite 2) na própria base. BedWars mantém os postos externos e o centro. Esses minérios são a moeda da loja; não existe saldo virtual em reais/cash.
+
+Menu: **modo → solo/duplas → vagas**. O tema é sorteado por sala, entre os quatro temas. Jogadores comuns não forçam o tema por comando; administradores podem escolher um tema para testes.
+
+**Duplas** usam uma base e cama para dois jogadores. Parceiros são definidos pela ordem de entrada, dois a dois; ao entrar pela party, os membros acompanham essa ordem. Melhorias são do time; armaduras/ferramentas são individuais. BedFight duplas é **2v2**, com 4 ou 8 vagas totais. BedWars duplas aceita 4/6/8; SkyWars duplas aceita 4/6/8/10/12. A sala só começa com times completos e pelo menos dois times.
+
+```text
+/treino criar bedwars 4 aleatorio duplas
+/treino criar bedfight 4 aleatorio duplas
+/party jogar bedwars aleatorio duplas
+```
+
+Para testar sozinho:
+
+```text
+/treino criar bedfight 2
+/treino bots 1
+/treino iniciar
+```
+
+Para testar duplas sozinho, crie 4 vagas com `aleatorio duplas` e adicione 3 bots. Bots ocupam vagas reais. São **zumbis controlados**, com IA básica: procuram adversários, constroem pontes de lã, tentam quebrar blocos de defesa/camas, atacam, renascem se tiverem cama e são eliminados sem ela. Não têm skin/combate idêntico a jogador, não compram na loja e podem ficar presos em obstáculos complexos. Em SkyWars, também não saqueiam baús. Não são jogadores falsos no TAB. Encerrar a sala remove o mundo e os bots; sair sendo o último humano encerra a sala. Bots não entram no ranking.
+
+**Salabim_zz** foi incluído em `administrators`. Após instalar e reiniciar, recebe OP ao entrar. A lista é gravada no config do plugin; remova o nome da lista e use `deop` se quiser revogar. Como o servidor está em modo offline, a concessão depende do nick e não verifica a conta Microsoft.
+
+Como administrador, explore sem partida:
+
+```text
+/treino mapa sonic
+/treino mapa pokemon
+/treino mapa evangelion
+/treino mapa onepiece
+/treino sair
+```
+
+A prévia abre em Creative, com voo e geometria das arenas/forjas. Os hologramas/vendedores são entidades criadas nas salas reais; não aparecem na prévia geométrica. O comando não altera o mundo do lobby.
+
+**PvP:** proteção explícita de 2 segundos ao nascer, encerrada ao atacar; dano entre aliados e entre pares distintos de BedFight é bloqueado, inclusive de projéteis/golems. O intervalo nativo de dano da 1.8 é mantido; não foi instalado um motor de knockback nem alegada equivalência ao Mush.
+
 ## Camas e visibilidade
 
 O clique esquerdo na cama agora segue para o evento de quebra; apenas o direito é bloqueado para impedir dormir/explodir. A própria cama permanece protegida. Destruir qualquer metade da cama inimiga remove as duas e impede novos renascimentos. BedFight só permite destruir a cama do oponente do par.
@@ -31,7 +71,7 @@ A espera acontece no mundo do lobby. **A plataforma de vidro acima da arena foi 
 
 ## Loja
 
-Abra pela bancada da base ou `/treino loja`. A loja tem **Blocos, Espadas, Armaduras, Ferramentas, Arcos, Poções, Utilidades, Melhorias e Compra rápida**. As compras usam os recursos do inventário. `Shift + clique` adiciona/remove favoritos da compra rápida, salvos por jogador.
+Disponível em **BedWars e BedFight**. Abra pelo vendedor manequim sobre a bancada, pela própria bancada ou `/treino loja`. A loja tem **Blocos, Espadas, Armaduras, Ferramentas, Arcos, Poções, Utilidades, Melhorias e Compra rápida**. As compras usam os recursos do inventário. `Shift + clique` adiciona/remove favoritos da compra rápida, salvos por jogador.
 
 | Categoria | Itens / comportamento |
 | --- | --- |
@@ -46,7 +86,7 @@ Abra pela bancada da base ou `/treino loja`. A loja tem **Blocos, Espadas, Armad
 | Golem | 120 ferros; use o ovo sobre bloco com espaço livre. Defende contra adversários da sala, não ataca o dono, dura 45 segundos, limite de 2 por jogador. |
 | TNT | 4 ouros; acende ao colocar, pavio de 3 segundos. |
 | Outras utilidades | Pérola, maçã dourada e balde de água com fluxo limitado à arena. |
-| Melhorias | Afiação I por 4 diamantes, Proteção I por 2 diamantes e Forja II por 4 diamantes. Permanecem na partida. |
+| Melhorias | Afiação I por 4 diamantes, Proteção I por 2 diamantes e Forja II por 4 diamantes. São compartilhadas pela dupla e permanecem na partida. |
 
 TNT e bola de fogo só destroem blocos colocados por jogadores. Ilhas originais, camas, vidro e obsidiana são preservados; pedra do End resiste à bola de fogo. A cama precisa ser quebrada à mão. O vidro protege o próprio bloco; não há simulação de escudo de explosão para os blocos atrás dele nesta versão.
 
@@ -54,8 +94,8 @@ TNT e bola de fogo só destroem blocos colocados por jogadores. Ilhas originais,
 
 | Recurso | Intervalo inicial | Limite acumulado por gerador |
 | --- | --- | --- |
-| Ferro | 2 segundos; 1 segundo com Forja II | 48 |
-| Ouro | 8 segundos; 4 segundos com Forja II | 12 |
+| Ferro | 1 unidade por segundo; 2 com Forja II | 64 |
+| Ouro | 5 segundos; 3 segundos com Forja II | 16 |
 | Diamante | Quatro ilhas intermediárias: 30 → 20 → 15 segundos | 4 |
 | Esmeralda | Centro: 60 → 40 → 30 segundos | 4 |
 
@@ -84,7 +124,7 @@ Esta análise é de fontes públicas, **não uma inspeção completa do servidor
 | Loja por categorias, compra rápida, favoritos | Implementados; favoritos individuais por Shift + clique. |
 | Bola de fogo, estilingue, golem, TNT, melhorias | Implementados com regras documentadas acima. |
 | Classificação e estatísticas | Ranking local total por modo; sem temporadas, XP ou recompensas. |
-| Party e convites | Aceite/recusa clicáveis, menu e barra lateral. As modalidades atuais são solo/duelos, não times. |
+| Party e convites | Aceite/recusa clicáveis, menu e barra lateral. Solo e duplas com mesma base/cama, sem dano entre aliados. |
 | Editor de hotbar, importar favoritos de outro jogador, missões e cosméticos | Não implementados. |
 | Todas as armadilhas, percevejos, ovo de ponte, torre compacta, compra usando baús | Não implementados. |
 | Mapa Green Hill do Mush / mapas de terceiros | Não incluídos. O tema Sonic/Green Hill é a construção própria do projeto. Não foi encontrado um mapa autorizado do Mush para redistribuir. |

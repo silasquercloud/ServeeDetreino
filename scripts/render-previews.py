@@ -14,7 +14,7 @@ FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 BOLD='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 WOOL=['#eee9df','#e5752b','#bc58c4','#74bbd6','#e1c638','#75b832','#dd88a7','#3b4145','#8b9192','#238c9a','#773fa8','#3258a6','#765238','#4e743a','#bf3544','#222834']
 CLAY=['#c7a98e','#c87944','#a3647a','#8c9eaa','#c3a14b','#8e9955','#bb7e7f','#615449','#9b8072','#668a8b','#805a8d','#515e7c','#76523c','#65714a','#a95340','#36353c']
-COLORS={'GRASS':'#6ba64b','DIRT':'#87603f','STONE':'#858b98','QUARTZ_BLOCK':'#e2e2e9','SMOOTH_BRICK':'#879095','SEA_LANTERN':'#c0eee0','GOLD_BLOCK':'#f6ce4f','LOG':'#94704a','LEAVES':'#458448','HAY_BLOCK':'#d6b148','CHEST':'#d59938','WORKBENCH':'#b88651','SANDSTONE':'#d9c794','WOOD':'#b88a53','FENCE':'#aa7e4d','BED_BLOCK':'#d84f67','STAINED_GLASS':'#75c1cf'}
+COLORS={'GRASS':'#6ba64b','DIRT':'#87603f','STONE':'#858b98','QUARTZ_BLOCK':'#e2e2e9','SMOOTH_BRICK':'#879095','SEA_LANTERN':'#c0eee0','GOLD_BLOCK':'#f6ce4f','LOG':'#94704a','LEAVES':'#458448','HAY_BLOCK':'#d6b148','CHEST':'#d59938','WORKBENCH':'#b88651','SANDSTONE':'#d9c794','WOOD':'#b88a53','FENCE':'#aa7e4d','BED_BLOCK':'#d84f67','IRON_BLOCK':'#d9dce1','DIAMOND_BLOCK':'#68dbdf','EMERALD_BLOCK':'#42c487','FURNACE':'#515a68','REDSTONE_BLOCK':'#bc303b','RED_ROSE':'#e34459','STAINED_GLASS':'#75c1cf'}
 THEMES={'pokemon':('POKÉMON','Centro Pokémon • Pokébola • árvores e ilhas de grama','#f28595'),'evangelion':('EVANGELION','Tokyo-3 • pirâmide • cabeça de EVA e detalhes verde-lima','#b6a0ff'),'sonic':('SONIC / GREEN HILL','Loop • argolas douradas • palmeiras e falésias quadriculadas','#7eb9ff'),'onepiece':('ONE PIECE','Navio pirata • vela e caveira • monumento do chapéu de palha','#f4c66f')}
 def font(n,bold=False):
     try:return ImageFont.truetype(BOLD if bold else FONT,n)
@@ -43,6 +43,7 @@ def card(title,subtitle,accent):
 
 def render(name,filename,title,subtitle,accent,scale=None):
     cells=json.loads((SCENES/filename).read_text())
+    if name=='forge':cells=[[-x,y,-z,material,data] for x,y,z,material,data in cells]  # look into the open entrance
     blocks={(x,y,z):(material,data) for x,y,z,material,data in cells}
     # Camera faces the front (-Z) and the right side (+X), so façades/skull are visible.
     raw=[((x+z),(x-z)*.5-y) for x,y,z,_,_ in cells]
@@ -63,20 +64,20 @@ def render(name,filename,title,subtitle,accent,scale=None):
     im.quantize(colors=256).save(OUT/(name+'.png'),optimize=True)
 
 def menu():
-    im,d=card('ESCOLHA O TEMA DA SUA SALA','Modo → tema → vagas → jogar com os amigos','#c5a4ff')
+    im,d=card('SOLO OU DUPLAS','Modo → equipes → vagas → tema sorteado ao criar a sala','#c5a4ff')
     x0,y0,sz=250,290,123
     for row in range(3):
         for col in range(9):
             x=x0+col*sz;y=y0+row*sz
             d.rounded_rectangle((x,y,x+sz-10,y+sz-10),radius=9,fill='#222735',outline='#3a4358',width=2)
-    for slot,label,accent in [(10,'POKÉ',THEMES['pokemon'][2]),(12,'EVA',THEMES['evangelion'][2]),(14,'SONIC',THEMES['sonic'][2]),(16,'PIRATA',THEMES['onepiece'][2])]:
+    for slot,label,accent in [(11,'SOLO','#f0c66f'),(15,'DUPLAS','#82d3ed')]:
         x=x0+slot%9*sz;y=y0+slot//9*sz
         d.rounded_rectangle((x+5,y+5,x+sz-15,y+sz-15),radius=8,fill='#2c2941',outline=accent,width=3)
-        d.text((x+13,y+40),label,font=font(20,True),fill=accent)
-    for i,(key,(title,sub,accent)) in enumerate(THEMES.items()):
-        x=110+i*380;d.text((x,755),title.split(' /')[0],font=font(23,True),fill=accent)
-        d.text((x,800),'Escolha no inventário',font=font(17),fill='#b0bbcf')
-    d.text((110,899),'Dentro do jogo aparecem os itens Minecraft. Esta imagem mostra a disposição dos slots.',font=font(20),fill='#a4b3c9')
+        d.text((x+13,y+40),label,font=font(19,True),fill=accent)
+    d.text((110,755),'CADA PARTIDA, UMA SURPRESA',font=font(32,True),fill='#f2ecff')
+    d.text((110,820),'Pokémon • Evangelion • Sonic / Green Hill • One Piece',font=font(25),fill='#b9c5db')
+    d.text((110,882),'Duplas compartilham cama e melhorias. Armaduras e ferramentas são individuais.',font=font(22),fill='#91aecb')
+    d.text((110,940),'Prévia da disposição real dos slots; não é screenshot do Minecraft.',font=font(19),fill='#919ab3')
     im.quantize(colors=256).save(OUT/'menu.png',optimize=True)
 
 if __name__=='__main__':
@@ -86,6 +87,8 @@ if __name__=='__main__':
     for key,(title,sub,accent) in THEMES.items():
         render(key,key+'.json',title+' / ILHA TEMÁTICA',sub,accent)
         render('arena-'+key,'arena-'+key+'.json',title+' / SKYWARS PARA 6','Seis bases temáticas • baús nas bases e centro • pontes construídas na partida',accent)
+    render('forge','forge.json','FORJA / RECURSOS DA BASE','Ferro e ouro • cobertura temática • piso iluminado • espaço livre para coletar','#79b9ff')
+    render('bedwars-sonic','bedwars-sonic.json','BEDWARS / GREEN HILL','Forjas cobertas • balcões • postos de diamantes • centro de esmeraldas','#79b9ff')
     render('lobby','lobby.json','LOBBY / QUATRO UNIVERSOS','Praça central • quatro alas temáticas • pontes iluminadas e portais coloridos','#c6afff')
     render('bedwars','bedwars.json','BEDWARS / POKÉMON','Quatro bases com cama • Centro Pokémon em cada ilha • loja e geradores',THEMES['pokemon'][2])
     render('bedfight','bedfight.json','BEDFIGHT / ONE PIECE','Duelo 1x1 entre ilhas piratas • kit pronto e camas • cenário de treino',THEMES['onepiece'][2])

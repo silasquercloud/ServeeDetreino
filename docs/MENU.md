@@ -10,6 +10,29 @@ bash menu.sh
 
 Se estiver com uma cópia antiga, primeiro use `git pull`. O comando antigo `bash scripts/setup.sh` também abre o mesmo menu.
 
+## Dependências automáticas antes do menu
+
+`menu.sh` começa em Bash, verifica o Python e usa o gerenciador de pacotes para instalar o que estiver faltando **antes** de chamar `menu.py`. Depois prepara o Java correto e baixa o Playit oficial. A entrada alternativa `scripts/setup.sh` usa exatamente o mesmo caminho.
+
+Instalar, iniciar e atualizar também verificam/carregam esse ambiente. No Codespace existente, basta `git pull` e `bash menu.sh`; não é necessário reconstruir o container para corrigir o erro da falta de Python. Em um Codespace novo, o `postCreateCommand` já executa essa preparação.
+
+| Dependência | Como é preparada |
+| --- | --- |
+| Python 3, venv, pip, Pillow | Pacotes da distribuição. |
+| Git, curl, CA, tar/gzip, unzip/zip e bibliotecas/fontes | Pacotes da distribuição. |
+| JDK 17 para compilação | Usa um JDK existente ou instala Temurin 17.0.21+9 com hash verificado. |
+| JDK 8 para Spigot/BuildTools | Usa um JDK existente ou instala Temurin 8u504-b01 com hash verificado. |
+| Playit agente e CLI | Release 1.1.0 oficial, com SHA-256 fixo. |
+| Maven usado pelo BuildTools | Baixado pelo próprio BuildTools durante a compilação do servidor. |
+
+Os JDKs baixados ficam em `.toolchains/`, ignorada pelo Git, e as variáveis de Java só são aplicadas aos processos do projeto. O bootstrap não vincula automaticamente uma conta Playit nem aceita a EULA; essas etapas continuam nas opções 1 e 3.
+
+Para preparar/verificar apenas as dependências, sem abrir o menu:
+
+```bash
+bash scripts/bootstrap.sh
+```
+
 ## As opções
 
 | Opção | Como funciona |

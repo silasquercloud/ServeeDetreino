@@ -2,6 +2,8 @@
 set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+bash scripts/bootstrap.sh
+source scripts/env.sh
 source scripts/java8.sh
 python3 scripts/playit.py check
 [[ -f server/server.jar && -f server/plugins/TreinoHub-1.0.0.jar ]] || { echo 'Execute bash scripts/install.sh primeiro.'; exit 1; }

@@ -10,7 +10,7 @@ O Playit cria um túnel entre um endereço público e o Minecraft na sua máquin
 bash menu.sh
 ```
 
-1. No menu, escolha **1 — Configurar Playit**. Aguarde o download e a verificação dos dois binários oficiais.
+1. Ao abrir `bash menu.sh`, o bootstrap instala as dependências e baixa/verifica os dois binários oficiais. Escolha **1 — Configurar Playit** para vincular o agente à sua conta.
 2. O terminal mostrará um link de `playit.gg/claim/...`. Abra-o, entre na sua conta Playit e vincule esse agente. Não precisa colar senha ou token no terminal.
 3. Volte ao terminal. O assistente aguarda a aprovação e a ativação do agente.
 4. No [painel de túneis](https://playit.gg/account/tunnels), crie um túnel com os dados abaixo.
@@ -71,6 +71,7 @@ As duas pastas são ignoradas pelo Git. A pasta privada usa permissão 700; os a
 | Endereço desconhecido | Copie exatamente o hostname e a porta do painel; não use `https://` nem URL `app.github.dev`. |
 | “You are not whitelisted” | No console: `whitelist add NICK` se você tiver ativado a whitelist; o padrão atual é desligado. |
 | Agente já em execução | Pare a execução anterior do launcher antes de iniciar outra. |
+| `python3: not found` ao abrir uma cópia antiga | Execute `git pull` e `bash menu.sh`; o bootstrap novo instala Python antes de usá-lo. |
 | Falha de download/conexão | Confira acesso ao GitHub, ao serviço Playit e a política de rede da máquina usada. Não desative TLS. |
 
 Em Codespaces, use o projeto para desenvolvimento/testes; Playit não transforma o serviço em uma host permanente. A vinculação da sua conta e uma conexão pública real **ainda precisam ser verificadas por você**.

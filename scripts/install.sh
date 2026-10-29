@@ -2,6 +2,8 @@
 set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+bash scripts/bootstrap.sh
+source scripts/env.sh
 python3 scripts/playit.py check
 python3 scripts/build.py
 source scripts/java8.sh

@@ -6,15 +6,18 @@
 
 Opção mais simples para desenvolver/testar: [criar um Codespace](https://codespaces.new/silasquercloud/ServeeDetreino). O contêiner prepara Java 17 e Java 8. Ao abrir, ele mostra o comando inicial e não instala o servidor antes do Playit.
 
-Em uma máquina Linux própria, instale Git, Python 3, curl, Java 17 para compilar o plugin e Java 8 para executar/compilar o Spigot. Clone o repositório e abra o terminal dentro dele.
+O próprio `bash menu.sh` verifica as dependências antes de abrir o Python. Se faltar algo, instala Python 3, Git, curl, certificados, utilitários de arquivo, Pillow/fontes para a galeria, JDK 17, JDK 8 e os binários do Playit. Não é necessário executar comandos manuais de Java/Python antes de começar.
 
-Caso o Java 8 não seja encontrado automaticamente, indique seu executável:
+O bootstrap reconhece `apt-get` em Ubuntu/Debian e `pacman` em Arch/CachyOS. Para pacotes de sistema é necessário root ou sudo; em uma máquina pessoal o sudo pode pedir a senha normalmente. Java e Playit são preparados em pastas locais e reaproveitados nas próximas execuções.
+
+No Codespace já aberto com o erro `python3: not found`, no terminal:
 
 ```bash
-export JAVA8_BIN=/caminho/real/do/jdk8/bin/java
+git pull
+bash menu.sh
 ```
 
-Troque o caminho pelo da sua instalação. No Codespace isso normalmente é automático.
+A primeira preparação pode demorar por causa dos downloads. O script mostra a dependência sendo preparada e para com erro se a instalação ou a verificação de hash falhar.
 
 ## 2. Abrir o menu e instalar
 

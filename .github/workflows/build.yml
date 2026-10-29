@@ -12,7 +12,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: python3 -m unittest discover -s tests -v
-      - run: bash -n menu.sh scripts/update.sh scripts/setup.sh scripts/install.sh scripts/start.sh scripts/welcome.sh scripts/java8.sh
+      - run: bash -n menu.sh scripts/update.sh scripts/setup.sh scripts/install.sh scripts/start.sh scripts/welcome.sh scripts/java8.sh scripts/bootstrap.sh scripts/env.sh
       - run: python3 scripts/test-playit-agent.py
         timeout-minutes: 3
       - run: python3 scripts/build.py
@@ -21,3 +21,26 @@ jobs:
           name: TreinoHub-1.0.0
           path: target/TreinoHub-1.0.0.jar
           if-no-files-found: error
+
+  bootstrap-clean:
+    name: Dependências em Ubuntu limpo
+    runs-on: ubuntu-latest
+    container: ubuntu:24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar todas as dependências sem Python pré-instalado
+        run: bash scripts/bootstrap.sh
+      - name: Conferir Java 17, Java 8, Python e Playit
+        shell: bash
+        run: |
+          source scripts/env.sh
+          python3 --version
+          javac -version
+          "$JAVA8_BIN" -version
+          .tools/playit-cli version
+      - name: Testar agente Playit sem vincular conta
+        run: python3 scripts/test-playit-agent.py
+      - name: Abrir e fechar o menu preparado
+        shell: bash
+        run: printf '0\n' | bash menu.sh

@@ -27,6 +27,10 @@ bash menu.sh
 | **5 — Atualizar servidor** | Busca as alterações do GitHub, compila/testa e atualiza o plugin com backup, preservando seus dados. |
 | **0 — Sair** | Fecha o menu. |
 
+Antes de abrir o menu, o próprio script verifica e instala o que faltar: **Python 3, Git, curl, certificados, utilitários, JDK 17, JDK 8 e os dois binários oficiais do Playit**. Isso também corrige um Codespace existente com `python3: not found`; não é necessário recriar o ambiente. O bootstrap não instala nem inicia o servidor antes das opções abaixo.
+
+O alvo principal é Ubuntu 24.04/Debian no Codespace. Os pacotes de sistema usam `apt-get` (ou `pacman` no Arch/CachyOS); pode ser necessário sudo para instalar pacotes. As ferramentas Java ficam locais, com versão/hash fixados em [config/toolchains.json](config/toolchains.json), sem trocar o Java padrão do sistema. Downloads já verificados são reutilizados.
+
 A ordem da primeira instalação é **1 → 2 → 3**. O menu bloqueia etapas que dependem de uma anterior. Ao digitar `stop` no console do servidor, os processos são encerrados e você volta ao menu.
 
 A opção 3 pede o aceite da [EULA do Minecraft](https://aka.ms/MinecraftEULA) na primeira inicialização. Se concordar, digite `ACEITO`; sem isso, o servidor não é iniciado. Nas próximas sessões, basta abrir o menu e escolher **3**.

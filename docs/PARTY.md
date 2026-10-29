@@ -72,3 +72,7 @@ Se o líder desconectar ou sair, um membro restante assume. Trocar líder ou dis
 Pare com `stop`, abra `bash menu.sh`, escolha **5 — Atualizar servidor** e, ao terminar, **3 — Ligar**. Para uma cópia antiga que ainda não tem a opção 5, execute `git pull` uma vez para obter o novo menu.
 
 Testes automatizados cobrem conteúdo dos cliques, posse/expiração dos convites, permissão do líder, limite de membros e cálculo das vagas. **O clique e a transferência completa ainda precisam ser testados dentro de uma partida real com clientes 1.8.9.**
+
+## Menu e barra lateral
+
+No lobby, clique com a etiqueta **Minha party** para ver todos os membros e os botões de puxar/sair. A barra lateral do lobby e das partidas mostra líder, tamanho do grupo e até quatro membros com sua sala. Grupos maiores mostram o total adicional; `/party lista` exibe todos. A classificação local abre pela estrela ou `/ranking`.

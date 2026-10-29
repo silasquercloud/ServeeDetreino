@@ -4,11 +4,17 @@ BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Po
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-**[Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
+**[BedWars / novidades](docs/BEDWARS.md) · [Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
 ![Lobby misto com quatro universos](docs/images/lobby.png)
 
 > As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
+
+## Atualização: BedWars, party e correções
+
+Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
+
+Para quem já está jogando: digite `stop` no console atual, espere encerrar, execute `git pull` e `bash menu.sh`, escolha **5** e depois **3**. Nas próximas sessões, a opção **6** ou `bash scripts/stop.sh` permite parar de outro terminal.
 
 ## Comece pelo menu
 
@@ -24,7 +30,8 @@ bash menu.sh
 | **2 — Instalar servidor completo** | Compila Spigot 1.8.8 e TreinoHub, inclui mapas/lobby/salas e prepara `server.properties`. |
 | **3 — Ligar servidor e mostrar IP/porta** | Inicia Playit + Minecraft, exibe os dados para conectar e abre o console. |
 | **4 — Ver endereço salvo** | Consulta os dados sem iniciar o servidor. |
-| **5 — Atualizar servidor** | Busca as alterações do GitHub, compila/testa e atualiza o plugin com backup, preservando seus dados. |
+| **5 — Atualizar servidor** | Busca as alterações do GitHub, compila/testa e atualiza TreinoHub + TreinoAntiLag com backup, preservando seus dados. |
+| **6 — Parar servidor** | Envia `stop`, espera salvar e encerra Minecraft + Playit (também funciona de outro terminal). |
 | **0 — Sair** | Fecha o menu. |
 
 Antes de abrir o menu, o próprio script verifica e instala o que faltar: **Python 3, Git, curl, certificados, utilitários, JDK 17, JDK 8 e os dois binários oficiais do Playit**. Isso também corrige um Codespace existente com `python3: not found`; não é necessário recriar o ambiente. O bootstrap não instala nem inicia o servidor antes das opções abaixo.
@@ -80,7 +87,7 @@ Para receber estas alterações numa instalação existente: pare com `stop`, ab
 
 | Modo | Vagas | O que está implementado |
 | --- | --- | --- |
-| **BedWars** | 2–8 | Solo, camas, respawn, loja na bancada, geradores de ferro/ouro e esmeralda no centro. |
+| **BedWars** | 2–8 | Solo, camas, loja por categorias/favoritos, bola de fogo, estilingue, golem, TNT, armaduras/melhorias permanentes e geradores de quatro recursos. |
 | **BedFight** | 2/4/6/8 | Pares de duelos 1x1, kit pronto, blocos, cama e respawn. Seis vagas = três duelos. |
 | **SkyWars** | 2–12 | Uma ilha por jogador, baús nas bases e no centro, espectador, vitória e reposição aos 3 minutos. |
 

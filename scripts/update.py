@@ -36,22 +36,42 @@ def update():
         execute(['git', 'pull', '--ff-only'])
         print('Compilando e testando o plugin atualizado...', flush=True)
         execute([sys.executable, 'scripts/build.py'])
-        source = ROOT/'target/TreinoHub-1.0.0.jar'
-        with zipfile.ZipFile(source) as artifact:
-            if artifact.testzip() is not None or 'plugin.yml' not in artifact.namelist():
-                raise RuntimeError('O novo plugin é inválido. O JAR instalado foi mantido.')
+        names = ['TreinoHub-1.0.0.jar', 'TreinoAntiLag-1.0.0.jar']
+        for name in names:
+            with zipfile.ZipFile(ROOT/'target'/name) as artifact:
+                if artifact.testzip() is not None or 'plugin.yml' not in artifact.namelist():
+                    raise RuntimeError('O novo plugin é inválido: '+name+'. Os JARs instalados foram mantidos.')
         backups = ROOT/'server/backups'
         backups.mkdir(exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-%f')
-        backup = backups/('TreinoHub-'+stamp+'.jar')
-        shutil.copy2(destination, backup)
-        temporary = destination.with_suffix('.jar.new')
+        originals = {}
+        staged = []
         try:
-            shutil.copy2(source, temporary)
-            temporary.replace(destination)
+            for name in names:
+                dest = ROOT/'server/plugins'/name
+                backup = backups/(stamp+'-'+name)
+                originals[dest] = backup if dest.exists() else None
+                if dest.exists():
+                    shutil.copy2(dest, backup)
+                temporary = dest.with_suffix('.jar.new')
+                staged.append((temporary, dest))
+                shutil.copy2(ROOT/'target'/name, temporary)
+            replaced = []
+            try:
+                for temporary, dest in staged:
+                    temporary.replace(dest)
+                    replaced.append(dest)
+            except OSError:
+                for dest in reversed(replaced):
+                    if originals[dest] is None:
+                        dest.unlink(missing_ok=True)
+                    else:
+                        shutil.copy2(originals[dest], dest)
+                raise
         finally:
-            temporary.unlink(missing_ok=True)
-        print('Atualização concluída. Backup do plugin anterior: '+backup.name)
+            for temporary, dest in staged:
+                temporary.unlink(missing_ok=True)
+        print('Atualização concluída: TreinoHub + TreinoAntiLag. Backups em server/backups/'+stamp+'-*')
         print('Playit, server.properties, EULA, mundos e configurações dos plugins foram preservados.')
         print('Base mantida: Spigot 1.8.8 / cliente 1.8.9. Escolha 3 no menu para ligar.')
 

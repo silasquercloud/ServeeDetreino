@@ -40,13 +40,19 @@ def main():
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes'])), 'br.ryuex.treino.RulesTest'], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.MapArtTest'], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.PartyBookTest'], check=True)
+    subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes'])), 'br.ryuex.treino.BedwarsItemsTest'], check=True)
+    subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.BedwarsEventsTest'], check=True)
     artifact = TARGET/'TreinoHub-1.0.0.jar' 
     with zipfile.ZipFile(artifact, 'w', zipfile.ZIP_DEFLATED) as out:
         for base in (classes, ROOT/'src/main/resources'):
             for path in sorted(base.rglob('*')):
-                if path.is_file():
+                if path.is_file() and not str(path.relative_to(base)).startswith('br/ryuex/antilag/'):
                     out.write(path, path.relative_to(base))
-    print('Plugin compilado: ' + str(artifact))
+    with zipfile.ZipFile(TARGET/'TreinoAntiLag-1.0.0.jar', 'w', zipfile.ZIP_DEFLATED) as out:
+        out.writestr('plugin.yml', 'name: TreinoAntiLag\nversion: 1.1.0\nmain: br.ryuex.antilag.TreinoAntiLag\nauthor: Ryuex\ncommands:\n  treinolag:\n    description: Indicadores de desempenho do treino.\n    permission: treino.admin\npermissions:\n  treino.admin:\n    default: op\n')
+        for path in sorted((classes/'br/ryuex/antilag').rglob('*.class')):
+            out.write(path, path.relative_to(classes))
+    print('Plugins compilados: TreinoHub-1.0.0.jar + TreinoAntiLag-1.0.0.jar')
 
 if __name__ == '__main__':
     main()

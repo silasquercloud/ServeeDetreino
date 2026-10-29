@@ -39,6 +39,7 @@ def dashboard():
     print('  3  Ligar servidor e mostrar IP/porta')
     print('  4  Ver endereço salvo e configuração')
     print('  5  Atualizar servidor (preservar dados)')
+    print('  6  Parar servidor com segurança')
     print('  0  Sair')
     print(paint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
     if ready:
@@ -130,7 +131,7 @@ def details():
 
 
 def main():
-    actions = {'1': configure, '2': install, '3': start, '4': details, '5': update_server}
+    actions = {'1': configure, '2': install, '3': start, '4': details, '5': update_server, '6': lambda: call(['bash', str(ROOT/'scripts/stop.sh')])}
     while True:
         try:
             dashboard()
@@ -139,7 +140,7 @@ def main():
                 print('Menu encerrado.')
                 return 0
             if choice not in actions:
-                print('Opção inválida. Use 1, 2, 3, 4, 5 ou 0.')
+                print('Opção inválida. Use 1, 2, 3, 4, 5, 6 ou 0.')
                 continue
             actions[choice]()
         except EOFError:

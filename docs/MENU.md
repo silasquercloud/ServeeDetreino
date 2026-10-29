@@ -42,6 +42,7 @@ bash scripts/bootstrap.sh
 | **3 — Ligar e mostrar IP/porta** | Exige as etapas anteriores; pede aceite da EULA na primeira vez, inicia Playit + Minecraft e mostra os dados da conexão. |
 | **4 — Ver endereço salvo** | Exibe o host, a porta e o endereço cadastrado sem iniciar os processos. |
 | **5 — Atualizar servidor** | Com o servidor parado, busca o código por fast-forward, compila/testa e substitui o plugin com backup; preserva configurações e Playit. |
+| **6 — Parar com segurança** | Envia `stop` ao launcher atual, espera salvar e encerra Playit; pode ser usado em outro terminal. |
 | **0 — Sair** | Encerra o menu. |
 
 O estado de cada etapa aparece na tela. Uma falha não é marcada como conclusão; o erro é mostrado e você pode tentar de novo. Usar `stop` no console Minecraft encerra os dois processos e retorna ao menu.
@@ -97,10 +98,12 @@ Testes automatizados cobrem ordem das etapas, recusa da EULA, migração com bac
 3. Aguarde a atualização do GitHub, os testes e a compilação.
 4. Escolha **3** para iniciar o plugin novo.
 
-Também funciona por `bash scripts/update.sh`. O atualizador mantém **Spigot 1.8.8**, troca o JAR TreinoHub e inclui as mudanças de mapas e comandos. Não muda automaticamente a versão do Minecraft.
+Também funciona por `bash scripts/update.sh`. O atualizador mantém **Spigot 1.8.8**, troca os JARs TreinoHub e TreinoAntiLag e inclui as mudanças de mapas e comandos. Não muda automaticamente a versão do Minecraft.
 
 Playit, `server.properties`, EULA, mundos e configurações dos plugins são preservados. A versão anterior do JAR fica em `server/backups/`. Esta opção difere da instalação da opção 2, que reaplica as propriedades padrão do projeto.
 
 O atualizador bloqueia atualização enquanto o launcher estiver ativo e detecta o agente das versões anteriores. Faz `git pull --ff-only`; se houver código modificado localmente ou histórico divergente, informa o problema sem `reset`, sem apagar alterações e sem fazer stash automático. Uma compilação que falha mantém o plugin instalado; o código fonte pode já ter recebido o fast-forward.
 
 Parties e convites são temporários e precisam ser recriados depois que o servidor reiniciar.
+
+A parada de outro terminal funciona nas sessões iniciadas após esta atualização. Se o servidor já estava ligado com a versão antiga, use `stop` no console original nesta primeira vez. [BedWars, loja, classificação e detalhes da parada →](BEDWARS.md)

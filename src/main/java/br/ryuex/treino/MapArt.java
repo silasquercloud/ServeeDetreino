@@ -134,6 +134,15 @@ public final class MapArt {
         decorate(s,theme,radius>=13?4:0);
         return s;
     }
+    public static int[] diamondPosition(int index) {double angle=Math.PI/4+index*Math.PI/2;return new int[]{(int)Math.round(Math.cos(angle)*24),(int)Math.round(Math.sin(angle)*24)};}
+    public static Scene diamondOutpost(Theme theme) {
+        Scene s=new Scene();s.disk(0,0,0,4,"SMOOTH_BRICK",0);s.disk(0,-1,0,3,"STONE",0);s.disk(0,-2,0,2,"STONE",0);
+        s.set(0,0,0,"DIAMOND_BLOCK");for(int x:new int[]{-3,3})for(int z:new int[]{-1,1})s.set(x,0,z,"WOOL",theme.color);
+        return s;
+    }
+    public static Scene bedwarsArena(Theme theme,int count) {
+        Scene s=arena(theme,count,true);for(int i=0;i<4;i++){int[] p=diamondPosition(i);s.add(diamondOutpost(theme),p[0],0,p[1]);}return s;
+    }
     public static Scene center(Theme theme) { return island(theme,13); }
     public static Scene lobby() {
         Scene s=new Scene();
@@ -193,7 +202,7 @@ public final class MapArt {
     public static void main(String[] args) throws IOException {
         File dir=new File(args.length==0?".cache/scenes":args[0]);dir.mkdirs();
         export(lobby(),new File(dir,"lobby.json"));
-        export(arena(Theme.POKEMON,4,true),new File(dir,"bedwars.json"));
+        export(bedwarsArena(Theme.POKEMON,4),new File(dir,"bedwars.json"));
         export(arena(Theme.ONEPIECE,2,true),new File(dir,"bedfight.json"));
         for(Theme t:Theme.values()) { export(island(t,8),new File(dir,t.name().toLowerCase(Locale.ROOT)+".json"));export(arena(t,6,false),new File(dir,"arena-"+t.name().toLowerCase(Locale.ROOT)+".json")); }
         System.out.println("Exported exact map geometry to "+dir);

@@ -12,14 +12,14 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: python3 -m unittest discover -s tests -v
-      - run: bash -n menu.sh scripts/update.sh scripts/setup.sh scripts/install.sh scripts/start.sh scripts/welcome.sh scripts/java8.sh scripts/bootstrap.sh scripts/env.sh
+      - run: bash -n menu.sh scripts/update.sh scripts/setup.sh scripts/install.sh scripts/start.sh scripts/welcome.sh scripts/java8.sh scripts/bootstrap.sh scripts/env.sh scripts/stop.sh
       - run: python3 scripts/test-playit-agent.py
         timeout-minutes: 3
       - run: python3 scripts/build.py
       - uses: actions/upload-artifact@v4
         with:
           name: TreinoHub-1.0.0
-          path: target/TreinoHub-1.0.0.jar
+          path: target/*.jar
           if-no-files-found: error
 
   bootstrap-clean:
@@ -34,7 +34,7 @@ jobs:
       - name: Conferir Java 17, Java 8, Python e Playit
         shell: bash
         run: |
-          source scripts/env.sh
+          source scripts/env.sh scripts/stop.sh
           python3 --version
           javac -version
           "$JAVA8_BIN" -version

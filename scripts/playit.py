@@ -11,6 +11,8 @@ import re
 import subprocess
 import sys
 import time
+import threading
+from server_control import Control
 import urllib.request
 from runtime_lock import server_lock
 
@@ -231,26 +233,55 @@ def _run_locked():
     data = check_ready()
     ensure_tools()
     agent = server = None
-    try:
-        agent = start_agent()
-        wait_running(agent)
-        print('\nPlayit ativo. Dados do túnel cadastrado:', flush=True)
-        print_connection(data)
-        print('Iniciando Minecraft. Espere a mensagem Done antes de conectar.\n', flush=True)
-        environment = os.environ.copy()
-        environment['TREINO_DIRECT'] = '1'
-        server = subprocess.Popen(['bash', str(ROOT/'scripts/start.sh')], cwd=ROOT, env=environment)
-        while server.poll() is None:
-            if agent.poll() is not None:
-                raise RuntimeError('Playit encerrou. O servidor será parado para reiniciar os dois juntos.')
-            time.sleep(0.5)
-        if server.returncode:
-            raise RuntimeError(f'O Minecraft encerrou com código {server.returncode}. Veja server/logs/latest.log.')
-    finally:
-        stop(server)
-        stop(agent)
-        if SOCKET.exists() and agent is not None and agent.poll() is not None:
-            SOCKET.unlink(missing_ok=True)
+    with Control(ROOT) as control:
+        try:
+            agent = start_agent()
+            wait_running(agent)
+            print('\nPlayit ativo. Dados do túnel cadastrado:', flush=True)
+            print_connection(data)
+            print('Iniciando Minecraft. Espere Done. Para parar: stop ou bash scripts/stop.sh em outro terminal.\n', flush=True)
+            environment = os.environ.copy()
+            environment['TREINO_DIRECT'] = '1'
+            server = subprocess.Popen(['bash', str(ROOT/'scripts/start.sh')], cwd=ROOT, env=environment,
+                                      stdin=subprocess.PIPE, text=True, bufsize=1)
+            write_lock = threading.Lock()
+
+            def command(line):
+                with write_lock:
+                    if server.poll() is None:
+                        try:
+                            server.stdin.write(line.rstrip('\n')+'\n')
+                            server.stdin.flush()
+                        except (BrokenPipeError, OSError):
+                            pass
+
+            def console():
+                for line in sys.stdin:
+                    command(line)
+
+            threading.Thread(target=console, daemon=True).start()
+            stopping = False
+            while server.poll() is None:
+                if not stopping and (control.requested() or agent.poll() is not None):
+                    print('Enviando stop: salvando o servidor...', flush=True)
+                    command('stop')
+                    stopping = True
+                time.sleep(0.25)
+            if server.returncode:
+                raise RuntimeError(f'O Minecraft encerrou com código {server.returncode}. Veja server/logs/latest.log.')
+        finally:
+            # SIGTERM invokes Spigot's shutdown hook if the wrapper is interrupted.
+            # Never force-kill Minecraft while it is saving worlds.
+            if server is not None and server.poll() is None:
+                server.terminate()
+                while server.poll() is None:
+                    try:
+                        server.wait(timeout=1)
+                    except (subprocess.TimeoutExpired, KeyboardInterrupt):
+                        continue
+            stop(agent)
+            if SOCKET.exists() and agent is not None and agent.poll() is not None:
+                SOCKET.unlink(missing_ok=True)
 
 
 def main():

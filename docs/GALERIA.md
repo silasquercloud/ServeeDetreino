@@ -82,4 +82,4 @@ Para reconstruir as projeções a partir do código atual, com Python 3, Pillow 
 python3 scripts/render-previews.py
 ```
 
-O script compila e testa o plugin, exporta as cenas do gerador Java e renderiza as imagens. As vistas de arena não mostram a plataforma de espera suspensa acima do centro.
+O script compila e testa o plugin, exporta as cenas do gerador Java e renderiza as imagens. A espera agora ocorre no mundo separado do lobby; não há plataforma suspensa acima das arenas. Os postos de diamantes aparecem na prévia BedWars.

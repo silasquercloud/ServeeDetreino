@@ -20,7 +20,7 @@ if [[ ! -f server/server.jar ]]; then
   )
   cp .cache/buildtools/spigot-1.8.8.jar server/server.jar
 fi
-cp target/TreinoHub-1.0.0.jar server/plugins/
+cp target/TreinoHub-1.0.0.jar target/TreinoAntiLag-1.0.0.jar server/plugins/
 python3 scripts/server_config.py apply
 if [[ ! -f server/eula.txt ]]; then printf 'eula=false\n' > server/eula.txt; fi
 printf '\nServidor completo instalado. Volte ao menu e escolha a opção 3 para ligar.\n'

@@ -43,10 +43,11 @@ class UpdateTests(unittest.TestCase):
     def fake_execute(self, args, capture=False):
         self.commands.append(args)
         if args[-1] == 'scripts/build.py':
-            target = self.root/'target/TreinoHub-1.0.0.jar'
-            target.parent.mkdir()
-            with zipfile.ZipFile(target, 'w') as archive:
-                archive.writestr('plugin.yml', 'name: TreinoHub\n')
+            directory = self.root/'target'
+            directory.mkdir()
+            for name in ['TreinoHub-1.0.0.jar', 'TreinoAntiLag-1.0.0.jar']:
+                with zipfile.ZipFile(directory/name, 'w') as archive:
+                    archive.writestr('plugin.yml', 'name: '+name+'\n')
         return SimpleNamespace(stdout='')
 
     def test_success_backs_up_plugin_and_preserves_local_data(self):
@@ -59,8 +60,21 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual((self.root/'server/plugins/TreinoHub/config.yml').read_text(), 'max-rooms: 8\n')
         self.assertEqual((self.root/'server/server.jar').read_bytes(), b'pinned-spigot')
         self.assertEqual(next((self.root/'server/backups').glob('*.jar')).read_bytes(), b'previous-plugin')
+        self.assertTrue((self.destination.parent/'TreinoAntiLag-1.0.0.jar').exists())
         with zipfile.ZipFile(self.destination) as archive:
             self.assertIn('plugin.yml', archive.namelist())
+
+    def test_invalid_second_plugin_does_not_replace_first(self):
+        def invalid(args, capture=False):
+            result = self.fake_execute(args, capture)
+            if args[-1] == 'scripts/build.py':
+                (self.root/'target/TreinoAntiLag-1.0.0.jar').write_bytes(b'bad-archive')
+            return result
+        with patch.object(updater, 'execute', side_effect=invalid):
+            with self.assertRaises(zipfile.BadZipFile):
+                updater.update()
+        self.assertEqual(self.destination.read_bytes(), b'previous-plugin')
+        self.assertFalse((self.destination.parent/'TreinoAntiLag-1.0.0.jar').exists())
 
     def test_build_failure_keeps_installed_plugin(self):
         def fail(args, capture=False):

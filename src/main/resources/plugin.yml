@@ -1,5 +1,5 @@
 name: TreinoHub
-version: 1.0.0
+version: 1.1.0
 main: br.ryuex.treino.Treino
 author: Ryuex
 load: POSTWORLD
@@ -13,3 +13,7 @@ commands:
     description: Party com convites clicáveis e entrada em grupo nas salas.
     aliases: [p]
     usage: /party
+  ranking:
+    description: Classificação local de vitórias, abates e camas.
+    aliases: [top]
+    usage: /ranking [bedwars|bedfight|skywars]

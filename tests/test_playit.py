@@ -75,6 +75,34 @@ class SetupTests(unittest.TestCase):
                 playit.run()
             self.assertIn(unittest.mock.call(agent), stop.call_args_list)
 
+    def test_stop_request_reaches_child_console_before_agent_closes(self):
+        self.ready()
+        import io
+        import subprocess
+        import sys
+        marker = self.directory/'saved.txt'
+        real_popen = subprocess.Popen
+        program = "import sys,pathlib; line=sys.stdin.readline(); assert line.strip()=='stop'; pathlib.Path(sys.argv[1]).write_text('saved')"
+        child = real_popen([sys.executable, '-c', program, str(marker)], stdin=subprocess.PIPE, text=True)
+        agent = Mock()
+        agent.poll.return_value = None
+        control = Mock()
+        control.__enter__ = Mock(return_value=control)
+        control.__exit__ = Mock(return_value=False)
+        control.requested.return_value = True
+        def close_agent(process):
+            self.assertTrue(marker.exists(), 'Minecraft must save before agent stops')
+        try:
+            with patch.object(playit, 'ensure_tools'), patch.object(playit, 'start_agent', return_value=agent), patch.object(playit, 'wait_running'), patch.object(playit, 'print_connection'), patch.object(playit, 'Control', return_value=control), patch.object(playit.subprocess, 'Popen', return_value=child), patch.object(playit, 'stop', side_effect=close_agent), patch.object(playit.sys, 'stdin', io.StringIO('')):
+                playit._run_locked()
+            self.assertEqual(child.returncode, 0)
+            self.assertEqual(marker.read_text(), 'saved')
+        finally:
+            if child.poll() is None:
+                child.terminate()
+                child.wait(timeout=5)
+            child.stdin.close()
+
     def test_missing_setup_prevents_agent_launch(self):
         with patch.object(playit, 'start_agent') as start:
             with self.assertRaises(RuntimeError):

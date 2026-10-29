@@ -139,12 +139,42 @@ def valid_address(address):
     return not match[2] or 1 <= int(match[2]) <= 65535
 
 
+def connection_info(data):
+    address = data['public_address']
+    host, separator, suffix = address.rpartition(':')
+    if not separator:
+        host = address
+    port = int(suffix) if separator else data.get('public_port')
+    if port is not None:
+        try:
+            if isinstance(port, bool):
+                raise ValueError('Porta pública inválida.')
+            port = int(port)
+        except (TypeError, ValueError) as error:
+            raise ValueError('Porta pública inválida. Reconfigure pela opção 1.') from error
+        if not 1 <= port <= 65535:
+            raise ValueError('Porta pública inválida. Reconfigure o Playit pela opção 1.')
+    return {'host': host, 'port': port, 'connect': host+':'+str(port) if port else host}
+
+
+def print_connection(data):
+    info = connection_info(data)
+    print('  IP / host público: ' + info['host'])
+    print('  Porta pública:    ' + (str(info['port']) if info['port'] else 'automática via endereço/SRV (não informada)'))
+    print('  Cole no Minecraft: ' + info['connect'])
+    print('  Destino local:    127.0.0.1:25565')
+    return info
+
+
 def check_ready():
     if not READY.exists() or not SECRET.exists() or SECRET.stat().st_size == 0:
-        raise RuntimeError('Configure o Playit ANTES de instalar/iniciar: bash scripts/setup.sh')
+        raise RuntimeError('Configure o Playit ANTES de instalar/iniciar: bash menu.sh (opção 1)')
     data = json.loads(READY.read_text())
+    if not isinstance(data, dict):
+        raise RuntimeError('Setup incompleto. Reconfigure o Playit pela opção 1.')
     if data.get('local_address') != '127.0.0.1:25565' or not valid_address(data.get('public_address', '')):
         raise RuntimeError('Setup incompleto. Execute python3 scripts/playit.py setup novamente.')
+    connection_info(data)
     return data
 
 
@@ -155,13 +185,13 @@ def setup():
         agent = start_agent()
         current = status()
         if current == 'waiting for secret':
-            print('\nETAPA 1/3 — abra o link mostrado a seguir e vincule o agente à sua conta Playit.\n', flush=True)
+            print('\nPLAYIT • PASSO 1/3 — abra o link mostrado a seguir e vincule o agente à sua conta Playit.\n', flush=True)
             cli('setup', check=True)
         wait_running(agent)
         if not SECRET.exists() or SECRET.stat().st_size == 0:
             raise RuntimeError('O Playit não salvou a credencial. Setup não concluído.')
         SECRET.chmod(0o600)
-        print('\nETAPA 2/3 — em https://playit.gg/account/tunnels crie um túnel:')
+        print('\nPLAYIT • PASSO 2/3 — em https://playit.gg/account/tunnels crie um túnel:')
         print('  Tipo: Minecraft Java / TCP | Agente: este computador')
         print('  Local address: 127.0.0.1 | Local port: 25565')
         print('  Salve e copie o endereço público do túnel. O servidor local ainda estará offline nesta etapa.')
@@ -170,9 +200,20 @@ def setup():
             if valid_address(address):
                 break
             print('Endereço inválido. Cole somente o hostname/IP público e a porta, se houver.')
-        READY.write_text(json.dumps({'version': VERSION, 'local_address': '127.0.0.1:25565', 'public_address': address}, indent=2)+'\n')
+        port = connection_info({'public_address': address})['port']
+        if port is None:
+            while True:
+                answer = input('Porta PÚBLICA mostrada no painel (Enter = endereço automático/SRV): ').strip()
+                if not answer:
+                    break
+                if answer.isdigit() and 1 <= int(answer) <= 65535:
+                    port = int(answer)
+                    break
+                print('Use uma porta de 1 a 65535, ou Enter se o endereço usa SRV.')
+        READY.write_text(json.dumps({'version': VERSION, 'local_address': '127.0.0.1:25565', 'public_address': address, 'public_port': port}, indent=2)+'\n')
         READY.chmod(0o600)
-        print('\nETAPA 3/3 — agente vinculado e endereço cadastrado. A instalação pode continuar.')
+        print('\nPLAYIT • PASSO 3/3 — agente vinculado e endereço cadastrado. Escolha a opção 2 do menu para instalar.')
+        print_connection(check_ready())
         print('A conexão pública será testada depois que o Minecraft estiver iniciado.')
     finally:
         stop(agent)
@@ -187,7 +228,8 @@ def run():
     try:
         agent = start_agent()
         wait_running(agent)
-        print('\nPlayit ativo. Endereço cadastrado: ' + data['public_address'], flush=True)
+        print('\nPlayit ativo. Dados do túnel cadastrado:', flush=True)
+        print_connection(data)
         print('Iniciando Minecraft. Espere a mensagem Done antes de conectar.\n', flush=True)
         environment = os.environ.copy()
         environment['TREINO_DIRECT'] = '1'

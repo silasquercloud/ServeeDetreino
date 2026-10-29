@@ -4,42 +4,50 @@ BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Po
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-**[Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
+**[Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
 ![Lobby misto com quatro universos](docs/images/lobby.png)
 
 > As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
 
-## Comece por aqui
+## Comece pelo menu
 
 No Linux ou no terminal do Codespace:
 
 ```bash
-bash scripts/setup.sh
+bash menu.sh
 ```
 
-O assistente segue esta ordem:
+| Opção | Ação |
+| --- | --- |
+| **1 — Configurar Playit** | Baixa os binários oficiais, vincula o agente à sua conta e cadastra o endereço/porta do túnel. |
+| **2 — Instalar servidor completo** | Compila Spigot 1.8.8 e TreinoHub, inclui mapas/lobby/salas e prepara `server.properties`. |
+| **3 — Ligar servidor e mostrar IP/porta** | Inicia Playit + Minecraft, exibe os dados para conectar e abre o console. |
+| **4 — Ver endereço salvo** | Consulta os dados sem iniciar o servidor. |
+| **0 — Sair** | Fecha o menu. |
 
-1. Baixa **Playit 1.1.0 oficial**, com SHA-256 verificado, sem exigir root/systemd.
-2. Mostra o link para você vincular o agente à sua conta.
-3. Orienta a criação de um túnel **Minecraft Java → 127.0.0.1:25565** e solicita o endereço público.
-4. Só então compila o plugin e instala o **Spigot 1.8.8**.
+A ordem da primeira instalação é **1 → 2 → 3**. O menu bloqueia etapas que dependem de uma anterior. Ao digitar `stop` no console do servidor, os processos são encerrados e você volta ao menu.
 
-A instalação direta do servidor é bloqueada enquanto o setup do Playit estiver incompleto. Não coloque tokens ou chaves no GitHub.
+A opção 3 pede o aceite da [EULA do Minecraft](https://aka.ms/MinecraftEULA) na primeira inicialização. Se concordar, digite `ACEITO`; sem isso, o servidor não é iniciado. Nas próximas sessões, basta abrir o menu e escolher **3**.
 
-Depois, leia a [EULA do Minecraft](https://aka.ms/MinecraftEULA). Se concordar:
+### Clientes originais e não originais
 
-```bash
-ACCEPT_EULA=true bash scripts/start.sh
+O instalador já prepara:
+
+```properties
+online-mode=false
+white-list=false
+server-port=25565
+server-ip=
 ```
 
-Nas próximas vezes:
+Isso permite clientes Java 1.8.9 originais e não autenticados na Microsoft. A whitelist fica desligada para entrada direta. **O modo offline não verifica a identidade dos nicks e não oferece proteção de login por senha.** O plugin não instala AuthMe ou restauração automática de skins.
 
-```bash
-bash scripts/start.sh
-```
+Se já houver `server.properties`, a opção 2 cria um backup e atualiza essas quatro propriedades, preservando as demais. A inicialização confere modo e porta antes de ligar.
 
-Esse comando inicia **Playit + Minecraft juntos**, mostra o endereço cadastrado e encerra o agente quando o servidor para. Não é necessário deixar dois terminais abertos. No console, use `stop` para desligar.
+A tela mostra **host público, porta pública, endereço completo para colar no Minecraft e porta local**. A porta pública vem do seu túnel Playit e pode ser diferente de 25565. Se você cadastrar apenas um hostname com DNS/SRV, a porta fica identificada como automática/não informada; o menu não inventa um número.
+
+[**Veja o guia detalhado do menu →**](docs/MENU.md)
 
 **O Playit fornece o túnel/endereço; a máquina onde você executa o projeto hospeda o servidor.** Ele não mantém uma máquina desligada online. Codespaces deve ser usado para desenvolvimento/testes do projeto, conforme os [termos do GitHub](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces).
 
@@ -82,15 +90,17 @@ BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméti
 
 | Pasta/arquivo | Conteúdo |
 | --- | --- |
-| [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, liberar amigos, comandos e teste em jogo. |
+| [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, conectar amigos, comandos e teste em jogo. |
+| [docs/MENU.md](docs/MENU.md) | Opções do menu, etapas e endereço/porta. |
 | [docs/PLAYIT.md](docs/PLAYIT.md) | Conta, túnel, endereço público e diagnóstico. |
 | [docs/GALERIA.md](docs/GALERIA.md) | Prévias visuais e instruções para screenshots reais. |
 | [docs/TEMAS.md](docs/TEMAS.md) | Temas, construções, seleção e compatibilidade dos mapas. |
-| [scripts/setup.sh](scripts/setup.sh) | Playit primeiro, instalação depois. |
+| [menu.sh](menu.sh) | Abre o menu com as etapas 1, 2 e 3. |
+| [scripts/setup.sh](scripts/setup.sh) | Entrada alternativa para o mesmo menu. |
 | [scripts/start.sh](scripts/start.sh) | Inicia os dois processos juntos. |
 | [config/server.properties](config/server.properties) | Configuração padrão do servidor. |
 | [src/main/java](src/main/java) | Código do plugin. |
 
 ## Referências
 
-[Spigot BuildTools](https://www.spigotmc.org/wiki/buildtools/) · [Protocolos 1.8.8/1.8.9](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json) · [Playit oficial](https://playit.gg/) · [Código e release fixada do Playit](https://github.com/playit-cloud/playit-agent/releases/tag/v1.1.0)
+[Configuração server.properties](https://www.spigotmc.org/wiki/spigot-configuration-server-properties/) · [Spigot BuildTools](https://www.spigotmc.org/wiki/buildtools/) · [Protocolos 1.8.8/1.8.9](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json) · [Playit oficial](https://playit.gg/) · [Código e release fixada do Playit](https://github.com/playit-cloud/playit-agent/releases/tag/v1.1.0)

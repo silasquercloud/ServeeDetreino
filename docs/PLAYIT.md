@@ -7,15 +7,15 @@ O Playit cria um túnel entre um endereço público e o Minecraft na sua máquin
 ## Setup guiado
 
 ```bash
-bash scripts/setup.sh
+bash menu.sh
 ```
 
-1. Aguarde o download e a verificação dos dois binários oficiais.
+1. No menu, escolha **1 — Configurar Playit**. Aguarde o download e a verificação dos dois binários oficiais.
 2. O terminal mostrará um link de `playit.gg/claim/...`. Abra-o, entre na sua conta Playit e vincule esse agente. Não precisa colar senha ou token no terminal.
 3. Volte ao terminal. O assistente aguarda a aprovação e a ativação do agente.
 4. No [painel de túneis](https://playit.gg/account/tunnels), crie um túnel com os dados abaixo.
-5. Copie o endereço público e cole quando o assistente solicitar.
-6. O agente temporário será encerrado e a instalação do servidor começará.
+5. Copie o endereço público e cole quando o assistente solicitar. Se ele não trouxer porta, informe a porta pública exibida no painel, ou pressione Enter para manter a indicação automática/DNS-SRV.
+6. O agente temporário será encerrado e você volta ao menu. Escolha **2** para instalar o servidor e **3** para ligar.
 
 | Campo | Valor |
 | --- | --- |
@@ -35,7 +35,7 @@ Não use Minecraft Bedrock/UDP. As opções de plano/região dependem do painel 
 bash scripts/start.sh
 ```
 
-O launcher inicia o agente, espera `Phase: running` e depois inicia o servidor. O endereço cadastrado aparece no terminal. Ao digitar `stop` no console Minecraft, ele encerra os dois processos. Se o agente encerrar inesperadamente, o launcher para o servidor e informa o erro.
+O launcher inicia o agente, espera `Phase: running` e depois inicia o servidor. O host, a porta pública cadastrada e o endereço completo aparecem no terminal. A porta local 25565 é identificada separadamente. Ao digitar `stop` no console Minecraft, ele encerra os dois processos. Se o agente encerrar inesperadamente, o launcher para o servidor e informa o erro.
 
 O agente tenta manter sua própria conexão com o Playit. A integração não promete uptime, IP disponível antes de criar o túnel ou funcionamento sem a máquina ligada.
 
@@ -64,12 +64,12 @@ As duas pastas são ignoradas pelo Git. A pasta privada usa permissão 700; os a
 
 | Sintoma | Verificação |
 | --- | --- |
-| “Configure o Playit ANTES…” | Execute `bash scripts/setup.sh` e termine a vinculação e o cadastro do túnel. |
+| “Configure o Playit ANTES…” | Abra `bash menu.sh`, escolha **1** e termine a vinculação e o cadastro do túnel. |
 | “invalid secret” | Revise o agente no painel; não compartilhe a chave para tentar resolver. |
 | “disabled over limit” | Confira o limite de agentes da sua conta no painel oficial. |
 | Agente ativo, mas Minecraft não conecta | Aguarde `Done`, confirme TCP/Minecraft Java, agente correto e destino `127.0.0.1:25565`. |
 | Endereço desconhecido | Copie exatamente o hostname e a porta do painel; não use `https://` nem URL `app.github.dev`. |
-| “You are not whitelisted” | No console: `whitelist add NICK`. |
+| “You are not whitelisted” | No console: `whitelist add NICK` se você tiver ativado a whitelist; o padrão atual é desligado. |
 | Agente já em execução | Pare a execução anterior do launcher antes de iniciar outra. |
 | Falha de download/conexão | Confira acesso ao GitHub, ao serviço Playit e a política de rede da máquina usada. Não desative TLS. |
 

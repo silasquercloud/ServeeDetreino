@@ -16,50 +16,57 @@ export JAVA8_BIN=/caminho/real/do/jdk8/bin/java
 
 Troque o caminho pelo da sua instalação. No Codespace isso normalmente é automático.
 
-## 2. Fazer o setup completo
+## 2. Abrir o menu e instalar
 
 ```bash
-bash scripts/setup.sh
+bash menu.sh
 ```
 
-Primeiro você conclui o [setup do Playit](PLAYIT.md). O script baixa o agente e o CLI oficiais, valida os hashes, inicia o agente temporariamente e mostra o link de vinculação. Você aprova no navegador e configura o túnel.
+Escolha **1 — Configurar Playit**. O assistente baixa o agente/CLI oficiais com hashes fixos e mostra o link de vinculação da sua conta. Configure o túnel **Minecraft Java/TCP → 127.0.0.1:25565** e cadastre o endereço público. Se o endereço não incluir porta, o assistente permite informar a porta pública do painel separadamente ou marcar o endereço como automático/DNS-SRV. Veja [o guia Playit](PLAYIT.md).
 
-Quando o agente estiver ativo, cadastre o endereço público solicitado. Só depois dessa etapa o assistente executa a instalação do servidor. Na primeira vez, o BuildTools precisa baixar dependências e compilar o Spigot; aguarde a mensagem de instalação concluída. Falhas interrompem o processo, sem apresentar a instalação como concluída.
+Depois escolha **2 — Instalar servidor completo**. A etapa compila Spigot 1.8.8, compila e instala TreinoHub e prepara os arquivos de configuração. O lobby e os mapas temáticos são construídos pelo plugin quando o servidor e as salas forem iniciados. A primeira compilação do Spigot pode demorar vários minutos; aguarde a mensagem de conclusão.
 
-Se o Playit já foi configurado e apenas a compilação falhou, corrija a causa e execute `bash scripts/install.sh` novamente.
+As opções são separadas: configurar o Playit não instala nem liga o servidor automaticamente. Falhas são mostradas e o menu permite tentar novamente.
 
-## 3. Iniciar os dois juntos
+## 3. Ligar e consultar IP/porta
 
-Leia a [EULA](https://aka.ms/MinecraftEULA). Se concordar:
+No menu, escolha **3**. Na primeira vez, leia a [EULA](https://aka.ms/MinecraftEULA) e, se concordar, digite `ACEITO`.
+
+A tela mostra:
+
+- IP/host público do Playit.
+- Porta pública do túnel, quando informada.
+- Endereço completo para colar no Minecraft.
+- Destino local `127.0.0.1:25565`.
+
+O launcher inicia o Playit, espera o agente ficar ativo e inicia o Minecraft no mesmo terminal. **Espere `Done`** no console antes de conectar. O endereço salvo, por si só, não comprova que o túnel público esteja acessível.
+
+Digite `stop` no console para desligar os dois e voltar ao menu. A opção **4** consulta o endereço salvo sem ligar. Fechar a máquina ou o ambiente deixa o servidor offline.
+
+Para ajustar a RAM antes de abrir o menu:
 
 ```bash
-ACCEPT_EULA=true bash scripts/start.sh
+SERVER_RAM=2G bash menu.sh
 ```
 
-Nas próximas vezes: `bash scripts/start.sh`.
+## 4. Entrar com amigos • original e não original
 
-O launcher verifica o setup, inicia o Playit, espera o estado `running` e inicia o Minecraft no mesmo terminal. O endereço mostrado é o que você cadastrou no setup; aguarde `Done` no console antes de entrar. A conectividade pública ainda deve ser testada no cliente.
+A instalação já aplica:
 
-Para limitar a RAM:
-
-```bash
-SERVER_RAM=2G bash scripts/start.sh
+```properties
+online-mode=false
+white-list=false
+server-port=25565
+server-ip=
 ```
 
-Para desligar, digite `stop` no console. O launcher também encerra seu agente Playit. Fechar/interromper esse processo ou desligar a máquina deixa o servidor offline; não há mecanismo para manter Codespaces artificialmente acordado.
+O servidor aceita clientes Minecraft Java **1.8.9** originais e não autenticados na Microsoft. Seus amigos entram pelo endereço público mostrado pelo menu e não precisam instalar Playit. Se houver porta pública explícita, mantenha `endereco:porta`.
 
-## 4. Liberar seus amigos
+O modo offline não verifica a identidade do nick. Esta configuração não inclui login por senha nem skins restauradas automaticamente. Não dê OP a outros jogadores apenas para abrir o menu: os comandos de salas não exigem OP.
 
-O padrão usa autenticação Microsoft e whitelist. No console do servidor, **sem barra**:
+A whitelist vem desligada. Se você ativá-la depois, precisará cadastrar os jogadores permitidos; isso é independente de `online-mode`.
 
-```text
-whitelist add SEU_NICK
-whitelist add NICK_DO_AMIGO
-```
-
-No Minecraft Java **1.8.9**, adicione o endereço público exibido pelo Playit. Seus amigos não precisam instalar Playit. Se o painel fornecer uma porta, mantenha `endereco:porta`.
-
-Não é necessário dar OP para abrir o menu ou criar salas.
+Ao atualizar uma instalação anterior, a opção **2** faz backup do arquivo existente e aplica o novo modo e destino local, preservando as outras propriedades. Se o arquivo ainda estiver com `online-mode=true`, a inicialização pede essa atualização antes de ligar.
 
 ## 5. Criar e jogar
 
@@ -100,4 +107,4 @@ Preserve IP/porta definidos pela host. Não copie essas propriedades sem conferi
 
 ## Atualizar
 
-Pare com `stop`, atualize os arquivos do repositório, execute `bash scripts/install.sh` e reinicie. Suas credenciais Playit ficam locais e não entram no GitHub. Não use `/reload` para atualizar o plugin.
+Pare com `stop`, atualize os arquivos do repositório, abra `bash menu.sh`, escolha **2** para atualizar e **3** para ligar. Suas credenciais Playit ficam locais e não entram no GitHub. Não use `/reload` para atualizar o plugin.

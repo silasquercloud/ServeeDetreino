@@ -1,5 +1,5 @@
 name: TreinoHub
-version: 1.3.0
+version: 1.4.0
 main: br.ryuex.treino.Treino
 author: Ryuex
 load: POSTWORLD
@@ -18,6 +18,9 @@ commands:
     aliases: [top]
     usage: /ranking [bedwars|bedfight|skywars]
 
+  importarcomprarapida:
+    description: Copia favoritos de outro perfil local.
+    usage: /importarcomprarapida <nick>
   treinoadmin:
     description: Painel de testes do administrador.
     permission: treino.admin

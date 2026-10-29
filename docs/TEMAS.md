@@ -24,16 +24,9 @@ São construções próprias inspiradas nesses universos, feitas com materiais n
 
 Vagas continuam obedecendo às regras: SkyWars 2–12; BedWars 2–8; BedFight 2/4/6/8. As ilhas ficam com centros a 42 blocos do centro da arena. As bases têm contorno orgânico em torno de 8 blocos de raio, com construções e camadas inferiores; o centro tem raio de 13. Não há pontes prontas nas partidas: construí-las faz parte do treino.
 
-## Lobby misto
+## Lobby neutro
 
-Uma praça central de quartzo e iluminação recebe os jogadores. Quatro caminhos com bordas de vidro e arcos coloridos conectam as alas:
-
-- Vermelho: Pokémon.
-- Roxo: Evangelion.
-- Azul: Sonic.
-- Laranja: One Piece.
-
-As quatro alas fazem parte do mesmo lobby e podem ser exploradas a pé. Os arcos são construções decorativas; a escolha da partida é feita pela bússola ou `/treino`.
+O lobby é uma praça própria de tamanho médio, com 45 blocos de largura, jardim, caminhos e quatro Villagers: três para os modos e um para classificação. Os temas continuam somente nas partidas. O mundo novo substitui a entrada antiga, sem alterar mundos pessoais.
 
 ## Como as imagens correspondem ao mapa
 
@@ -51,8 +44,12 @@ Ao atualizar, pare com `stop`, execute `git pull`, abra `bash menu.sh`, escolha 
 
 ## Direção visual 1.2
 
-Ilhas com contorno orgânico, corpo rochoso mais profundo, caminhos iluminados e praças. Pokémon ganhou jardins/entrada; Green Hill, cascata decorativa de vidro azul, flores e relevos quadriculados; Evangelion, sinalização industrial e luzes vermelhas; One Piece, cais e postes de lanterna. BedWars/BedFight usam bases mais livres: gerador baixo, vendedor na lateral e detalhe temático pequeno ao fundo. As construções maiores ficam no centro e no lobby. As decorações usam blocos nativos 1.8.8; a cascata é vidro, sem simular fluido.
+Ilhas com contorno orgânico, corpo rochoso mais profundo, caminhos iluminados e praças. Pokémon ganhou jardins/entrada; Green Hill, cascata decorativa de vidro azul, flores e relevos quadriculados; Evangelion, sinalização industrial e luzes vermelhas; One Piece, cais e postes de lanterna. BedWars usa gerador baixo e balcão lateral com Villagers; BedFight usa kit e defesa inicial, sem loja/gerador. As bases mantêm a frente livre e um detalhe recuado. As construções temáticas maiores ficam no centro das arenas. As decorações usam blocos nativos 1.8.8; a cascata é vidro, sem simular fluido.
 
 Referências públicas encontradas para a direção visual: [Greenhill / Tails Workshop](https://www.planetminecraft.com/project/tails-workshop/), [Simple Pokecenter](https://www.planetminecraft.com/project/simple-pokecenter-pokemon-center/) e [PokéIsland](https://www.planetminecraft.com/project/pokisland/). São referências de composição e linguagem visual; nenhum mapa, schematic ou imagem desses autores foi incorporado ao projeto. Não se alega que este layout seja o mais popular ou uma cópia desses trabalhos.
 
 A galeria é regenerada com os mesmos blocos do código sempre que esta geometria muda. As imagens continuam sendo prévias técnicas; aparência final, textura e iluminação precisam ser vistas no cliente.
+
+## Green Hill • revisão 1.4
+
+A composição foi revista após consultar a imagem oficial do fórum: casinha quadriculada com teto de grama ao fundo, plataforma frontal aberta e arco maior no centro. [Referências verificadas e limites do vídeo →](REFERENCIAS.md)

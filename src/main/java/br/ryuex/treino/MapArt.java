@@ -136,7 +136,7 @@ public final class MapArt {
             for(int x=-radius;x<=radius;x++) for(int z=-radius;z<=radius;z++) if(x*x+z*z<=radius*radius && x*x+z*z>(radius-1)*(radius-1)) s.set(x,0,z,"STAINED_GLASS",3);
         }
         // Walkable approach and a framed plaza; all furniture/bed lanes stay clear.
-        String paving=theme==Theme.ONEPIECE?"WOOD":theme==Theme.EVANGELION?"STAINED_CLAY":"SMOOTH_BRICK";
+        String paving=theme==Theme.ONEPIECE?"WOOD":theme==Theme.EVANGELION?"STAINED_CLAY":theme==Theme.SONIC?"GRASS":"SMOOTH_BRICK";
         for(int z=-radius+1;z<=2;z++)for(int x=-1;x<=1;x++)s.set(x,0,z,paving,theme==Theme.EVANGELION?15:0);
         for(int z=-radius+2;z<=1;z+=3)for(int x:new int[]{-2,2})s.set(x,0,z,"SEA_LANTERN");
         if(theme==Theme.POKEMON) {
@@ -154,7 +154,7 @@ public final class MapArt {
             for(int x:new int[]{-6,6})for(int z=-4;z<=1;z++)s.set(x,0,z,"WOOD",1);
             for(int x:new int[]{-6,6}){s.set(x,1,-4,"FENCE");s.set(x,2,-4,"SEA_LANTERN");}
         }
-        decorate(s,theme,radius>=13?4:0);
+        if(theme==Theme.SONIC && radius>=13)sonicCenter(s);else decorate(s,theme,radius>=13?4:0);
         if(radius>=13) {
             for(int x:new int[]{-10,10})for(int z:new int[]{-5,5}){s.box(x,1,z,x,3,z,"QUARTZ_BLOCK",0);s.set(x,4,z,"SEA_LANTERN");}
             for(int x=-9;x<=9;x++)s.set(x,0,-8,theme==Theme.SONIC?"GOLD_BLOCK":"QUARTZ_BLOCK");
@@ -171,7 +171,19 @@ public final class MapArt {
         Scene s=new Scene();s.add(resourceWell("IRON_BLOCK"),0,0,-3);s.set(1,0,-3,"GOLD_BLOCK");return s;
     }
     public static Scene shopKiosk(Theme theme) {
-        Scene s=new Scene();s.set(-6,1,0,"WORKBENCH");s.set(-7,1,1,"FENCE");s.set(-7,2,1,"SEA_LANTERN");s.set(-6,0,0,"WOOL",theme.color);return s;
+        Scene s=new Scene();s.box(-9,0,-3,-5,0,1,"WOOD",1);s.box(-9,1,-3,-5,2,-3,"WOOD",1);
+        for(int x:new int[]{-9,-5})s.box(x,1,-2,x,3,0,"FENCE",0);
+        s.box(-9,4,-3,-5,4,1,"STAINED_CLAY",theme.color);s.set(-7,4,-1,"SEA_LANTERN");s.set(-8,1,0,"WORKBENCH");s.set(-6,1,0,"WORKBENCH");
+        s.set(-6,1,3,"CHEST");s.set(-5,1,3,"ENDER_CHEST");return s;
+    }
+    public static Scene bedDefense() {
+        Scene s=new Scene();for(int x=1;x<=3;x++)for(int z=-1;z<=2;z++)if(x!=2 || z==-1 || z==2)s.set(x,1,z,"WOOD");
+        s.set(2,2,0,"WOOD");s.set(2,2,1,"WOOD");return s;
+    }
+    public static Scene bedfightArena(Theme theme,int bases) {
+        Scene s=center(theme);for(int i=0;i<bases;i++){double angle=2*Math.PI*i/bases;int x=(int)Math.round(Math.cos(angle)*42),z=(int)Math.round(Math.sin(angle)*42);
+            s.add(battleBase(theme),x,0,z);s.set(x+2,1,z,"BED_BLOCK",0);s.set(x+2,1,z+1,"BED_BLOCK",8);s.add(bedDefense(),x,0,z);
+        }return s;
     }
     public static Scene emeraldOutpost() { return resourceWell("EMERALD_BLOCK"); }
     /** Combat bases keep all landmarks behind the bed's open fighting apron. */
@@ -180,7 +192,12 @@ public final class MapArt {
         switch(theme) {
         case POKEMON:s.box(-2,1,6,2,2,8,"QUARTZ_BLOCK",0);s.box(-3,3,6,3,3,8,"WOOL",14);s.set(0,2,5,"WOOL",14);break;
         case EVANGELION:for(int x:new int[]{-5,5}){s.box(x,1,6,x,4,7,"STAINED_CLAY",10);s.set(x,5,6,"SEA_LANTERN");s.set(x,3,5,"WOOL",5);}break;
-        case SONIC:ring(s,0,3,7,2,"GOLD_BLOCK",0);s.box(-5,1,6,-5,3,6,"LOG",0);s.box(-7,4,6,-3,4,6,"LEAVES",4);break;
+        case SONIC:
+            for(int x=-3;x<=3;x++)for(int y=1;y<=4;y++)for(int z=5;z<=8;z++)s.set(x,y,z,"STAINED_CLAY",(Math.floorDiv(x,2)+Math.floorDiv(y,2)+Math.floorDiv(z,2))%2==0?12:1);
+            s.box(-2,1,6,2,3,7,"AIR",0);s.box(0,1,5,0,2,5,"AIR",0);s.box(-4,5,5,4,5,8,"GRASS",0);
+            for(int x:new int[]{-2,2}){s.set(x,2,5,"GOLD_BLOCK");s.set(x,3,5,"STAINED_GLASS",3);}
+            for(int x=-4;x<=5;x++)for(int z=-5;z<=2;z++)if(s.at(x,0,z)!=null)s.set(x,0,z,(Math.floorDiv(x,2)+Math.floorDiv(z,2))%2==0?"GRASS":"WOOL",5);
+            break;
         case ONEPIECE:s.box(-3,1,6,3,1,8,"WOOD",1);s.box(0,2,7,0,6,7,"LOG",0);s.box(-2,4,7,2,5,7,"WOOL",0);s.set(0,4,6,"WOOL",15);break;
         default:throw new IllegalArgumentException("Unknown theme");
         }
@@ -202,41 +219,28 @@ public final class MapArt {
     public static Scene bedwarsArena(Theme theme,int count) {
         Scene s=arena(theme,count,true);s.add(emeraldOutpost(),0,0,0);for(int i=0;i<4;i++){int[] p=diamondPosition(i);s.add(diamondOutpost(theme),p[0],0,p[1]);}return s;
     }
+    private static void sonicCenter(Scene s) {
+        // Broad grass-covered checker arch behind the clear central approach.
+        for(int x=-7;x<=7;x++)for(int y=1;y<=15;y++)for(int z=4;z<=8;z++) {
+            double distance=Math.sqrt(x*x+(y-8)*(y-8));if(distance<=7.3 && distance>=4.8)s.set(x,y,z,"STAINED_CLAY",(Math.floorDiv(x,2)+Math.floorDiv(y,2)+Math.floorDiv(z,2))%2==0?12:1);
+        }
+        for(int x=-7;x<=7;x++)for(int z=4;z<=8;z++)for(int y=15;y>=1;y--)if(s.at(x,y,z)!=null){s.set(x,y,z,"GRASS");break;}
+        for(int x:new int[]{-10,10}) {s.box(x-2,1,5,x+2,2,10,"STAINED_CLAY",12);s.box(x-2,3,5,x+2,3,10,"GRASS",0);tree(s,x,8,true);}
+        for(int z=-9;z<=2;z++)for(int x=-8;x<=8;x++)if(s.at(x,0,z)!=null)s.set(x,0,z,(Math.floorDiv(x,3)+Math.floorDiv(z,3))%2==0?"GRASS":"WOOL",5);
+        for(int x:new int[]{-7,7})ring(s,x,3,-3,1,"GOLD_BLOCK",0);
+        for(int z=-6;z<=3;z++)s.set(10,0,z,"STAINED_GLASS",3);
+    }
     public static Scene center(Theme theme) { return island(theme,13); }
+    /** Medium neutral plaza: 45 blocks wide, three selectors and one ranking pavilion. */
     public static Scene lobby() {
-        Scene s=new Scene();
-        for(int depth=0;depth<=5;depth++) s.disk(0,-depth,0,14-depth*2,depth==0?"QUARTZ_BLOCK":"STAINED_CLAY",depth==0?0:15);
-        for(int x=-13;x<=13;x++) for(int z=-13;z<=13;z++) {
-            int r=x*x+z*z;
-            if(r>=156 && r<=180) s.set(x,0,z,"SEA_LANTERN");
-            if(r>9 && r<90 && (Math.abs(x)<=1 || Math.abs(z)<=1)) wool(s,x,0,z,x>1?14:x< -1?10:z>1?11:1);
-        }
-        Theme[] themes=Theme.values();
-        int[][] positions={{36,0},{-36,0},{0,36},{0,-36}};
-        for(int i=0;i<4;i++) {
-            int cx=positions[i][0],cz=positions[i][1];Theme t=themes[i];
-            s.add(island(t,10),cx,0,cz);
-            for(int n=12;n<=28;n++) for(int a=-3;a<=3;a++) {
-                int x=cx==0?a:(cx>0?n:-n),z=cz==0?a:(cz>0?n:-n);
-                s.set(x,-1,z,"STAINED_CLAY",15);s.set(x,0,z,Math.abs(a)==3?"SEA_LANTERN":"QUARTZ_BLOCK");
-                if(a==0) wool(s,x,0,z,t.color);
-                if(Math.abs(a)==3) s.set(x,1,z,"STAINED_GLASS",t.color);
-            }
-            // A colored gate on each wing, connected by safe walkable bridges.
-            if(cx!=0) {
-                int x=cx>0?23:-23;
-                for(int z:new int[]{-4,4}) s.box(x,1,z,x,6,z,"QUARTZ_BLOCK",0);
-                s.box(x,7,-4,x,7,4,"WOOL",t.color);
-            } else {
-                int z=cz>0?23:-23;
-                for(int x:new int[]{-4,4}) s.box(x,1,z,x,6,z,"QUARTZ_BLOCK",0);
-                s.box(-4,7,z,4,7,z,"WOOL",t.color);
-            }
-        }
-        // Four corner beacons keep the spawn unobstructed and frame the plaza.
-        for(int x:new int[]{-8,8}) for(int z:new int[]{-8,8}) {
-            s.box(x,1,z,x,3,z,"QUARTZ_BLOCK",0);s.set(x,4,z,"SEA_LANTERN");
-        }
+        Scene s=new Scene();for(int depth=0;depth<=7;depth++)s.disk(0,-depth,0,22-depth*2,depth==0?"GRASS":"STONE",0);
+        s.disk(0,0,0,10,"QUARTZ_BLOCK",0);
+        for(int z=-19;z<=18;z++)for(int x=-2;x<=2;x++)s.set(x,0,z,Math.abs(x)==2?"SMOOTH_BRICK":"QUARTZ_BLOCK");
+        for(int x=-19;x<=19;x++)for(int z=-2;z<=2;z++)s.set(x,0,z,Math.abs(z)==2?"SMOOTH_BRICK":"QUARTZ_BLOCK");
+        for(int x:new int[]{-12,0,12}){s.box(x-3,0,11,x+3,0,17,"SMOOTH_BRICK",0);s.box(x-3,1,15,x-3,5,15,"QUARTZ_BLOCK",0);s.box(x+3,1,15,x+3,5,15,"QUARTZ_BLOCK",0);s.box(x-3,6,15,x+3,6,15,"STAINED_CLAY",15);s.set(x,5,15,"SEA_LANTERN");}
+        for(int x:new int[]{-15,15})for(int z:new int[]{-10,7}){s.box(x,1,z,x,3,z,"FENCE",0);s.set(x,4,z,"SEA_LANTERN");}
+        for(int x:new int[]{-14,14}){tree(s,x,-14,false);s.box(x-2,1,-10,x+2,1,-10,"LEAVES",4);}
+        s.box(-5,0,-19,5,0,-14,"SMOOTH_BRICK",0);for(int x:new int[]{-5,5})s.box(x,1,-18,x,5,-18,"QUARTZ_BLOCK",0);s.box(-5,6,-19,5,6,-14,"STAINED_CLAY",15);
         return s;
     }
     public static Scene arena(Theme theme,int count,boolean beds) {
@@ -262,7 +266,7 @@ public final class MapArt {
         File dir=new File(args.length==0?".cache/scenes":args[0]);dir.mkdirs();
         export(lobby(),new File(dir,"lobby.json"));export(forge(Theme.SONIC),new File(dir,"forge.json"));export(emeraldOutpost(),new File(dir,"emerald-generator.json"));export(practiceArena(),new File(dir,"admin-practice.json"));Scene assisted=practiceArena();for(int z=1;z<32;z++)assisted.set(0,0,z,"WOOL",10);export(assisted,new File(dir,"admin-fastplace.json"));export(bedwarsArena(Theme.SONIC,4),new File(dir,"bedwars-sonic.json"));
         export(bedwarsArena(Theme.POKEMON,4),new File(dir,"bedwars.json"));
-        export(arena(Theme.ONEPIECE,2,true),new File(dir,"bedfight.json"));
+        export(bedfightArena(Theme.ONEPIECE,2),new File(dir,"bedfight.json"));Scene fightBase=battleBase(Theme.SONIC);fightBase.set(2,1,0,"BED_BLOCK",0);fightBase.set(2,1,1,"BED_BLOCK",8);fightBase.add(bedDefense(),0,0,0);export(fightBase,new File(dir,"bedfight-base.json"));export(shopKiosk(Theme.SONIC),new File(dir,"shop-kiosk.json"));
         for(Theme t:Theme.values()) {Scene base=battleBase(t);base.add(forge(t),0,0,0);base.add(shopKiosk(t),0,0,0);base.set(2,1,0,"BED_BLOCK",0);base.set(2,1,1,"BED_BLOCK",8);for(int x=-1;x<=1;x++)base.set(x,0,0,"WOOL",14);export(base,new File(dir,"base-"+t.name().toLowerCase(Locale.ROOT)+".json")); export(island(t,8),new File(dir,t.name().toLowerCase(Locale.ROOT)+".json"));export(arena(t,6,false),new File(dir,"arena-"+t.name().toLowerCase(Locale.ROOT)+".json")); }
         System.out.println("Exported exact map geometry to "+dir);
     }

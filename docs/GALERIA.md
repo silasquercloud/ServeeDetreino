@@ -1,12 +1,12 @@
-# Galeria • Ryuex Multiverso
+# Galeria • Ryuex Treino
 
 [← Início](../README.md) · [Temas e comandos](TEMAS.md) · [Instalar](GUIA.md)
 
 **Prévias técnicas das construções implementadas; não são screenshots do Minecraft.** As posições e materiais são exportados diretamente de `MapArt.java`, o mesmo gerador usado pelo plugin. O render usa cores e faces simplificadas, sem reproduzir texturas, transparências, HUD ou formas especiais de itens/cercas.
 
-## Geradores e bases • versão 1.3
+## Geradores e bases • versão 1.4
 
-Poços baixos de pedra, com núcleo de minério visível, presentes em BedWars e BedFight. Os contadores flutuantes e o vendedor são entidades adicionadas no jogo; as projeções abaixo mostram a geometria em blocos. A área da cama fica livre e os detalhes maiores ficam no centro/lobby.
+Poços baixos de pedra, com núcleo de minério visível, presentes no BedWars; BedFight usa kit pronto. Os contadores flutuantes e o vendedor são entidades adicionadas no jogo; as projeções abaixo mostram a geometria em blocos. A área da cama fica livre e os detalhes maiores ficam no centro/lobby.
 
 ![Forja baixa implementada](images/forge.png)
 
@@ -14,11 +14,25 @@ Poços baixos de pedra, com núcleo de minério visível, presentes em BedWars e
 
 ![BedWars Green Hill com forjas](images/bedwars-sonic.png)
 
-## Lobby misto • quatro universos
+## Lobby neutro • praça central
 
-Praça central, quatro alas decoradas, pontes iluminadas com bordas e arcos nas cores de cada tema. Explore tudo a pé e use a bússola para jogar.
+Praça de 45 blocos de largura, caminhos de quartzo/pedra, jardins, três seletores Villager de modo e pavilhão de ranking. Não há mais alas de quatro temas.
 
-![Lobby misto com quatro alas](images/lobby.png)
+![Lobby neutro de tamanho médio](images/lobby.png)
+
+## Loja BedWars e BedFight com kit
+
+O balcão possui dois Villagers reais em tempo de jogo; esta projeção mostra somente a estrutura em blocos. Os menus abaixo são diagramas de slots, sem simular screenshot do cliente.
+
+![Balcão dos Villagers](images/shop-kiosk.png)
+
+![Loja e categorias](images/shop-bedwars.png)
+
+![Editor de hotbar](images/shop-hotbar.png)
+
+No BedFight não há loja: a cama já começa protegida e o jogador recebe o kit.
+
+![Base BedFight com defesa inicial](images/bedfight-base.png)
 
 ## Pokémon
 

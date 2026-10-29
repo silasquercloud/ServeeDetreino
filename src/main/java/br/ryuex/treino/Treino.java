@@ -28,17 +28,19 @@ public final class Treino extends JavaPlugin implements Listener {
     private final Map<UUID,Integer> teamChoices=new HashMap<>();
     private final Map<UUID, Mode> choosing = new HashMap<>();
     private final Map<UUID, MapArt.Theme> themes = new HashMap<>();
+    private final Map<UUID,String> editingFavorite=new HashMap<>(),editingHotbar=new HashMap<>();
     private final Map<UUID,Integer> shopPages=new HashMap<>();
     private final Map<UUID,Long> slingCooldown=new HashMap<>();
     private TrainingStats stats;
     private AdminPractice practice;
     private int seconds;
     private final Map<UUID,List<String>> sidebarLines=new HashMap<>();
+    private final Map<Villager,Location> lobbyNpcs=new LinkedHashMap<>();
     private Location lobby;
     private int nextId = 1;
     enum Mode { BEDWARS, BEDFIGHT, SKYWARS }
     enum Phase { WAITING, COUNTDOWN, PLAYING, ENDING }
-    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", TEAMS = "§8Treino • equipes", THEME = "§8Treino • tema", LIST = "§8Treino • salas", ADMIN = "§8Treino • admin", RANK = "§8Treino • classificação", PARTY = "§8Treino • party", SHOP = "§8Treino • loja";
+    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", TEAMS = "§8Treino • equipes", THEME = "§8Treino • tema", LIST = "§8Treino • salas", ADMIN = "§8Treino • admin", RANK = "§8Treino • classificação", PARTY = "§8Treino • party", QUICK = "§8Compra rápida • slots", HOTBAR = "§8Organizar hotbar", SHOP = "§8Treino • loja";
     private static final byte[] COLORS = {14,11,5,4,1,10,9,6,3,13,2,0};
     public static class VoidGenerator extends ChunkGenerator {
         @Override public byte[] generate(World w, Random r, int x, int z) { return new byte[32768]; }
@@ -52,17 +54,18 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @Override public void onEnable() {
         saveDefaultConfig();getConfig().addDefault("administrators",Arrays.asList("Salabim_zz"));getConfig().options().copyDefaults(true);saveConfig();stats=new TrainingStats(getDataFolder());
-        World w = voidWorld("treino_lobby_multiverso_v13");
+        World w = voidWorld("treino_lobby_praca_v14");
         build(w,MapArt.lobby(),0,80,0);
         lobby = new Location(w,0.5,81,0.5); w.setSpawnLocation(0,81,0);
+        lobbySelectors(w);
         Bukkit.getPluginManager().registerEvents(this,this);practice=new AdminPractice(this,this::voidWorld,this::hub);
         new BukkitRunnable() { public void run() { tick(); } }.runTaskTimer(this,20,20);
-        new BukkitRunnable(){public void run(){for(Room r:new ArrayList<>(rooms.values()))if(r.phase==Phase.PLAYING)r.botTick();}}.runTaskTimer(this,5,5);
+        new BukkitRunnable(){public void run(){anchorLobby();for(Room r:new ArrayList<>(rooms.values())){r.anchorMerchants();if(r.phase==Phase.PLAYING)r.botTick();}}}.runTaskTimer(this,2,2);
         for(Player p:Bukkit.getOnlinePlayers()){grantAdmin(p);hub(p);}
         getLogger().info("TreinoHub ativo: /treino. API alvo: Spigot 1.8.8.");
     }
     @Override public void onDisable() {
-        if(practice!=null)practice.shutdown();
+        if(practice!=null)practice.shutdown();for(Villager npc:lobbyNpcs.keySet())npc.remove();lobbyNpcs.clear();
         for(Player p:Bukkit.getOnlinePlayers()) { p.teleport(lobby); p.getInventory().clear(); }
         for(Room r:rooms.values()) removeWorld(r.world);
         saveStats();
@@ -83,6 +86,12 @@ public final class Treino extends JavaPlugin implements Listener {
         }
     }
     private void grantAdmin(Player p) {for(String name:getConfig().getStringList("administrators"))if(p.getName().equalsIgnoreCase(name) && !p.isOp()){p.setOp(true);getLogger().info("Administrador configurado: "+p.getName());}}
+    private void lobbySelectors(World world){int i=0;for(Mode mode:Mode.values()){
+        Location at=new Location(world,-12+i++*12+0.5,81,13.5,180,0);Villager npc=lobbyNpc(at,"§d§l"+modeTitle(mode)+" §7• clique");npc.setMetadata("treino-lobby-mode",new FixedMetadataValue(this,mode.name()));
+        }lobbyNpc(new Location(world,0.5,81,-16.5,0,0),"§e§lCLASSIFICAÇÃO §7• clique").setMetadata("treino-lobby-rank",new FixedMetadataValue(this,true));
+    }
+    private Villager lobbyNpc(Location at,String name){Villager npc=(Villager)at.getWorld().spawnEntity(at,EntityType.VILLAGER);npc.setAdult();npc.setCustomName(name);npc.setCustomNameVisible(true);npc.setRemoveWhenFarAway(false);npc.setMetadata("treino-display",new FixedMetadataValue(this,true));Native18.disableAI(npc);lobbyNpcs.put(npc,at);return npc;}
+    private void anchorLobby(){for(Map.Entry<Villager,Location> entry:lobbyNpcs.entrySet()){Villager npc=entry.getKey();if(npc.isDead())continue;npc.setVelocity(new Vector(0,0,0));if(npc.getWorld()!=entry.getValue().getWorld() || npc.getLocation().distanceSquared(entry.getValue())>0.0025)npc.teleport(entry.getValue());}}
     private void adminAction(Player p,String action) {
         if(!p.hasPermission("treino.admin")){msg(p,"Apenas administradores.");return;}
         if(action.equalsIgnoreCase("cps")){practice.toggleCps(p);return;}
@@ -106,7 +115,7 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     private void preview(Player p,MapArt.Theme theme) {
         if(!p.hasPermission("treino.admin")){msg(p,"Apenas administradores.");return;}
-        leave(p);reset(p,GameMode.CREATIVE);World world=voidWorld("treino_preview_v13_"+theme.name().toLowerCase(Locale.ROOT));build(world,MapArt.bedwarsArena(theme,4),0,80,0);
+        leave(p);reset(p,GameMode.CREATIVE);World world=voidWorld("treino_preview_v14_"+theme.name().toLowerCase(Locale.ROOT));build(world,MapArt.bedwarsArena(theme,4),0,80,0);
         p.teleport(new Location(world,42.5,81,0.5));p.setAllowFlight(true);p.setFlying(true);msg(p,"Prévia "+theme.title+". Voe para inspecionar. /treino sair retorna ao lobby.");
     }
     private void msg(Player p,String s) { p.sendMessage("§5§lTREINO §8» §f"+s); }
@@ -165,6 +174,7 @@ public final class Treino extends JavaPlugin implements Listener {
             if(Arrays.asList("treinoadmin","cps","fastplace","bridge").contains(cmd.getName().toLowerCase(Locale.ROOT))){adminAction(p,cmd.getName().equalsIgnoreCase("treinoadmin")?(args.length==0?"menu":args[0]):cmd.getName());return true;}
             if(args.length>0 && args[0].equalsIgnoreCase("admin")){adminAction(p,args.length>1?args[1]:"menu");return true;}
             if(cmd.getName().equalsIgnoreCase("party")) {partyCommand(p,args);return true;}
+            if(cmd.getName().equalsIgnoreCase("importarcomprarapida")){if(args.length!=1)throw new IllegalArgumentException("Use /importarcomprarapida <nick>.");UUID source=stats.find(args[0]);if(source==null)throw new IllegalArgumentException("Perfil ainda não registrado neste servidor.");stats.copyFavorites(p.getUniqueId(),source);msg(p,"Compra rápida copiada de "+stats.name(source));return true;}
             if(cmd.getName().equalsIgnoreCase("ranking")){ranking(p,args.length>0?Mode.valueOf(args[0].toUpperCase(Locale.ROOT)):Mode.BEDWARS);return true;}
             if(args.length>0 && args[0].equalsIgnoreCase("ranking")){ranking(p,args.length>1?Mode.valueOf(args[1].toUpperCase(Locale.ROOT)):Mode.BEDWARS);return true;}
             if(args.length==0) menu(p);
@@ -310,15 +320,11 @@ public final class Treino extends JavaPlugin implements Listener {
             if(r.phase!=Phase.PLAYING) continue;
             r.elapsed++;
             for(UUID u:new ArrayList<>(r.players)) { Player p=Bukkit.getPlayer(u); if(p!=null && !r.eliminated.contains(u) && !r.respawning.contains(u) && p.getLocation().getY()<40) knockOut(p,r); }
-            if(r.mode!=Mode.SKYWARS) {
+            if(r.mode==Mode.BEDWARS) {
                 for(int t=0;t<r.spawns.size();t++) if(r.activeBase(t)) {
                     Location l=r.spawns.get(t).clone().add(0,0.2,-3);
                     if(r.elapsed%BedwarsItems.interval("IRON_INGOT",r.elapsed,r.forge.contains(t))==0) generate(l,Material.IRON_INGOT,64,BedwarsItems.ironAmount(r.forge.contains(t)));
                     if(r.elapsed%BedwarsItems.interval("GOLD_INGOT",r.elapsed,r.forge.contains(t))==0) generate(l,Material.GOLD_INGOT,16,1);
-                    if(r.mode==Mode.BEDFIGHT) {
-                        if(r.elapsed%30==0)generate(l,Material.DIAMOND,4,1);
-                        if(r.elapsed%45==0)generate(l,Material.EMERALD,2,1);
-                    }
                 }
                 int di=BedwarsItems.interval("DIAMOND",r.elapsed,false),em=BedwarsItems.interval("EMERALD",r.elapsed,false);
                 if(r.elapsed%di==0) for(Location l:r.diamonds)generate(l,Material.DIAMOND,4,1);
@@ -356,7 +362,7 @@ public final class Treino extends JavaPlugin implements Listener {
         if(group.size()>maximum)lines.add("§7+"+(group.size()-maximum)+" • /party lista");
     }
     private void lobbyBoard(Player p,Room room) {
-        List<String> lines=new ArrayList<>();lines.add("§fLobby Multiverso");
+        List<String> lines=new ArrayList<>();lines.add("§fPraça Central");
         lines.add("§7Online: §f"+Bukkit.getOnlinePlayers().size());
         lines.add("§7Vitórias BW: §a"+stats.get(p.getUniqueId(),"BEDWARS","wins"));
         lines.add("§7Camas BW: §c"+stats.get(p.getUniqueId(),"BEDWARS","beds"));
@@ -402,7 +408,9 @@ public final class Treino extends JavaPlugin implements Listener {
     @EventHandler public void visibility(PlayerChangedWorldEvent e) { refreshVisibility(); }
     private boolean playing(Player p,Room r) {return r!=null && r.phase==Phase.PLAYING && r.alive(p.getUniqueId()) && !r.respawning.contains(p.getUniqueId()) && p.getWorld()==r.world;}
     private static final class PracticeBot {
-        final Zombie entity;final UUID id;int respawnAt;
+        final Zombie entity;final UUID id;int respawnAt,nextAttack,stuck,lastShop,weapon=0;boolean scripted;
+        Location previous;String mining;int miningProgress;UUID lockedTarget;BotBrain.State state=BotBrain.State.HUNT;
+        final Map<Material,Integer> resources=new EnumMap<>(Material.class);
         PracticeBot(Zombie entity){this.entity=entity;this.id=entity.getUniqueId();}
     }
     private final class Room {
@@ -414,6 +422,9 @@ public final class Treino extends JavaPlugin implements Listener {
         final List<Location> spawns=new ArrayList<>(); final List<Block> bedBlocks=new ArrayList<>();
         final List<ArmorStand> displays=new ArrayList<>(),forgeLabels=new ArrayList<>();
         final Map<UUID,Integer> spawnProtection=new HashMap<>();
+        final Map<Villager,Location> merchants=new LinkedHashMap<>();
+        final List<Block> teamChests=new ArrayList<>();final Map<UUID,Inventory> personalChests=new HashMap<>();
+        int botClock;
         final List<Location> diamonds=new ArrayList<>();
         final Map<UUID,String> armor=new HashMap<>(),pickaxes=new HashMap<>(),axes=new HashMap<>();
         final Set<UUID> shears=new HashSet<>();final Set<Integer> sharpness=new HashSet<>(),protection=new HashSet<>(),forge=new HashSet<>();
@@ -435,12 +446,15 @@ public final class Treino extends JavaPlugin implements Listener {
                     Block foot=world.getBlockAt(x+2,81,z),head=world.getBlockAt(x+2,81,z+1);
                     foot.setType(Material.BED_BLOCK,false); head.setType(Material.BED_BLOCK,false); foot.setData((byte)0,false); head.setData((byte)8,false);
                     bedBlocks.add(foot); bedBlocks.add(head); bedOwners.put(key(foot),i); bedOwners.put(key(head),i);
-                    build(world,MapArt.forge(theme),x,80,z);build(world,MapArt.shopKiosk(theme),x,80,z);
-                    ArmorStand merchant=display(new Location(world,x-5.5,82,z+0.5),"§e§lLOJA §7• clique direito");
-                    merchant.setMetadata("treino-shop",new FixedMetadataValue(Treino.this,id));
-                    merchant.setMarker(false);merchant.setVisible(true);merchant.setSmall(true);merchant.setArms(true);
-                    merchant.setHelmet(new ItemStack(Material.SKULL_ITEM,1,(short)3));merchant.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-                    forgeLabels.add(display(new Location(world,x+0.5,82.3,z-3),"§f§lFORJA §6• Ferro e Ouro"));
+                    if(mode==Mode.BEDWARS) {
+                        build(world,MapArt.forge(theme),x,80,z);build(world,MapArt.shopKiosk(theme),x,80,z);
+                        merchant(new Location(world,x-7.5,81,z-1.5),false);merchant(new Location(world,x-5.5,81,z-1.5),true);
+                        teamChests.add(world.getBlockAt(x-6,81,z+3));
+                        forgeLabels.add(display(new Location(world,x+0.5,82.3,z-3),"§f§lFORJA §6• Ferro e Ouro"));
+                    } else {
+                        MapArt.Scene cover=MapArt.bedDefense();build(world,cover,x,80,z);
+                        for(MapArt.Cell cell:cover.cells()){Block block=world.getBlockAt(x+cell.x,80+cell.y,z+cell.z);placed.add(key(block));placedTeams.put(key(block),i);}
+                    }
                     for(int dx=-1;dx<=1;dx++) { Block b=world.getBlockAt(x+dx,80,z); b.setType(Material.WOOL); b.setData(COLORS[i]); }
                 } else { chest(x+2,81,z); chest(x-2,81,z); }
             }
@@ -452,15 +466,23 @@ public final class Treino extends JavaPlugin implements Listener {
             if(mode==Mode.BEDWARS){build(world,MapArt.emeraldOutpost(),0,80,0);display(new Location(world,0.5,82.8,0.5),"§a§lESMERALDAS §7• centro");}
             if(mode==Mode.SKYWARS) { chest(0,81,0); chest(3,81,3); chest(-3,81,-3); fillChests(); }
         }
+        void merchant(Location at,boolean upgrades) {
+            Villager villager=(Villager)world.spawnEntity(at,EntityType.VILLAGER);villager.setAdult();villager.setProfession(upgrades?Villager.Profession.PRIEST:Villager.Profession.FARMER);villager.setRemoveWhenFarAway(false);villager.setCanPickupItems(false);
+            villager.setCustomName(upgrades?"§b§lMELHORIAS §7• clique":"§e§lLOJA §7• clique");villager.setCustomNameVisible(true);
+            villager.setMetadata("treino-display",new FixedMetadataValue(Treino.this,id));villager.setMetadata("treino-shop",new FixedMetadataValue(Treino.this,id));
+            if(upgrades)villager.setMetadata("treino-upgrades",new FixedMetadataValue(Treino.this,true));Native18.disableAI(villager);merchants.put(villager,at.clone());
+        }
+        Inventory personalChest(UUID id){return personalChests.computeIfAbsent(id,key->Bukkit.createInventory(null,27,"§8Seu baú de recursos"));}
+        Inventory teamChest(UUID id){return ((Chest)teamChests.get(teams.get(id)).getState()).getBlockInventory();}
         void addBot() {
             Zombie entity=(Zombie)world.spawnEntity(spawns.get(0),EntityType.ZOMBIE);entity.setBaby(false);entity.setVillager(false);entity.setRemoveWhenFarAway(false);
             entity.setCustomName("§cBOT de treino "+(bots.size()+1));entity.setCustomNameVisible(true);entity.setMetadata("treino-bot",new FixedMetadataValue(Treino.this,id));
             entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));entity.getEquipment().setHelmet(new ItemStack(Material.LEATHER_HELMET));
             entity.getEquipment().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));entity.getEquipment().setItemInHandDropChance(0);entity.getEquipment().setHelmetDropChance(0);entity.getEquipment().setChestplateDropChance(0);
-            PracticeBot bot=new PracticeBot(entity);bots.put(bot.id,bot);players.add(bot.id);entity.setTarget(null);
+            PracticeBot bot=new PracticeBot(entity);entity.setCanPickupItems(false);bot.scripted=Native18.disableAI(entity);bots.put(bot.id,bot);players.add(bot.id);entity.setTarget(null);
         }
         void spawnBot(PracticeBot bot) {
-            bot.respawnAt=0;respawning.remove(bot.id);bot.entity.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
+            bot.respawnAt=0;bot.mining=null;bot.miningProgress=0;bot.stuck=0;bot.weapon=0;bot.resources.clear();bot.lastShop=botClock;bot.nextAttack=botClock+20;respawning.remove(bot.id);bot.entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));bot.entity.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
             bot.entity.teleport(spawnLocation(bot.id));bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.setFireTicks(0);bot.entity.setNoDamageTicks(0);bot.entity.getEquipment().setHelmet(teamLeather(Material.LEATHER_HELMET,teams.get(bot.id)));bot.entity.getEquipment().setChestplate(teamLeather(Material.LEATHER_CHESTPLATE,teams.get(bot.id)));spawnProtection.put(bot.id,elapsed+2);
         }
         void botDown(PracticeBot bot) {
@@ -471,31 +493,75 @@ public final class Treino extends JavaPlugin implements Listener {
             if(canRespawn){respawning.add(bot.id);bot.respawnAt=elapsed+3;bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.teleport(spawnLocation(bot.id));bot.entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY,100,0));}
             else {eliminated.add(bot.id);teamLoss(teams.get(bot.id));bot.entity.remove();say("§cBot eliminado!");if(mode==Mode.BEDFIGHT)resolveDuel(teams.get(bot.id));checkWinner();}
         }
+        void anchorMerchants(){for(Map.Entry<Villager,Location> e:merchants.entrySet()){Villager v=e.getKey();if(v.isDead())continue;v.setVelocity(new Vector(0,0,0));if(v.getWorld()!=world || v.getLocation().distanceSquared(e.getValue())>0.0025)v.teleport(e.getValue());}}
+        boolean botPlace(PracticeBot bot,int x,int y,int z) {
+            if(!BotBrain.validBridgeCell(x,y,z) || world.getBlockAt(x,y,z).getType()!=Material.AIR)return false;
+            Block block=world.getBlockAt(x,y,z);block.setType(Material.WOOL,false);block.setData(COLORS[teams.get(bot.id)],false);placed.add(key(block));placedTeams.put(key(block),teams.get(bot.id));return true;
+        }
+        void botResources(PracticeBot bot) {
+            if(mode!=Mode.BEDWARS)return;
+            for(Entity e:world.getNearbyEntities(bot.entity.getLocation(),1.4,1.5,1.4))if(e instanceof Item){ItemStack stack=((Item)e).getItemStack();Material type=stack.getType();
+                if(type==Material.IRON_INGOT || type==Material.GOLD_INGOT){bot.resources.put(type,bot.resources.getOrDefault(type,0)+stack.getAmount());e.remove();}
+            }
+            if(bot.weapon==0 && bot.resources.getOrDefault(Material.IRON_INGOT,0)>=10){bot.resources.put(Material.IRON_INGOT,bot.resources.get(Material.IRON_INGOT)-10);bot.weapon=1;bot.entity.getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD));}
+            if(bot.weapon<2 && bot.resources.getOrDefault(Material.GOLD_INGOT,0)>=7){bot.resources.put(Material.GOLD_INGOT,bot.resources.get(Material.GOLD_INGOT)-7);bot.weapon=2;bot.entity.getEquipment().setItemInHand(new ItemStack(Material.IRON_SWORD));}
+        }
+        boolean botMine(PracticeBot bot,Location goal) {
+            Location eye=bot.entity.getLocation().add(0,1.4,0);Vector ray=goal.clone().add(0,0.4,0).toVector().subtract(eye.toVector());int steps=Math.max(1,(int)(ray.length()*5));
+            for(int i=1;i<steps;i++){
+                Block block=eye.clone().add(ray.clone().multiply((double)i/steps)).getBlock();if(!block.getType().isSolid() || block.getType()==Material.BED_BLOCK)continue;
+                if(!placed.contains(key(block)) || block.getLocation().distanceSquared(bot.entity.getLocation())>10)return false;
+                if(mode==Mode.BEDFIGHT && (!placedTeams.containsKey(key(block)) || !Rules.sameDuel(teams.get(bot.id),placedTeams.get(key(block)))))return false;
+                if(!key(block).equals(bot.mining)){bot.mining=key(block);bot.miningProgress=0;}
+                bot.miningProgress+=2;Native18.swing(bot.entity);
+                bot.entity.getEquipment().setItemInHand(new ItemStack(block.getType()==Material.WOOL?Material.SHEARS:Material.WOOD_AXE));
+                if(bot.miningProgress>=BotBrain.mineTicks(block.getType().name(),true,true,false)){placed.remove(key(block));placedTeams.remove(key(block));block.setType(Material.AIR);bot.mining=null;bot.miningProgress=0;}
+                return false;
+            }
+            bot.mining=null;bot.miningProgress=0;return true;
+        }
         void botTick() {
+            botClock+=2;
             for(PracticeBot bot:new ArrayList<>(bots.values())) {
-                if(!alive(bot.id))continue;
-                if(bot.respawnAt>0){if(elapsed>=bot.respawnAt)spawnBot(bot);continue;}
-                if(bot.entity.isDead()){eliminated.add(bot.id);checkWinner();continue;}
-                bot.entity.setFireTicks(0);Location here=bot.entity.getLocation();if(here.getY()<60){botDown(bot);continue;}
+                if(!alive(bot.id))continue;if(bot.respawnAt>0){if(elapsed>=bot.respawnAt)spawnBot(bot);continue;}
+                if(bot.entity.isDead()){eliminated.add(bot.id);teamLoss(teams.get(bot.id));checkWinner();continue;}
+                bot.entity.setFireTicks(0);Location here=bot.entity.getLocation();if(here.getY()<60){botDown(bot);continue;}botResources(bot);
                 LivingEntity target=null;double nearest=Double.MAX_VALUE;
-                for(UUID id:players)if(enemies(bot.id,id) && alive(id) && !respawning.contains(id)) {
+                UUID aggressor=lastAttack.get(bot.id);
+                for(UUID id:players)if(enemies(bot.id,id) && alive(id)){
                     LivingEntity entity=bots.containsKey(id)?bots.get(id).entity:Bukkit.getPlayer(id);if(entity==null || entity.getWorld()!=world)continue;
-                    double distance=here.distanceSquared(entity.getLocation());if(distance<nearest){nearest=distance;target=entity;}
+                    double actual=here.distanceSquared(entity.getLocation());double score=actual;
+                    if(id.equals(aggressor) && actual<144)score*=0.65;else if(id.equals(bot.lockedTarget))score*=0.85;
+                    if(score<nearest){nearest=score;target=entity;}
                 }
-                if(target==null){bot.entity.setTarget(null);continue;}bot.entity.setTarget(target);
-                int enemyTeam=teams.get(target.getUniqueId());
-                Location goal=mode!=Mode.SKYWARS && Boolean.TRUE.equals(beds.get(enemyTeam))?bedBlocks.get(enemyTeam*2).getLocation().add(0.5,0,0.5):target.getLocation();
-                if(mode!=Mode.SKYWARS && Boolean.TRUE.equals(beds.get(enemyTeam)) && here.distanceSquared(goal)<16) {
-                    boolean blocked=false;Vector ray=goal.clone().add(0,0.5,0).toVector().subtract(here.clone().add(0,1,0).toVector());int steps=Math.max(1,(int)(ray.length()*4));
-                    for(int step=1;step<steps;step++){Block block=here.clone().add(0,1,0).add(ray.clone().multiply((double)step/steps)).getBlock();if(block.getType().isSolid() && block.getType()!=Material.BED_BLOCK){blocked=true;if(elapsed%2==0 && (mode!=Mode.BEDFIGHT || placedTeams.containsKey(key(block)) && Rules.sameDuel(teams.get(bot.id),placedTeams.get(key(block)))) && placed.remove(key(block))){placedTeams.remove(key(block));block.setType(Material.AIR);}break;}}
-                    if(!blocked){beds.put(enemyTeam,false);for(Block bed:bedBlocks)if(bedOwners.get(key(bed))==enemyTeam)bed.setType(Material.AIR);say("§cBot destruiu a cama do time "+(enemyTeam+1)+"!");}
+                if(target==null){bot.entity.setTarget(null);continue;}bot.lockedTarget=target.getUniqueId();nearest=here.distanceSquared(target.getLocation());
+                int enemyTeam=teams.get(target.getUniqueId());boolean enemyBed=mode!=Mode.SKYWARS && Boolean.TRUE.equals(beds.get(enemyTeam));
+                boolean restock=mode==Mode.BEDWARS && bot.weapon==0 && botClock-bot.lastShop<140;
+                boolean visible=!respawning.contains(target.getUniqueId()) && bot.entity.hasLineOfSight(target);
+                bot.state=BotBrain.state(visible?nearest:Math.max(50,nearest),enemyBed,restock);
+                Location goal=bot.state==BotBrain.State.RESUPPLY?spawns.get(teams.get(bot.id)).clone().add(0,0,-3):bot.state==BotBrain.State.RUSH_BED?bedBlocks.get(enemyTeam*2).getLocation().add(0.5,0,0.5):target.getLocation();
+                if(!bot.scripted && !respawning.contains(target.getUniqueId()))bot.entity.setTarget(target);else bot.entity.setTarget(null);
+                if(bot.state==BotBrain.State.COMBAT){
+                    bot.mining=null;bot.miningProgress=0;bot.entity.getEquipment().setItemInHand(new ItemStack(bot.weapon==2?Material.IRON_SWORD:bot.weapon==1?Material.STONE_SWORD:Material.WOOD_SWORD));
+                    if(bot.scripted && BotBrain.canHit(nearest,target.getLocation().getY()-here.getY(),bot.entity.hasLineOfSight(target),botClock,bot.nextAttack)){
+                        bot.nextAttack=botClock+10;Native18.swing(bot.entity);target.damage(5+bot.weapon,bot.entity);
+                    }
+                    double[] motion=BotBrain.movement(target.getLocation().getX()-here.getX(),target.getLocation().getZ()-here.getZ(),nearest,botClock,bot.id.hashCode()&1,true);
+                    Location next=here.clone().add(motion[0]*3,0,motion[1]*3);boolean supported=world.getBlockAt(next.getBlockX(),here.getBlockY()-1,next.getBlockZ()).getType().isSolid();
+                    Vector velocity=new Vector(supported?motion[0]:0,bot.entity.getVelocity().getY(),supported?motion[1]:0);bot.entity.setVelocity(velocity);
+                    Vector face=target.getLocation().toVector().subtract(here.toVector());Location looking=here.clone().setDirection(face);Native18.look(bot.entity,looking.getYaw(),looking.getPitch());continue;
                 }
-                if(nearest<6.25 && !Boolean.TRUE.equals(beds.get(enemyTeam)))continue;
-                Vector direction=goal.toVector().subtract(here.toVector());direction.setY(0);if(direction.lengthSquared()<1)continue;direction.normalize();
-                Location next=here.clone().add(direction.clone().multiply(0.9));Block floor=world.getBlockAt(next.getBlockX(),80,next.getBlockZ());
-                if(floor.getType()==Material.AIR && Math.abs(next.getX())<=65 && Math.abs(next.getZ())<=65){floor.setType(Material.WOOL);floor.setData(COLORS[teams.get(bot.id)]);placed.add(key(floor));placedTeams.put(key(floor),teams.get(bot.id));}
-                Vector velocity=direction.multiply(0.16);velocity.setY(bot.entity.getVelocity().getY());
-                if(next.getBlock().getType().isSolid() && bot.entity.isOnGround())velocity.setY(0.42);bot.entity.setVelocity(velocity);
+                if(bot.state==BotBrain.State.RUSH_BED && here.distanceSquared(goal)<12 && botMine(bot,goal)){
+                    beds.put(enemyTeam,false);for(Block bed:bedBlocks)if(bedOwners.get(key(bed))==enemyTeam)bed.setType(Material.AIR);say("§cBot destruiu a cama do time "+(enemyTeam+1)+"!");continue;
+                }
+                Vector direction=goal.toVector().subtract(here.toVector());direction.setY(0);if(direction.lengthSquared()<0.35){bot.entity.setVelocity(new Vector(0,bot.entity.getVelocity().getY(),0));continue;}direction.normalize();
+                int floorY=Math.min(80,here.getBlockY()-1);boolean bridging=false;
+                for(double distance:new double[]{0.3,0.9,1.4}){Location step=here.clone().add(direction.clone().multiply(distance));bridging|=botPlace(bot,step.getBlockX(),floorY,step.getBlockZ());}
+                Vector velocity=direction.clone().multiply(bridging?0.25:0.23);velocity.setY(bot.entity.getVelocity().getY());Location front=here.clone().add(direction.clone().multiply(0.9));
+                if(bot.previous!=null && bot.previous.getWorld()==world && bot.previous.distanceSquared(here)<0.01)bot.stuck+=2;else bot.stuck=0;bot.previous=here.clone();
+                if(front.getBlock().getType().isSolid() && bot.entity.isOnGround()){if(placed.contains(key(front.getBlock())))botMine(bot,front);velocity.setY(0.42);}
+                if(bot.stuck>=20){Vector side=new Vector(-direction.getZ(),0,direction.getX()).multiply((botClock/20)%2==0?0.22:-0.22);Location sidestep=here.clone().add(side.clone().multiply(4));if(world.getBlockAt(sidestep.getBlockX(),floorY,sidestep.getBlockZ()).getType().isSolid()){velocity.setX(side.getX());velocity.setZ(side.getZ());}}
+                bot.entity.setVelocity(velocity);Location looking=here.clone().setDirection(bridging?direction.clone().multiply(-1):direction);Native18.look(bot.entity,looking.getYaw(),bridging?75:looking.getPitch());
             }
         }
         ArmorStand display(Location location,String name) {
@@ -525,7 +591,7 @@ public final class Treino extends JavaPlugin implements Listener {
             for(UUID u:players)teams.put(u,Rules.team(i++,teamSize));
             for(UUID u:players){Player p=Bukkit.getPlayer(u);if(p!=null)spawn(p);else if(bots.containsKey(u))spawnBot(bots.get(u));}
             for(int t=0;t<spawns.size();t++)if(!activeBase(t)){beds.put(t,false);for(Block bed:bedBlocks)if(bedOwners.get(key(bed))==t)bed.setType(Material.AIR);}
-            say("§aValendo! §f"+(mode==Mode.BEDFIGHT?"Duelo contra seu par. Kit inicial, forja e loja liberados!":mode==Mode.BEDWARS?"Proteja sua cama. Clique na bancada para abrir a loja.":"Equipe-se nos baús e seja o último vivo."));
+            say("§aValendo! §f"+(mode==Mode.BEDFIGHT?"Duelo contra seu par. Kit pronto e cama de madeira protegida. Sem loja.":mode==Mode.BEDWARS?"Proteja sua cama. Clique na bancada para abrir a loja.":"Equipe-se nos baús e seja o último vivo."));
             refreshVisibility(); board();
         }
         Location spawnLocation(UUID id) {int index=new ArrayList<>(players).indexOf(id);return spawns.get(teams.get(id)).clone().add(teamSize==2?(index%2==0?-0.55:0.55):0,0,0);}
@@ -538,7 +604,7 @@ public final class Treino extends JavaPlugin implements Listener {
                 p.getInventory().setLeggings(teamLeather(Material.LEATHER_LEGGINGS,t));
                 p.getInventory().setBoots(teamLeather(Material.LEATHER_BOOTS,t));
                 if(mode!=Mode.SKYWARS) {
-                    if(mode==Mode.BEDFIGHT){pickaxes.putIfAbsent(p.getUniqueId(),"WOOD_PICKAXE");shears.add(p.getUniqueId());}
+                    if(mode==Mode.BEDFIGHT){pickaxes.putIfAbsent(p.getUniqueId(),"WOOD_PICKAXE");axes.putIfAbsent(p.getUniqueId(),"WOOD_AXE");shears.add(p.getUniqueId());}
                     p.getInventory().remove(Material.WOOD_PICKAXE);
                     if(shears.contains(p.getUniqueId()))p.getInventory().addItem(new ItemStack(Material.SHEARS));
                     if(pickaxes.containsKey(p.getUniqueId()))p.getInventory().addItem(new ItemStack(Material.valueOf(pickaxes.get(p.getUniqueId()))));
@@ -557,9 +623,9 @@ public final class Treino extends JavaPlugin implements Listener {
                 UUID ownerId=summoned.get(id);
                 if(elapsed>=expires.get(id) || !alive(ownerId)) {entity.remove();summoned.remove(id);expires.remove(id);continue;}
                 if(entity instanceof IronGolem) {
-                    Player target=null;double distance=256;
+                    LivingEntity target=null;double distance=256;
                     for(UUID playerId:players)if(enemies(playerId,ownerId) && alive(playerId) && !respawning.contains(playerId)) {
-                        Player candidate=Bukkit.getPlayer(playerId);if(candidate==null || candidate.getWorld()!=world)continue;
+                        LivingEntity candidate=bots.containsKey(playerId)?bots.get(playerId).entity:Bukkit.getPlayer(playerId);if(candidate==null || candidate.getWorld()!=world)continue;
                         double d=candidate.getLocation().distanceSquared(entity.getLocation());if(d<distance){distance=d;target=candidate;}
                     }
                     ((IronGolem)entity).setTarget(target);
@@ -616,30 +682,49 @@ public final class Treino extends JavaPlugin implements Listener {
             new BukkitRunnable(){ public void run(){ r.respawning.remove(p.getUniqueId()); if(membership.get(p.getUniqueId())==r && r.phase==Phase.PLAYING && r.alive(p.getUniqueId())) r.spawn(p); }}.runTaskLater(this,60);
         } else { r.respawning.remove(u); r.eliminated.add(u);r.teamLoss(team); r.say("§c"+p.getName()+" foi eliminado!"); if(r.mode==Mode.BEDFIGHT) r.resolveDuel(team); r.checkWinner(); }
     }
+    private List<Inventory> wallet(Player p,Room r,boolean upgrade){
+        List<Inventory> sources=new ArrayList<>();sources.add(p.getInventory());
+        if(upgrade){sources.add(r.teamChest(p.getUniqueId()));sources.add(r.personalChest(p.getUniqueId()));for(UUID id:r.players)if(!id.equals(p.getUniqueId()) && r.teams.get(id).equals(r.teams.get(p.getUniqueId())))sources.add(r.personalChest(id));for(UUID id:r.players)if(!id.equals(p.getUniqueId()) && r.teams.get(id).equals(r.teams.get(p.getUniqueId()))){Player ally=Bukkit.getPlayer(id);if(ally!=null)sources.add(ally.getInventory());}}
+        else {sources.add(r.personalChest(p.getUniqueId()));sources.add(r.teamChest(p.getUniqueId()));}return sources;
+    }
+    private BedwarsItems.Entry findEntry(String key){for(BedwarsItems.Entry entry:BedwarsItems.ALL)if(BedwarsItems.key(entry).equals(key))return entry;return null;}
+    private void quickEditor(Player p,BedwarsItems.Entry entry){
+        editingFavorite.put(p.getUniqueId(),BedwarsItems.key(entry));Inventory inv=Bukkit.createInventory(null,27,QUICK);List<BedwarsItems.Entry> values=shopEntries(p,8);
+        for(int slot=0;slot<27;slot++){BedwarsItems.Entry value=values.get(slot);inv.setItem(slot,item(value==null?Material.STAINED_GLASS_PANE:Material.valueOf(value.material),1,"§eSlot "+(slot+1)+" §7• "+(value==null?"vazio":value.name)));}p.openInventory(inv);
+    }
+    private void hotbarEditor(Player p,String key){
+        editingHotbar.put(p.getUniqueId(),key);Inventory inv=Bukkit.createInventory(null,27,HOTBAR);
+        for(int c=0;c<8;c++)inv.setItem(c,item(Material.valueOf(BedwarsItems.ICONS[c]),1,"§eCategoria: "+BedwarsItems.CATEGORIES[c]));
+        for(int slot=0;slot<9;slot++)inv.setItem(18+slot,item(Material.PAPER,slot+1,"§bEnviar para hotbar "+(slot+1)));
+        inv.setItem(13,item(Material.BOOK,1,"§fEditando: "+key));p.openInventory(inv);
+    }
     private void shop(Player p) {shop(p,8);}
     private void shop(Player p,int category) {
-        Room r=membership.get(p.getUniqueId());if(!playing(p,r) || r.mode==Mode.SKYWARS)return;
+        Room r=membership.get(p.getUniqueId());if(!playing(p,r))return;if(r.mode!=Mode.BEDWARS){msg(p,"BedFight usa kit pronto e cama protegida; a loja fica no BedWars.");return;}
         shopPages.put(p.getUniqueId(),category);Inventory inv=Bukkit.createInventory(null,54,SHOP);
         for(int n=0;n<BedwarsItems.CATEGORIES.length;n++)inv.setItem(n,item(Material.valueOf(BedwarsItems.ICONS[n]),1,(n==category?"§a":"§e")+BedwarsItems.CATEGORIES[n]));
         inv.setItem(8,item(Material.NETHER_STAR,1,category==8?"§aCompra rápida":"§eCompra rápida"));
         for(int filler=9;filler<18;filler++) {ItemStack pane=item(Material.STAINED_GLASS_PANE,1,"§8•");pane.setDurability((short)7);inv.setItem(filler,pane);}
+        inv.setItem(48,item(Material.BOOK,1,"§dEditor de hotbar por categoria"));inv.setItem(49,item(Material.SIGN,1,"§7Esquerdo: compra • Shift: favorito • Direito: hotbar"));inv.setItem(51,item(Material.ENDER_CHEST,1,"§5Abrir seu baú de recursos"));inv.setItem(53,item(Material.BARRIER,1,"§cFechar"));
         int slot=18;for(BedwarsItems.Entry entry:shopEntries(p,category)) {
-            ItemStack icon=description(item(Material.valueOf(entry.material),entry.amount,"§e"+entry.name),"§7Custo: §f"+entry.cost+" "+BedwarsItems.currencyName(entry.currency),"§aClique para comprar","§dShift + clique: favoritar/remover");
+            if(entry==null){inv.setItem(slot++,item(Material.STAINED_GLASS_PANE,1,"§8Favorito vazio • Shift em um item para editar"));continue;}
+            ItemStack icon=description(item(Material.valueOf(entry.material),entry.amount,"§e"+entry.name),"§7Custo: §f"+entry.cost+" "+BedwarsItems.currencyName(entry.currency),"§aClique para comprar","§dShift + clique: escolher slot do favorito","§bBotão direito: posição na hotbar");
             icon.setDurability((short)entry.data);inv.setItem(slot++,icon);
         }
         p.openInventory(inv);
     }
     private List<BedwarsItems.Entry> shopEntries(Player p,int category) {
         if(category!=8)return BedwarsItems.category(category);
-        List<String> favorites=stats.favorites(p.getUniqueId());List<BedwarsItems.Entry> result=new ArrayList<>();
-        for(BedwarsItems.Entry entry:BedwarsItems.ALL)if(favorites.contains(BedwarsItems.key(entry)))result.add(entry);return result;
+        List<String> favorites=stats.favorites(p.getUniqueId());List<BedwarsItems.Entry> result=new ArrayList<>();for(int slot=0;slot<27;slot++)result.add(slot<favorites.size()?findEntry(favorites.get(slot)):null);return result;
     }
-    private void purchase(Player p,Room r,int slot,boolean shift) {
+
+    private void purchase(Player p,Room r,int slot,boolean shift,boolean right) {
+        if(slot==48){hotbarEditor(p,"category-0");return;}if(slot==51){p.openInventory(r.personalChest(p.getUniqueId()));return;}if(slot==53){p.closeInventory();return;}
         if(slot>=0 && slot<9){shop(p,slot);return;}
         List<BedwarsItems.Entry> entries=shopEntries(p,shopPages.getOrDefault(p.getUniqueId(),8));
         int index=slot-18;if(index<0 || index>=entries.size())return;
-        BedwarsItems.Entry entry=entries.get(index);int team=r.teams.get(p.getUniqueId());String action=entry.action;
-        if(shift){stats.toggleFavorite(p.getUniqueId(),BedwarsItems.key(entry));shop(p,shopPages.getOrDefault(p.getUniqueId(),8));return;}
+        BedwarsItems.Entry entry=entries.get(index);if(entry==null)return;int team=r.teams.get(p.getUniqueId());String action=entry.action;
+        if(shift){quickEditor(p,entry);return;}if(right){hotbarEditor(p,BedwarsItems.key(entry));return;}
         Set<Integer> upgrade=action.equals("sharpness")?r.sharpness:action.equals("protection")?r.protection:action.equals("forge")?r.forge:null;
         Map<UUID,String> tools=action.equals("pickaxe")?r.pickaxes:action.equals("axe")?r.axes:null;
         if(action.equals("shears") && r.shears.contains(p.getUniqueId())){msg(p,"Você já possui tesoura.");return;}
@@ -647,17 +732,19 @@ public final class Treino extends JavaPlugin implements Listener {
         if(action.equals("armor") && r.armor.containsKey(p.getUniqueId()) && BedwarsItems.tier(r.armor.get(p.getUniqueId()))>=BedwarsItems.tier(entry.material)) {msg(p,"Você já possui armadura igual ou melhor.");return;}
         if(tools!=null && tools.containsKey(p.getUniqueId()) && BedwarsItems.tier(tools.get(p.getUniqueId()))>=BedwarsItems.tier(entry.material)){msg(p,"Você já possui ferramenta igual ou melhor.");return;}
         boolean inventory=upgrade==null && !action.equals("armor") || action.equals("shears");
-        if(inventory && p.getInventory().firstEmpty()==-1){msg(p,"Libere um espaço no inventário.");return;}
-        Material currency=Material.valueOf(entry.currency);if(!p.getInventory().contains(currency,entry.cost)){msg(p,"Recursos insuficientes.");return;}
-        p.getInventory().removeItem(new ItemStack(currency,entry.cost));
+        ItemStack deliver=new ItemStack(Material.valueOf(entry.material),entry.amount,(short)entry.data);
+        if(deliver.getType()==Material.WOOL || deliver.getType()==Material.STAINED_GLASS)deliver.setDurability(COLORS[team]);
+        if(inventory && !ShopWallet.canFit(p.getInventory(),deliver)){msg(p,"Libere um espaço no inventário.");return;}
+        Material currency=Material.valueOf(entry.currency);if(!ShopWallet.pay(wallet(p,r,upgrade!=null),currency,entry.cost)){msg(p,"Recursos insuficientes.");return;}
         if(upgrade!=null)upgrade.add(team);if(action.equals("shears"))r.shears.add(p.getUniqueId());
         if(action.equals("armor"))r.armor.put(p.getUniqueId(),entry.material.substring(0,entry.material.indexOf('_')));
         else if(inventory) {
-            ItemStack bought=new ItemStack(Material.valueOf(entry.material),entry.amount,(short)entry.data);
+            ItemStack bought=deliver;
             if(bought.getType()==Material.WOOL || bought.getType()==Material.STAINED_GLASS)bought.setDurability(COLORS[team]);
             if(action.equals("knockback"))bought.addUnsafeEnchantment(Enchantment.KNOCKBACK,1);
+            if(action.startsWith("bow-"))bought.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE,1);if(action.equals("bow-punch"))bought.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK,1);
             if(tools!=null){String old=tools.put(p.getUniqueId(),entry.material);if(old!=null)p.getInventory().remove(Material.valueOf(old));}
-            p.getInventory().addItem(bought);
+            int preferred=stats.hotbar(p.getUniqueId(),BedwarsItems.key(entry));if(preferred<0)preferred=stats.hotbar(p.getUniqueId(),"category-"+entry.category);ShopWallet.give(p.getInventory(),bought,preferred);
         }
         for(UUID member:r.players)if(r.teams.get(member)==team){Player ally=Bukkit.getPlayer(member);if(ally!=null)r.equipment(ally);}msg(p,"§aCompra concluída: "+entry.name);
     }
@@ -669,9 +756,11 @@ public final class Treino extends JavaPlugin implements Listener {
     private void handleClick(InventoryClickEvent e) {
         if(!(e.getWhoClicked() instanceof Player)) return;
         Player p=(Player)e.getWhoClicked(); String title=e.getView().getTitle();
-        if(!Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN).contains(title)) return;
+        if(!Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN,QUICK,HOTBAR).contains(title)) return;
         e.setCancelled(true); if(e.getRawSlot()<0 || e.getRawSlot()>=e.getView().getTopInventory().getSize()) return;
         ItemStack i=e.getCurrentItem(); if(i==null || i.getType()==Material.AIR) return;
+        if(title.equals(QUICK)){String key=editingFavorite.get(p.getUniqueId());if(key!=null && e.getRawSlot()<27){if(e.isRightClick()){stats.favoriteSlot(p.getUniqueId(),"",e.getRawSlot());quickEditor(p,findEntry(key));}else {editingFavorite.remove(p.getUniqueId());stats.favoriteSlot(p.getUniqueId(),key,e.getRawSlot());shop(p,8);}}return;}
+        if(title.equals(HOTBAR)){if(e.getRawSlot()<8){hotbarEditor(p,"category-"+e.getRawSlot());return;}String key=editingHotbar.get(p.getUniqueId());if(key!=null && e.getRawSlot()>=18 && e.getRawSlot()<27){stats.hotbar(p.getUniqueId(),key,e.getRawSlot()-18);msg(p,"Hotbar salva.");shop(p,8);}return;}
         if(title.equals(ADMIN)){if(e.getRawSlot()==10)adminAction(p,"cps");else if(e.getRawSlot()==13)adminAction(p,"fastplace");else if(e.getRawSlot()==16)adminAction(p,"bridge");return;}
         if(title.equals(RANK)){if(e.getRawSlot()<3)ranking(p,Mode.values()[e.getRawSlot()]);return;}
         if(title.equals(PARTY)){if(e.getRawSlot()==22){p.closeInventory();partyCommand(p,new String[]{"puxar"});}else if(e.getRawSlot()==26){p.closeInventory();partyCommand(p,new String[]{"sair"});}return;}
@@ -685,21 +774,22 @@ public final class Treino extends JavaPlugin implements Listener {
         else if(title.equals(SIZE)) { Mode m=choosing.remove(p.getUniqueId()); MapArt.Theme t=themes.remove(p.getUniqueId()); if(m!=null && t!=null) { p.closeInventory(); create(p,m,i.getAmount(),t,teamChoices.getOrDefault(p.getUniqueId(),1)); } }
         else if(title.equals(LIST)) enter(p,rooms.get(Integer.parseInt(ChatColor.stripColor(i.getItemMeta().getDisplayName()).split(" ")[0].substring(1))));
         else {
-            Room r=membership.get(p.getUniqueId()); if(r==null || r.phase!=Phase.PLAYING || r.mode==Mode.SKYWARS || !r.alive(p.getUniqueId()) || r.respawning.contains(p.getUniqueId())) return;
-            purchase(p,r,e.getRawSlot(),e.isShiftClick());
+            Room r=membership.get(p.getUniqueId()); if(r==null || r.phase!=Phase.PLAYING || r.mode!=Mode.BEDWARS || !r.alive(p.getUniqueId()) || r.respawning.contains(p.getUniqueId())) return;
+            purchase(p,r,e.getRawSlot(),e.isShiftClick(),e.isRightClick());
         }
     }
-    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN).contains(e.getView().getTitle())) e.setCancelled(true); }
+    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN,QUICK,HOTBAR).contains(e.getView().getTitle())) e.setCancelled(true); }
     @EventHandler public void interact(PlayerInteractEvent e) {
         Player p=e.getPlayer(); Room r=membership.get(p.getUniqueId());
         if(p.getWorld()==lobby.getWorld()) { e.setCancelled(true); if(e.hasItem() && (e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK)) {
             if(e.getItem().getType()==Material.COMPASS)menu(p);else if(e.getItem().getType()==Material.NETHER_STAR)ranking(p,Mode.BEDWARS);else if(e.getItem().getType()==Material.NAME_TAG)partyMenu(p);
         } return; }
         if(r!=null && !playing(p,r)) { e.setCancelled(true); return; }
+        if(playing(p,r) && r.mode==Mode.BEDWARS && e.hasBlock() && e.getAction()==Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getType()==Material.ENDER_CHEST){e.setCancelled(true);p.openInventory(r.personalChest(p.getUniqueId()));return;}
         if(r!=null && e.hasBlock() && e.getClickedBlock().getType()==Material.WORKBENCH) { if(e.getAction()==Action.RIGHT_CLICK_BLOCK){e.setCancelled(true);shop(p);}return; }
         if(r!=null && e.hasBlock() && e.getClickedBlock().getType()==Material.BED_BLOCK && e.getAction()==Action.RIGHT_CLICK_BLOCK) {e.setCancelled(true);return;}
         if(p.getOpenInventory()!=null && SHOP.equals(p.getOpenInventory().getTitle())){e.setCancelled(true);return;}
-        if(playing(p,r) && r.mode!=Mode.SKYWARS && (e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) && e.hasItem()) {
+        if(playing(p,r) && r.mode==Mode.BEDWARS && (e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK) && e.hasItem()) {
             if(e.hasBlock() && (e.getClickedBlock().getState() instanceof InventoryHolder))return;
             Material type=e.getItem().getType();
             if(type==Material.FIREBALL) {
@@ -723,12 +813,12 @@ public final class Treino extends JavaPlugin implements Listener {
         Room r=membership.get(e.getPlayer().getUniqueId());
         if(r==null) { if(e.getBlock().getWorld()==lobby.getWorld()) e.setCancelled(true); return; }
         if(!playing(e.getPlayer(),r) || e.getBlock().getY()<60 || e.getBlock().getY()>100 || Math.abs(e.getBlock().getX())>65 || Math.abs(e.getBlock().getZ())>65) { e.setCancelled(true); return; }
-        if(r.mode!=Mode.SKYWARS) {
+        if(r.mode==Mode.BEDWARS) {
             List<Location> protectedGenerators=new ArrayList<>(r.diamonds);protectedGenerators.add(new Location(r.world,0.5,81,0.5));
             for(Location l:r.spawns)protectedGenerators.add(l.clone().add(0,0,-3));
             for(Location l:protectedGenerators)if(e.getBlock().getLocation().add(0.5,0,0.5).distanceSquared(l)<2.5){e.setCancelled(true);msg(e.getPlayer(),"Não bloqueie o gerador.");return;}
         }
-        if(r.mode!=Mode.SKYWARS && e.getBlock().getType()==Material.TNT) {
+        if(r.mode==Mode.BEDWARS && e.getBlock().getType()==Material.TNT) {
             e.getBlock().setType(Material.AIR);TNTPrimed tnt=(TNTPrimed)r.world.spawnEntity(e.getBlock().getLocation().add(0.5,0,0.5),EntityType.PRIMED_TNT);
             tnt.setFuseTicks(60);tnt.setMetadata("treino-owner",new FixedMetadataValue(this,e.getPlayer().getUniqueId().toString()));return;
         }
@@ -747,7 +837,7 @@ public final class Treino extends JavaPlugin implements Listener {
         }
         Integer placedTeam=r.placedTeams.get(key(b));
         if(r.mode==Mode.BEDFIGHT && placedTeam!=null && !Rules.sameDuel(placedTeam,r.teams.get(p.getUniqueId())))return;
-        if(r.placed.remove(key(b))){r.placedTeams.remove(key(b));e.setCancelled(false);}
+        if(r.placed.remove(key(b))){r.placedTeams.remove(key(b));if(r.mode==Mode.BEDFIGHT)b.setType(Material.AIR);else e.setCancelled(false);}
     }
     @EventHandler(ignoreCancelled=true) public void damage(EntityDamageEvent e) {
         if(!(e.getEntity() instanceof Player)) return; Player p=(Player)e.getEntity(); Room r=membership.get(p.getUniqueId());
@@ -795,19 +885,21 @@ public final class Treino extends JavaPlugin implements Listener {
     private Room roomWorld(World world) {for(Room r:rooms.values())if(r.world==world)return r;return null;}
     @EventHandler public void merchant(PlayerInteractEntityEvent e) {
         if(!e.getRightClicked().hasMetadata("treino-display"))return;e.setCancelled(true);
-        if(e.getRightClicked().hasMetadata("treino-shop"))shop(e.getPlayer());
+        if(e.getRightClicked().hasMetadata("treino-lobby-mode")){teamMenu(e.getPlayer(),Mode.valueOf(e.getRightClicked().getMetadata("treino-lobby-mode").get(0).asString()));return;}
+        if(e.getRightClicked().hasMetadata("treino-lobby-rank")){ranking(e.getPlayer(),Mode.BEDWARS);return;}
+        if(e.getRightClicked().hasMetadata("treino-shop"))shop(e.getPlayer(),e.getRightClicked().hasMetadata("treino-upgrades")?7:8);
     }
     @EventHandler public void merchantAt(PlayerInteractAtEntityEvent e) {merchant(e);}
     @EventHandler public void protectDisplay(EntityDamageEvent e) {if(e.getEntity().hasMetadata("treino-display"))e.setCancelled(true);}
     @EventHandler public void protectDisplayEquipment(PlayerArmorStandManipulateEvent e) {if(e.getRightClicked().hasMetadata("treino-display"))e.setCancelled(true);}
     @EventHandler public void target(EntityTargetEvent e) {
         Room r=roomWorld(e.getEntity().getWorld());if(r==null)return;
+        if(e.getEntity().hasMetadata("treino-shop")){e.setCancelled(true);return;}
         if(r.bots.containsKey(e.getEntity().getUniqueId())) {
             UUID id=e.getEntity().getUniqueId();if(e.getTarget()!=null && (r.phase!=Phase.PLAYING || r.respawning.contains(id) || !r.enemies(id,e.getTarget().getUniqueId()) || r.respawning.contains(e.getTarget().getUniqueId())))e.setCancelled(true);return;
         }
         if(!r.summoned.containsKey(e.getEntity().getUniqueId()))return;
-        if(!(e.getTarget() instanceof Player)){if(e.getTarget()!=null)e.setCancelled(true);return;}
-        Player p=(Player)e.getTarget();if(!playing(p,r) || !r.enemies(p.getUniqueId(),r.summoned.get(e.getEntity().getUniqueId())))e.setCancelled(true);
+        Entity target=e.getTarget();if(target!=null && (!r.enemies(target.getUniqueId(),r.summoned.get(e.getEntity().getUniqueId())) || !r.alive(target.getUniqueId()) || r.respawning.contains(target.getUniqueId())))e.setCancelled(true);
     }
     @EventHandler public void golemDamage(EntityDamageByEntityEvent e) {
         Room r=roomWorld(e.getDamager().getWorld());if(r==null)return;
@@ -820,7 +912,7 @@ public final class Treino extends JavaPlugin implements Listener {
     @EventHandler public void explosion(EntityExplodeEvent e) {
         if(!e.getLocation().getWorld().getName().startsWith("treino_"))return;
         Room r=roomWorld(e.getLocation().getWorld());
-        if(r==null || r.phase!=Phase.PLAYING || r.mode==Mode.SKYWARS || !e.getEntity().hasMetadata("treino-owner")){e.setCancelled(true);return;}
+        if(r==null || r.phase!=Phase.PLAYING || r.mode!=Mode.BEDWARS || !e.getEntity().hasMetadata("treino-owner")){e.setCancelled(true);return;}
         UUID bomber=null;
         if(r.mode==Mode.BEDFIGHT)try {bomber=UUID.fromString(e.getEntity().getMetadata("treino-owner").get(0).asString());}catch(RuntimeException ignored) {e.setCancelled(true);return;}
         Integer bomberTeam=bomber==null?null:r.teams.get(bomber);

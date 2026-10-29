@@ -32,6 +32,11 @@ final class TrainingStats {
         return data.contains(path)?new ArrayList<>(data.getStringList(path)):new ArrayList<>(Arrays.asList("item:WOOL","item:FIREBALL","item:TNT","item:MAGMA_CREAM","item:MONSTER_EGG","item:GOLDEN_APPLE"));
     }
     void toggleFavorite(UUID id,String key) {List<String> list=favorites(id);if(!list.remove(key) && list.size()<27)list.add(key);data.set("players."+id+".favorites",list);dirty=true;}
+    void favoriteSlot(UUID id,String key,int slot){if(slot<0 || slot>=27)throw new IllegalArgumentException("Slot inválido.");List<String> list=favorites(id);while(list.size()<27)list.add("");for(int i=0;i<list.size();i++)if(list.get(i).equals(key))list.set(i,"");list.set(slot,key);data.set("players."+id+".favorites",list);dirty=true;}
+    UUID find(String name){if(data.getConfigurationSection("players")==null)return null;for(String value:data.getConfigurationSection("players").getKeys(false))try{UUID id=UUID.fromString(value);if(name(id).equalsIgnoreCase(name))return id;}catch(IllegalArgumentException ignored){}return null;}
+    void copyFavorites(UUID target,UUID source){data.set("players."+target+".favorites",new ArrayList<>(favorites(source)));dirty=true;}
+    int hotbar(UUID id,String key){return data.getInt("players."+id+".hotbar."+key.replace(':','_'),-1);}
+    void hotbar(UUID id,String key,int slot){if(slot<0 || slot>8)throw new IllegalArgumentException("Slot inválido.");data.set("players."+id+".hotbar."+key.replace(':','_'),slot);dirty=true;}
     void save() throws IOException {
         if(!dirty)return;file.getParentFile().mkdirs();File temp=new File(file.getParentFile(),"stats.yml.tmp");data.save(temp);
         try {Files.move(temp.toPath(),file.toPath(),StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}

@@ -1,4 +1,4 @@
-# Painel do administrador • 1.3.0
+# Painel do administrador • 1.4.0
 
 [← Início](../README.md) · [Galeria](GALERIA.md) · [BedWars e BedFight](BEDWARS.md)
 
@@ -44,7 +44,7 @@ Vitórias aumentam a sequência; perder o time ou abandonar uma partida em andam
 
 A forja alta foi substituída por um **poço baixo de pedra**, com lajes ao redor e o minério visível no centro, seguindo a referência enviada. Os geradores de diamante/esmeralda usam o mesmo vocabulário visual. Hologramas e recursos são adicionados durante a partida.
 
-As bases BedWars/BedFight têm uma área frontal livre de construções altas; somente cama, marcação do time e acessos. O vendedor foi deslocado para a lateral. A identidade temática aparece no relevo, no piso e num pequeno detalhe ao fundo. As construções temáticas maiores permanecem no centro e no lobby; SkyWars mantém sua própria decoração.
+As bases BedWars/BedFight têm uma área frontal livre de construções altas; cama, marcação do time e acessos. BedWars tem Villagers na lateral; BedFight começa com defesa baixa de madeira e kit, sem vendedor. A identidade temática aparece no relevo, no piso e num pequeno detalhe ao fundo. As construções temáticas maiores permanecem no centro das arenas; SkyWars mantém sua própria decoração.
 
 ![Gerador de esmeralda baixo](images/emerald-generator.png)
 

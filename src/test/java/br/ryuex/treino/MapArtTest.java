@@ -37,10 +37,13 @@ public final class MapArtTest {
         check(signatures.size()==4,"All themes must have distinct palettes/geometry");
         MapArt.Scene lobby=MapArt.lobby();
         check(lobby.at(0,1,0)==null && lobby.at(0,2,0)==null,"Lobby spawn must be clear");
-        for(int n=-36;n<=36;n++) {
+        for(int n=-19;n<=18;n++) {
             check(lobby.at(n,0,0)!=null,"Walkable east-west lobby bridge at "+n);
             check(lobby.at(0,0,n)!=null,"Walkable north-south lobby bridge at "+n);
         }
+        check(lobby.at(36,0,0)==null && lobby.at(-36,0,0)==null,"neutral lobby has no detached themed wings");
+        MapArt.Scene fight=MapArt.bedfightArena(MapArt.Theme.SONIC,2);check(fight.at(44,2,0).material.equals("WOOD"),"BedFight starts with a protected bed");
+        for(MapArt.Cell cell:fight.cells())check(!cell.material.equals("WORKBENCH") && !cell.material.equals("ENDER_CHEST"),"BedFight has no shop furniture");
         System.out.println("MapArtTest: OK — 4 themes, spawn/bed/chest clearance, 12-player layout and lobby bridges");
     }
 }

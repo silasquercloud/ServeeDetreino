@@ -44,6 +44,8 @@ def main():
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.BedwarsEventsTest'], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes'])), 'br.ryuex.treino.ClickMeterTest'], check=True)
     subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.AdminPracticeTest'], check=True)
+    subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.BotBrainTest'], check=True)
+    subprocess.run(['java', '-cp', os.pathsep.join(map(str, [classes, TARGET/'test-classes', CACHE/'spigot-api.jar'])), 'br.ryuex.treino.ShopWalletTest'], check=True)
     artifact = TARGET/'TreinoHub-1.0.0.jar' 
     with zipfile.ZipFile(artifact, 'w', zipfile.ZIP_DEFLATED) as out:
         for base in (classes, ROOT/'src/main/resources'):

@@ -34,7 +34,10 @@ final class BedwarsItems {
         add(3,"DIAMOND_PICKAXE",1,0,6,"GOLD_INGOT","Picareta de diamante • mantém ao morrer","pickaxe");
         add(3,"WOOD_AXE",1,0,10,"IRON_INGOT","Machado • mantém ao morrer","axe");
         add(3,"IRON_AXE",1,0,3,"GOLD_INGOT","Machado de ferro • mantém ao morrer","axe");
+        add(3,"DIAMOND_AXE",1,0,6,"GOLD_INGOT","Machado de diamante • mantém ao morrer","axe");
         add(4,"BOW",1,0,12,"GOLD_INGOT","Arco","item");
+        add(4,"BOW",1,0,24,"GOLD_INGOT","Arco • Força I","bow-power");
+        add(4,"BOW",1,0,8,"EMERALD","Arco • Força I e Impacto I","bow-punch");
         add(4,"ARROW",8,0,2,"GOLD_INGOT","8 flechas","item");
         add(5,"POTION",1,8194,1,"EMERALD","Poção de velocidade","item");
         add(5,"POTION",1,8203,1,"EMERALD","Poção de salto","item");
@@ -60,6 +63,12 @@ final class BedwarsItems {
         if(resource.equals("GOLD_INGOT"))return forge?3:5;
         if(resource.equals("DIAMOND"))return tier==3?15:tier==2?20:30;
         return tier==3?30:tier==2?40:60;
+    }
+    public static void main(String[] args)throws Exception {
+        java.io.File file=new java.io.File(args[0]);file.getParentFile().mkdirs();
+        try(java.io.PrintWriter out=new java.io.PrintWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(file),"UTF-8"))){
+            out.print("[");boolean first=true;for(Entry e:ALL){if(!first)out.print(",");first=false;out.print("["+e.category+",\""+e.material+"\","+e.amount+","+e.cost+",\""+currencyName(e.currency)+"\",\""+e.name+"\",\""+key(e)+"\"]");}out.print("]");
+        }
     }
     static boolean canBreakBed(boolean playing,boolean alive,boolean respawning,int own,int target,boolean duel) {
         return playing && alive && !respawning && own!=target && (!duel || Rules.sameDuel(own,target));

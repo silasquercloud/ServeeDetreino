@@ -37,6 +37,7 @@ public final class BedwarsEventsTest {
                     return proxy(Zombie.class,(m,a)->{
                         switch(m.getName()){case "getUniqueId":return id;case "getWorld":return at[0].getWorld();case "getLocation":return at[0];case "teleport":at[0]=(Location)a[0];return true;case "getHealth":case "getMaxHealth":return 20d;case "getEquipment":return equipment;default:return null;}
                     });}
+                if(args[1]==EntityType.VILLAGER){final Location[] at={(Location)args[0]};return proxy(Villager.class,(m,a)->m.getName().equals("getWorld")?at[0].getWorld():m.getName().equals("getLocation")?at[0]:null);}
                 return proxy(ArmorStand.class,(m,a)->null);
             }
             if(method.getName().equals("dropItem")){ItemStack stack=(ItemStack)args[1];drops.add(stack);return proxy(Item.class,(m,a)->m.getName().equals("getItemStack")?stack:null);}
@@ -116,7 +117,9 @@ public final class BedwarsEventsTest {
         Map<UUID,Integer> fightTeams=(Map<UUID,Integer>)field(fight,"teams");fightTeams.put(me,0);fightTeams.put(enemy,1);fightTeams.put(outsider,2);
         Map<UUID,Object> membership=(Map<UUID,Object>)field(plugin,"membership");membership.put(me,fight);membership.put(enemy,fight);membership.put(outsider,fight);
         Method shop=Treino.class.getDeclaredMethod("shop",Player.class);shop.setAccessible(true);set(plugin,"shopPages",new HashMap<>());
-        shop.invoke(plugin,player);check(opened[0]!=null,"BedFight must open the actual shop handler");
+        shop.invoke(plugin,player);check(opened[0]==null,"BedFight is kit-only and never opens a shop");
+        check(((Map<?,?>)field(fight,"merchants")).isEmpty() && ((List<?>)field(fight,"forgeLabels")).isEmpty(),"BedFight has no seller or generator");
+        check(!((Set<?>)field(fight,"placed")).isEmpty(),"BedFight starts with breakable bed defense");
         Method enemies=roomType.getDeclaredMethod("enemies",UUID.class,UUID.class);enemies.setAccessible(true);
         check((boolean)enemies.invoke(fight,me,enemy),"same pair can fight");check(!(boolean)enemies.invoke(fight,me,outsider),"golems/TNT cannot cross pairs");
         Player enemyPlayer=proxy(Player.class,(m,a)->m.getName().equals("getUniqueId")?enemy:m.getName().equals("getWorld")?arena.world:null);
@@ -129,6 +132,8 @@ public final class BedwarsEventsTest {
         Player otherPlayer=proxy(Player.class,(m,a)->m.getName().equals("getUniqueId")?outsider:m.getName().equals("getWorld")?arena.world:null);
         EntityDamageByEntityEvent crossHit=new EntityDamageByEntityEvent(otherPlayer,player,EntityDamageEvent.DamageCause.ENTITY_ATTACK,2);
         plugin.damage(crossHit);check(crossHit.isCancelled(),"no damage from a different BedFight pair");
+        set(room,"phase",Enum.valueOf((Class<Enum>)Class.forName("br.ryuex.treino.Treino$Phase"),"PLAYING"));membership.put(me,room);opened[0]=null;shop.invoke(plugin,player);check(opened[0]!=null,"BedWars still opens its shop");membership.put(me,fight);
+        check(((Map<?,?>)field(room,"merchants")).size()==4,"BedWars has two villager sellers per base");
         // Two players on one team must be allies, and one base serves the pair.
         Constructor<?> duosConstructor=roomType.getDeclaredConstructor(Treino.class,int.class,Treino.Mode.class,int.class,UUID.class,MapArt.Theme.class,int.class);duosConstructor.setAccessible(true);
         Object duos=duosConstructor.newInstance(plugin,3,Treino.Mode.BEDWARS,4,me,MapArt.Theme.SONIC,2);
@@ -151,11 +156,15 @@ public final class BedwarsEventsTest {
         TrainingStats stats=(TrainingStats)field(plugin,"stats");stats.name(me,"Tester");stats.add(me,"BEDWARS","wins");stats.save();
         TrainingStats loaded=new TrainingStats(temp.toFile());check(loaded.get(me,"BEDWARS","wins")==1 && loaded.get(me,"BEDWARS","beds")==1,"stats survive reload");
         stats.toggleFavorite(me,"item:FIREBALL");stats.save();check(!new TrainingStats(temp.toFile()).favorites(me).contains("item:FIREBALL"),"favorites survive reload");
+        stats.favoriteSlot(me,"item:FIREBALL",26);check(stats.favorites(me).size()==27 && stats.favorites(me).get(26).equals("item:FIREBALL"),"favorite lands in chosen quick-buy slot");
+        stats.favoriteSlot(me,"item:FIREBALL",0);check(stats.favorites(me).get(26).isEmpty() && stats.favorites(me).get(0).equals("item:FIREBALL"),"moving a favorite does not duplicate it");
+        stats.hotbar(me,"item:WOOL",3);check(stats.hotbar(me,"item:WOOL")==3,"per-item hotbar preference saved");stats.hotbar(me,"category-0",6);check(stats.hotbar(me,"category-0")==6,"category hotbar preference saved independently");
+        UUID copied=UUID.randomUUID();stats.copyFavorites(copied,me);check(stats.favorites(copied).equals(stats.favorites(me)),"quick-buy import copies layout");
         UUID runner=UUID.randomUUID();stats.name(runner,"Runner");stats.add(me,"SKYWARS","wins");stats.add(me,"SKYWARS","wins");stats.add(runner,"SKYWARS","wins");
         check(stats.topDaily("SKYWARS").get(0).equals(me) && stats.dailyBest(me,"SKYWARS")==2,"daily top orders actual consecutive wins");
         stats.loss(me,"SKYWARS");stats.add(me,"SKYWARS","wins");check(stats.get(me,"SKYWARS","streak")==1 && stats.dailyBest(me,"SKYWARS")==2,"loss resets streak without deleting daily record");stats.save();
         check(new TrainingStats(temp.toFile()).dailyBest(me,"SKYWARS")==2,"daily leaderboard persists");
         Files.deleteIfExists(temp.resolve("stats.yml"));Files.delete(temp);
-        System.out.println("BedwarsEventsTest: OK — actual handlers: bed clicks/break, TNT protection, separate lobby, persistent stats, BedFight shop and PvP protection");
+        System.out.println("BedwarsEventsTest: OK — actual handlers: bed clicks/break, TNT protection, separate lobby, persistent stats, BedFight kit-only, BedWars shop and PvP protection");
     }
 }

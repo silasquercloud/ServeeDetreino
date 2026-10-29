@@ -1,140 +1,93 @@
 # Ryuex Treino • Minecraft Java 1.8.9
 
-BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Pokémon, Evangelion, Sonic e One Piece**, com lobby misturando os quatro universos. Plugin próprio, seleção de tema/vagas e construções geradas automaticamente.
+Servidor para jogar e treinar com amigos: **BedWars, BedFight e SkyWars**, solo/duplas, party, bots de treino e mapas próprios inspirados em Pokémon, Evangelion, Sonic/Green Hill e One Piece. O lobby é uma praça neutra de tamanho médio, separada das arenas.
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-**[Admin / CPS / bridge](docs/ADMIN.md) · [BedWars / novidades](docs/BEDWARS.md) · [Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
+**[Galeria](docs/GALERIA.md) · [Modos](docs/BEDWARS.md) · [Loja](docs/LOJA.md) · [Bots](docs/BOTS.md) · [Party](docs/PARTY.md) · [Admin](docs/ADMIN.md) · [Instalação](docs/MENU.md) · [Playit](docs/PLAYIT.md) · [Referências](docs/REFERENCIAS.md)**
 
-![Lobby misto com quatro universos](docs/images/lobby.png)
+![Praça central do lobby](docs/images/lobby.png)
 
-> As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
+> As imagens são projeções dos blocos implementados e diagramas de interface; não são capturas do cliente Minecraft. Os Villagers e hologramas são entidades criadas no servidor.
 
-## Atualização 1.3: geradores baixos e testes de administrador
+## Atualização 1.4.0
 
-Geradores baixos de pedra com hologramas, bases de cama abertas, menu com winstreak diário, painel `/treinoadmin` com `/cps`, `/fastplace` assistido e `/bridge`, loja em BedWars **e BedFight**, solo/duplas, bots básicos de treino e OP configurado para **Salabim_zz**. Temas sorteados por partida. Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
+- Lobby neutro de 45 blocos de largura, com três seletores Villager e ranking.
+- **BedWars:** dois Villagers fixos no balcão, loja/melhorias, favoritos em slots, editor de hotbar e uso de recursos dos baús.
+- **BedFight:** sem loja ou geradores; começa com kit e defesa de madeira na cama.
+- Bots com decisões de combate, espaçamento/strafe, pontes rápidas, mineração e coleta de recursos. São zumbis controlados, com limites documentados.
+- Green Hill com casinha recuada, frente aberta e arco quadriculado/gramado no centro. Geometria própria inspirada na imagem oficial do fórum, sem copiar arquivos do Mush.
 
-Para quem já está jogando: digite `stop` no console atual, espere encerrar, execute `git pull` e `bash menu.sh`, escolha **5** e depois **3**. Nas próximas sessões, a opção **6** ou `bash scripts/stop.sh` permite parar de outro terminal.
+## Instalar ou atualizar
 
-## Comece pelo menu
-
-No Linux ou no terminal do Codespace:
+Abra o terminal do Linux/Codespace dentro do repositório:
 
 ```bash
 bash menu.sh
 ```
 
+O script instala dependências ausentes antes de abrir o menu: Python, Git, curl, certificados, utilitários, Java 17 para compilar, Java 8 para executar e os binários oficiais do Playit, com versões/hashes fixos. A preparação de pacotes pode exigir sudo. [Detalhes →](docs/MENU.md)
+
 | Opção | Ação |
 | --- | --- |
-| **1 — Configurar Playit** | Baixa os binários oficiais, vincula o agente à sua conta e cadastra o endereço/porta do túnel. |
-| **2 — Instalar servidor completo** | Compila Spigot 1.8.8 e TreinoHub, inclui mapas/lobby/salas e prepara `server.properties`. |
-| **3 — Ligar servidor e mostrar IP/porta** | Inicia Playit + Minecraft, exibe os dados para conectar e abre o console. |
-| **4 — Ver endereço salvo** | Consulta os dados sem iniciar o servidor. |
-| **5 — Atualizar servidor** | Busca as alterações do GitHub, compila/testa e atualiza TreinoHub + TreinoAntiLag com backup, preservando seus dados. |
-| **6 — Parar servidor** | Envia `stop`, espera salvar e encerra Minecraft + Playit (também funciona de outro terminal). |
-| **0 — Sair** | Fecha o menu. |
+| 1 | Configurar Playit: baixar ferramentas, vincular sua conta e salvar endereço/porta. |
+| 2 | Instalar Spigot 1.8.8, TreinoHub, TreinoAntiLag e propriedades. |
+| 3 | Iniciar Minecraft + Playit e mostrar endereço público. |
+| 4 | Consultar endereço/configuração salva. |
+| 5 | Atualizar código e plugins com testes, backup e preservação de dados. |
+| 6 | Solicitar `stop`, aguardar salvar e fechar os processos. |
+| 0 | Sair do menu. |
 
-Antes de abrir o menu, o próprio script verifica e instala o que faltar: **Python 3, Git, curl, certificados, utilitários, JDK 17, JDK 8 e os dois binários oficiais do Playit**. Isso também corrige um Codespace existente com `python3: not found`; não é necessário recriar o ambiente. O bootstrap não instala nem inicia o servidor antes das opções abaixo.
+Primeira instalação: **1 → 2 → 3**. O vínculo da conta Playit é feito por você; a EULA só é aceita se você digitar `ACEITO`. Não são automatizados esses consentimentos.
 
-O alvo principal é Ubuntu 24.04/Debian no Codespace. Os pacotes de sistema usam `apt-get` (ou `pacman` no Arch/CachyOS); pode ser necessário sudo para instalar pacotes. As ferramentas Java ficam locais, com versão/hash fixados em [config/toolchains.json](config/toolchains.json), sem trocar o Java padrão do sistema. Downloads já verificados são reutilizados.
+Para uma instalação existente, pare com `stop` e aguarde encerrar. Depois:
 
-A ordem da primeira instalação é **1 → 2 → 3**. O menu bloqueia etapas que dependem de uma anterior. Ao digitar `stop` no console do servidor, os processos são encerrados e você volta ao menu.
-
-A opção 3 pede o aceite da [EULA do Minecraft](https://aka.ms/MinecraftEULA) na primeira inicialização. Se concordar, digite `ACEITO`; sem isso, o servidor não é iniciado. Nas próximas sessões, basta abrir o menu e escolher **3**.
-
-### Clientes originais e não originais
-
-O instalador já prepara:
-
-```properties
-online-mode=false
-white-list=false
-server-port=25565
-server-ip=
+```bash
+git pull --ff-only
+bash scripts/update.sh
+bash menu.sh
 ```
 
-Isso permite clientes Java 1.8.9 originais e não autenticados na Microsoft. A whitelist fica desligada para entrada direta. **O modo offline não verifica a identidade dos nicks e não oferece proteção de login por senha.** O plugin não instala AuthMe ou restauração automática de skins.
+Escolha **3**. O atualizador mostra versão/hash instalados e guarda os JARs anteriores em `server/backups/`. Playit, propriedades, mundos pessoais e configurações são preservados. Código modificado localmente não é descartado à força. Para parar de outro terminal nas sessões do launcher novo: `bash scripts/stop.sh`.
 
-Se já houver `server.properties`, a opção 2 cria um backup e atualiza essas quatro propriedades, preservando as demais. A inicialização confere modo e porta antes de ligar.
+O instalador usa `online-mode=false` para clientes originais e não autenticados. Nesse modo, os nicks não têm identidade Microsoft verificada; não há plugin de senha instalado. A whitelist começa desligada. A porta pública do Playit pode ser diferente da porta local 25565: use o endereço mostrado pelo menu.
 
-A tela mostra **host público, porta pública, endereço completo para colar no Minecraft e porta local**. A porta pública vem do seu túnel Playit e pode ser diferente de 25565. Se você cadastrar apenas um hostname com DNS/SRV, a porta fica identificada como automática/não informada; o menu não inventa um número.
+**Playit fornece o túnel; a máquina hospeda o servidor.** Ele não mantém Codespace suspenso ligado. Codespaces é ambiente de desenvolvimento/testes, não promessa de hospedagem 24h.
 
-[**Veja o guia detalhado do menu →**](docs/MENU.md)
+## Jogar
 
-**O Playit fornece o túnel/endereço; a máquina onde você executa o projeto hospeda o servidor.** Ele não mantém uma máquina desligada online. Codespaces deve ser usado para desenvolvimento/testes do projeto, conforme os [termos do GitHub](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces).
+Bússola ou NPCs do lobby: **modo → solo/duplas → vagas**. O tema é sorteado por sala. Passe `/treino entrar ID` aos amigos ou use party.
 
-## Party com aceite clicável
-
-Convide seu amigo:
-
-```text
-/party NICK_DO_AMIGO
-```
-
-Ele recebe **[ACEITAR] [RECUSAR]** no chat e pode clicar. O convite expira em 60 segundos. Depois, o líder pode abrir o x1 para os dois:
-
-```text
-/party jogar bedfight onepiece
-```
-
-Ou reunir o grupo em uma sala em espera com `/party puxar <sala>`. Quando o líder cria ou entra numa sala pelo menu normal, a party inteira acompanha se houver vagas. A verificação é feita antes de mover alguém; jogadores em partidas em andamento não são retirados à força.
-
-**[Todos os comandos e regras de Party →](docs/PARTY.md)**
-
-Para receber estas alterações numa instalação existente: pare com `stop`, abra `bash menu.sh` e escolha **5 — Atualizar servidor**. Na primeira vez em uma cópia ainda sem essa opção, execute `git pull` para obter o novo menu.
-
-## Escolha o modo, solo/duplas e as vagas
-
-| Modo | Vagas | O que está implementado |
+| Modo | Vagas | Regras |
 | --- | --- | --- |
-| **BedWars** | 2–8 | Solo, camas, loja por categorias/favoritos, bola de fogo, estilingue, golem, TNT, armaduras/melhorias permanentes e geradores de quatro recursos. |
-| **BedFight** | Solo 2/4/6/8; duplas 4/8 | Duelos 1x1 ou 2v2, kit inicial, cama, forja, loja e respawn. |
-| **SkyWars** | 2–12 | Uma ilha por jogador, baús nas bases e no centro, espectador, vitória e reposição aos 3 minutos. |
-
-Use a bússola ou `/treino`: **modo → solo/duplas → vagas**, com tema aleatório. Todos os quatro temas estão disponíveis nos três modos. [Veja os mapas e comandos de cada tema](docs/TEMAS.md). Exemplo para seis amigos com tema aleatório:
+| BedWars | Solo 2–8; duplas 4/6/8 | Cama, respawn, loja Villager, geradores e melhorias do time. |
+| BedFight | Solo 2/4/6/8; duplas 4/8 | Pares 1x1 ou 2v2, kit pronto e cama protegida, sem economia. |
+| SkyWars | Solo 2–12; duplas pares 4–12 | Baús nas bases/centro, reposição e último time vivo. |
 
 ```text
+/party NICK
+/party aceitar NICK
+/party jogar bedwars aleatorio duplas
 /treino criar skywars 6
-/treino entrar 1
+/treino criar bedfight 2
+/treino bots 1
+/treino iniciar
 ```
 
-O número da sala aparece no chat. Ela inicia ao encher; o dono pode antecipar com `/treino iniciar` se houver pelo menos dois jogadores. BedFight exige número par.
+A party tem aceite clicável e barra lateral. Duplas usam uma base e cama por time, com dano entre aliados bloqueado. A espera ocorre em outro mundo: não há plataforma de lobby sobre as arenas.
 
-## Imagens do projeto
+![Arena própria Green Hill](docs/images/bedwars-sonic.png)
 
-![Disposição do menu implementado](docs/images/menu.png)
+## Loja e administração
 
-Veja os quatro temas em detalhe e arenas para seis jogadores na [galeria completa](docs/GALERIA.md).
+No **BedWars**, clique nos Villagers **LOJA** ou **MELHORIAS**. Esquerdo compra; Shift configura favorito; direito configura hotbar do item. Há editor por categoria e `/importarcomprarapida NICK`. A carteira procura recursos nos inventários/baús na ordem documentada. [Loja completa e limites →](docs/LOJA.md)
 
-## Compatibilidade e estado dos testes
+**Salabim_zz** está em `administrators` e recebe OP ao entrar após reiniciar. Use `/treinoadmin`, `/cps`, `/fastplace`, `/bridge` ou `/treino mapa sonic`. CPS é observado pelo servidor; fastplace assistido funciona em pista separada, sem alterar o cliente. [Admin →](docs/ADMIN.md)
 
-- **Cliente principal: Minecraft Java 1.8.9.** Spigot 1.8.8 e cliente 1.8.9 usam o protocolo 47; não precisa ViaVersion para essa combinação.
-- **Servidor: Spigot 1.8.8, Java 8 atualizado.** BuildTools oficial compilado com sucesso neste projeto.
-- Plugin: **TreinoHub 1.0.0**, compilado contra a API 1.8.8 com bytecode Java 8 e dependências verificadas por hash.
-- Compilação do plugin e testes de vagas/início/pares aprovados. Os scripts Playit têm testes de pré-requisitos e encerramento de processos.
-- **Ainda não foi validada uma partida multiplayer completa.** Vincular sua conta, criar o túnel e testar uma conexão pública são etapas que dependem do seu setup.
-- Playit funciona como processo externo: não depende da versão da API Bukkit. O setup portátil suporta Linux x64 e ARM64; Java/Spigot em ARM64 não foram testados neste projeto.
-- Não há plugins BedWars1058/SkyWarsReloaded instalados: os três modos estão no TreinoHub. Clientes modernos e Bedrock não foram configurados.
+`/ranking` mostra estatísticas locais; o menu tem top diário de sequência de vitórias. Os dados ficam em `server/plugins/TreinoHub/stats.yml`, salvos periodicamente e ao desligar normalmente. TreinoAntiLag limpa somente itens/projéteis antigos das arenas; `/treinolag` exibe métricas para administrador.
 
-BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméticos, TNT/fireballs ou recursos de grandes redes. Não inclui bots. Os mapas são construções próprias em blocos, inspiradas nos quatro universos. Não são cópias de mapas de outros servidores, e não exigem resource pack. As áreas de spawn, camas, baús e pontes do lobby têm testes de geometria e materiais da 1.8.8.
+## Compatibilidade e validação
 
-## Onde está cada coisa
+**Alvo exato: Spigot 1.8.8, Java 8 e cliente Minecraft Java 1.8.9.** O plugin é compilado com a API 1.8.8 e bytecode Java 8. O adaptador NoAI/animação usa a base 1.8.8; não se declara suporte a outras versões. Não precisa de mods ou resource pack obrigatório no cliente.
 
-| Pasta/arquivo | Conteúdo |
-| --- | --- |
-| [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, conectar amigos, comandos e teste em jogo. |
-| [docs/MENU.md](docs/MENU.md) | Opções do menu, etapas e endereço/porta. |
-| [docs/PARTY.md](docs/PARTY.md) | Convites clicáveis, comandos e entrada em grupo. |
-| [docs/PLAYIT.md](docs/PLAYIT.md) | Conta, túnel, endereço público e diagnóstico. |
-| [docs/GALERIA.md](docs/GALERIA.md) | Prévias visuais e instruções para screenshots reais. |
-| [docs/TEMAS.md](docs/TEMAS.md) | Temas, construções, seleção e compatibilidade dos mapas. |
-| [menu.sh](menu.sh) | Abre o menu com as etapas 1, 2 e 3. |
-| [scripts/setup.sh](scripts/setup.sh) | Entrada alternativa para o mesmo menu. |
-| [scripts/start.sh](scripts/start.sh) | Inicia os dois processos juntos. |
-| [scripts/update.sh](scripts/update.sh) | Atualiza com backup sem reconfigurar os dados locais. |
-| [config/server.properties](config/server.properties) | Configuração padrão do servidor. |
-| [src/main/java](src/main/java) | Código do plugin. |
-
-## Referências
-
-[Configuração server.properties](https://www.spigotmc.org/wiki/spigot-configuration-server-properties/) · [Spigot BuildTools](https://www.spigotmc.org/wiki/buildtools/) · [Protocolos 1.8.8/1.8.9](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json) · [Playit oficial](https://playit.gg/) · [Código e release fixada do Playit](https://github.com/playit-cloud/playit-agent/releases/tag/v1.1.0)
+Os testes cobrem regras, camas, kit/defesa, loja, carteira, preferências, bots, admin, instalação e atualização com Git real. Ainda falta validação multiplayer completa no cliente. Não se promete equivalência de loja, mapas, bots ou knockback com o Mush. [Fontes consultadas e análise do vídeo/fórum →](docs/REFERENCIAS.md)

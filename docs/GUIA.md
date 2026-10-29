@@ -86,10 +86,10 @@ Use a bússola ou `/treino`. Escolha modo → solo/duplas → vagas (tema sortea
 | `/treino entrar 1` | Entra na sala de ID 1, se disponível. |
 | `/treino iniciar` | Dono antecipa o início com pelo menos 2 jogadores. |
 | `/treino salas` | Lista salas abertas. |
-| `/treino loja` | Abre a loja durante BedWars. Também abre clicando na bancada. |
+| `/treino loja` | Abre a loja durante BedWars. Também abre clicando nos Villagers ou na bancada do BedWars. |
 | `/treino sair` | Sai da sala e volta ao lobby. |
 
-Temas: `pokemon`, `evangelion`, `sonic`, `onepiece`. O tema é opcional no comando; sem ele, usa Pokémon. O menu sempre oferece os quatro. Veja a [galeria](GALERIA.md).
+Temas: `pokemon`, `evangelion`, `sonic`, `onepiece`. O tema é sorteado nas salas. Administradores podem indicar um tema no comando para testes. Veja a [galeria](GALERIA.md).
 
 Máximo inicial: 4 salas simultâneas. Altere `server/plugins/TreinoHub/config.yml` com o servidor parado. Camas são removidas na morte súbita após 10 minutos; jogadores longe do centro recebem dano. Aos 15 minutos, empate. Desconectar elimina o jogador da partida.
 
@@ -113,3 +113,7 @@ Preserve IP/porta definidos pela host. Não copie essas propriedades sem conferi
 Pare com `stop`, atualize os arquivos do repositório, abra `bash menu.sh`, escolha **5** para atualizar e **3** para ligar. Suas credenciais Playit ficam locais e não entram no GitHub. Não use `/reload` para atualizar o plugin.
 
 Para jogar em grupo, veja [Party e convites clicáveis](PARTY.md). O líder pode usar `/party jogar bedfight onepiece` para abrir um x1 com a party de dois jogadores.
+
+## Revisão 1.4
+
+Lobby neutro de tamanho médio. BedWars tem Villagers, loja, favoritos/hotbar e uso de baús. BedFight começa com kit e defesa de madeira, sem loja/geradores. [Modos atuais](BEDWARS.md) · [Loja](LOJA.md) · [Bots](BOTS.md).

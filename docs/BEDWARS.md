@@ -2,7 +2,7 @@
 
 [← Início](../README.md) · [Menu de controle](MENU.md) · [Party](PARTY.md) · [Galeria](GALERIA.md)
 
-TreinoHub **1.2.0**; TreinoAntiLag **1.1.0**. Os nomes dos arquivos JAR permanecem estáveis para substituir a instalação anterior sem carregar duas cópias.
+TreinoHub **1.3.0**; TreinoAntiLag **1.1.0**. Os nomes dos arquivos JAR permanecem estáveis para substituir a instalação anterior sem carregar duas cópias.
 
 ## Aplicar em uma instalação existente
 
@@ -23,9 +23,11 @@ bash scripts/stop.sh
 
 O launcher encaminha `stop` ao console Minecraft, aguarda seu encerramento e fecha o Playit. A solicitação pertence à execução atual; pedidos antigos não param uma nova sessão. Não abre RCON na internet, não usa `kill -9` e não atualiza o servidor enquanto o launcher estiver ativo. Se o salvamento demorar mais de dois minutos, a ferramenta informa o atraso e deixa o processo terminar; confira o console. O script de parada não instala dependências nem faz downloads.
 
-## Forjas, duplas, bots e administração • 1.2.0
+## Forjas, duplas, bots e administração • 1.3.0
 
-O gerador da base agora é uma construção: piso de ferro/ouro iluminado, bancada de fornalha, colunas e cobertura temática. O holograma mostra ferro por segundo e contagem do ouro. O balcão tem um manequim vendedor clicável; é uma entidade ArmorStand estática, não um NPC humano. O BedFight usa a mesma loja e forja, com diamante a cada 30 segundos (limite 4) e esmeralda a cada 45 segundos (limite 2) na própria base. BedWars mantém os postos externos e o centro. Esses minérios são a moeda da loja; não existe saldo virtual em reais/cash.
+O gerador da base agora segue a referência enviada: **poço baixo de pedra e lajes**, minério visível e coleta no centro. A estrutura alta foi removida; as ilhas das camas ficam abertas, com o vendedor na lateral e detalhes pequenos ao fundo. O holograma mostra a produção e contagem do ouro. O BedFight usa a mesma loja e gerador, com diamante a cada 30 segundos (limite 4) e esmeralda a cada 45 segundos (limite 2) na própria base. BedWars mantém os postos externos e o centro. Esses minérios são a moeda da loja; não existe saldo virtual em reais/cash.
+
+O administrador tem painel `/treinoadmin`, contador `/cps` e pistas de `/fastplace` e `/bridge`. [Guia e imagens →](ADMIN.md)
 
 Menu: **modo → solo/duplas → vagas**. O tema é sorteado por sala, entre os quatro temas. Jogadores comuns não forçam o tema por comando; administradores podem escolher um tema para testes.
 

@@ -4,15 +4,15 @@ BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Po
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-**[BedWars / novidades](docs/BEDWARS.md) · [Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
+**[Admin / CPS / bridge](docs/ADMIN.md) · [BedWars / novidades](docs/BEDWARS.md) · [Party](docs/PARTY.md) · [Menu de instalação](docs/MENU.md) · [Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
 ![Lobby misto com quatro universos](docs/images/lobby.png)
 
 > As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
 
-## Atualização 1.2: forjas, duplas e bots
+## Atualização 1.3: geradores baixos e testes de administrador
 
-Forjas cobertas com hologramas, loja em BedWars **e BedFight**, solo/duplas, bots básicos de treino e OP configurado para **Salabim_zz**. Temas sorteados por partida. Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
+Geradores baixos de pedra com hologramas, bases de cama abertas, menu com winstreak diário, painel `/treinoadmin` com `/cps`, `/fastplace` assistido e `/bridge`, loja em BedWars **e BedFight**, solo/duplas, bots básicos de treino e OP configurado para **Salabim_zz**. Temas sorteados por partida. Camas com quebra corrigida; espera em outro mundo, sem plataforma acima da arena; recuperação de visibilidade após renascer; classificação local persistente e party na barra lateral. A loja inclui compra rápida, estilingue, bola de fogo, golem e melhorias. **TreinoAntiLag** é instalado junto. [Detalhes, preços, análise pública do Mush e limites →](docs/BEDWARS.md)
 
 Para quem já está jogando: digite `stop` no console atual, espere encerrar, execute `git pull` e `bash menu.sh`, escolha **5** e depois **3**. Nas próximas sessões, a opção **6** ou `bash scripts/stop.sh` permite parar de outro terminal.
 

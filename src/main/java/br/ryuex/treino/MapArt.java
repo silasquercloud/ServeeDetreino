@@ -161,30 +161,43 @@ public final class MapArt {
         }
         return s;
     }
-    /** Open-front forge: safe pickup lane, solid floor and a lit canopy. */
-    public static Scene forge(Theme theme) {
-        Scene s=new Scene();
-        for(int x=-2;x<=2;x++)for(int z=-5;z<=-1;z++)s.set(x,0,z,"SMOOTH_BRICK");
-        s.set(-1,0,-3,"IRON_BLOCK");s.set(1,0,-3,"GOLD_BLOCK");s.set(0,0,-3,"SEA_LANTERN");
-        for(int x:new int[]{-2,2}) {s.box(x,1,-5,x,3,-5,"QUARTZ_BLOCK",0);s.box(x,1,-2,x,3,-2,"QUARTZ_BLOCK",0);}
-        s.box(-2,1,-5,2,2,-5,"SMOOTH_BRICK",0);s.set(0,1,-5,"FURNACE");
-        s.box(-2,4,-5,2,4,-2,"STAINED_CLAY",theme.color);s.set(0,3,-5,"SEA_LANTERN");
+    /** Low stone resource well, inspired by the supplied gameplay reference. */
+    public static Scene resourceWell(String resource) {
+        Scene s=new Scene();s.box(-1,0,-1,1,0,1,"SMOOTH_BRICK",0);s.set(0,0,0,resource);
+        for(int x=-1;x<=1;x++)for(int z=-1;z<=1;z++)if(x!=0 || z!=0)s.set(x,1,z,"STEP",5);
         return s;
     }
-    public static Scene shopKiosk(Theme theme) {
-        Scene s=new Scene();s.set(-2,1,0,"WORKBENCH");
-        for(int x:new int[]{-3,-1})s.box(x,1,1,x,3,1,"FENCE",0);
-        s.box(-3,4,-1,-1,4,1,"WOOL",theme.color);s.set(-2,4,0,"SEA_LANTERN");return s;
+    public static Scene forge(Theme theme) {
+        Scene s=new Scene();s.add(resourceWell("IRON_BLOCK"),0,0,-3);s.set(1,0,-3,"GOLD_BLOCK");return s;
     }
-    public static Scene emeraldOutpost() {
-        Scene s=new Scene();s.disk(0,0,0,2,"QUARTZ_BLOCK",0);s.set(0,0,0,"EMERALD_BLOCK");
-        for(int x:new int[]{-2,2})s.set(x,0,0,"SEA_LANTERN");return s;
+    public static Scene shopKiosk(Theme theme) {
+        Scene s=new Scene();s.set(-6,1,0,"WORKBENCH");s.set(-7,1,1,"FENCE");s.set(-7,2,1,"SEA_LANTERN");s.set(-6,0,0,"WOOL",theme.color);return s;
+    }
+    public static Scene emeraldOutpost() { return resourceWell("EMERALD_BLOCK"); }
+    /** Combat bases keep all landmarks behind the bed's open fighting apron. */
+    public static Scene battleBase(Theme theme) {
+        Scene source=island(theme,8),s=new Scene();for(Cell c:source.cells())if(c.y<=0)s.set(c.x,c.y,c.z,c.material,c.data);
+        switch(theme) {
+        case POKEMON:s.box(-2,1,6,2,2,8,"QUARTZ_BLOCK",0);s.box(-3,3,6,3,3,8,"WOOL",14);s.set(0,2,5,"WOOL",14);break;
+        case EVANGELION:for(int x:new int[]{-5,5}){s.box(x,1,6,x,4,7,"STAINED_CLAY",10);s.set(x,5,6,"SEA_LANTERN");s.set(x,3,5,"WOOL",5);}break;
+        case SONIC:ring(s,0,3,7,2,"GOLD_BLOCK",0);s.box(-5,1,6,-5,3,6,"LOG",0);s.box(-7,4,6,-3,4,6,"LEAVES",4);break;
+        case ONEPIECE:s.box(-3,1,6,3,1,8,"WOOD",1);s.box(0,2,7,0,6,7,"LOG",0);s.box(-2,4,7,2,5,7,"WOOL",0);s.set(0,4,6,"WOOL",15);break;
+        default:throw new IllegalArgumentException("Unknown theme");
+        }
+        return s;
+    }
+    public static Scene practiceArena() {
+        Scene s=new Scene();
+        for(int z=-5;z<=0;z++)for(int x=-3;x<=3;x++)s.set(x,0,z,"QUARTZ_BLOCK");
+        for(int z=32;z<=37;z++)for(int x=-3;x<=3;x++)s.set(x,0,z,"SMOOTH_BRICK");
+        for(int x=-3;x<=3;x++){s.set(x,0,0,"WOOL",10);s.set(x,0,32,"GOLD_BLOCK");}
+        for(int z:new int[]{-4,36})for(int x:new int[]{-3,3}){s.box(x,1,z,x,3,z,"STAINED_CLAY",15);s.set(x,4,z,"SEA_LANTERN");}
+        return s;
     }
     public static int[] diamondPosition(int index) {double angle=Math.PI/4+index*Math.PI/2;return new int[]{(int)Math.round(Math.cos(angle)*24),(int)Math.round(Math.sin(angle)*24)};}
     public static Scene diamondOutpost(Theme theme) {
-        Scene s=new Scene();s.disk(0,0,0,4,"SMOOTH_BRICK",0);s.disk(0,-1,0,3,"STONE",0);s.disk(0,-2,0,2,"STONE",0);
-        s.set(0,0,0,"DIAMOND_BLOCK");for(int x:new int[]{-3,3})for(int z:new int[]{-2,2}){s.set(x,1,z,"QUARTZ_BLOCK");s.set(x,2,z,"SEA_LANTERN");}for(int x:new int[]{-3,3})for(int z:new int[]{-1,1})s.set(x,0,z,"WOOL",theme.color);
-        return s;
+        Scene s=new Scene();s.disk(0,0,0,4,"SMOOTH_BRICK",0);s.disk(0,-1,0,3,"STONE",0);s.disk(0,-2,0,2,"STONE",0);s.add(resourceWell("DIAMOND_BLOCK"),0,0,0);
+        for(int x:new int[]{-3,3})for(int z:new int[]{-1,1})s.set(x,0,z,"WOOL",theme.color);return s;
     }
     public static Scene bedwarsArena(Theme theme,int count) {
         Scene s=arena(theme,count,true);s.add(emeraldOutpost(),0,0,0);for(int i=0;i<4;i++){int[] p=diamondPosition(i);s.add(diamondOutpost(theme),p[0],0,p[1]);}return s;
@@ -230,7 +243,7 @@ public final class MapArt {
         Scene s=center(theme);
         for(int i=0;i<count;i++) {
             double angle=2*Math.PI*i/count;int x=(int)Math.round(Math.cos(angle)*42),z=(int)Math.round(Math.sin(angle)*42);
-            s.add(island(theme,8),x,0,z);
+            s.add(beds?battleBase(theme):island(theme,8),x,0,z);
             if(beds) {
                 s.set(x+2,1,z,"BED_BLOCK",0);s.set(x+2,1,z+1,"BED_BLOCK",8);s.add(forge(theme),x,0,z);s.add(shopKiosk(theme),x,0,z);
             } else { s.set(x+2,1,z,"CHEST");s.set(x-2,1,z,"CHEST"); }
@@ -247,10 +260,10 @@ public final class MapArt {
     }
     public static void main(String[] args) throws IOException {
         File dir=new File(args.length==0?".cache/scenes":args[0]);dir.mkdirs();
-        export(lobby(),new File(dir,"lobby.json"));export(forge(Theme.SONIC),new File(dir,"forge.json"));export(bedwarsArena(Theme.SONIC,4),new File(dir,"bedwars-sonic.json"));
+        export(lobby(),new File(dir,"lobby.json"));export(forge(Theme.SONIC),new File(dir,"forge.json"));export(emeraldOutpost(),new File(dir,"emerald-generator.json"));export(practiceArena(),new File(dir,"admin-practice.json"));Scene assisted=practiceArena();for(int z=1;z<32;z++)assisted.set(0,0,z,"WOOL",10);export(assisted,new File(dir,"admin-fastplace.json"));export(bedwarsArena(Theme.SONIC,4),new File(dir,"bedwars-sonic.json"));
         export(bedwarsArena(Theme.POKEMON,4),new File(dir,"bedwars.json"));
         export(arena(Theme.ONEPIECE,2,true),new File(dir,"bedfight.json"));
-        for(Theme t:Theme.values()) { export(island(t,8),new File(dir,t.name().toLowerCase(Locale.ROOT)+".json"));export(arena(t,6,false),new File(dir,"arena-"+t.name().toLowerCase(Locale.ROOT)+".json")); }
+        for(Theme t:Theme.values()) {Scene base=battleBase(t);base.add(forge(t),0,0,0);base.add(shopKiosk(t),0,0,0);base.set(2,1,0,"BED_BLOCK",0);base.set(2,1,1,"BED_BLOCK",8);for(int x=-1;x<=1;x++)base.set(x,0,0,"WOOL",14);export(base,new File(dir,"base-"+t.name().toLowerCase(Locale.ROOT)+".json")); export(island(t,8),new File(dir,t.name().toLowerCase(Locale.ROOT)+".json"));export(arena(t,6,false),new File(dir,"arena-"+t.name().toLowerCase(Locale.ROOT)+".json")); }
         System.out.println("Exported exact map geometry to "+dir);
     }
 }

@@ -12,7 +12,17 @@ final class TrainingStats {
     void name(UUID id,String name){data.set("players."+id+".name",name);dirty=true;}
     String name(UUID id){return data.getString("players."+id+".name",id.toString().substring(0,8));}
     int get(UUID id,String mode,String key){return data.getInt("players."+id+"."+mode+"."+key,0);}
-    void add(UUID id,String mode,String key){data.set("players."+id+"."+mode+"."+key,get(id,mode,key)+1);dirty=true;}
+    static String today(){return java.time.LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")).toString();}
+    int dailyBest(UUID id,String mode){return data.getInt("players."+id+"."+mode+".daily."+today()+".best",0);}
+    void loss(UUID id,String mode){data.set("players."+id+"."+mode+".streak",0);data.set("players."+id+"."+mode+".daily."+today()+".current",0);dirty=true;}
+    void add(UUID id,String mode,String key){
+        data.set("players."+id+"."+mode+"."+key,get(id,mode,key)+1);dirty=true;
+        if(key.equals("wins")) {
+            String base="players."+id+"."+mode;int streak=get(id,mode,"streak")+1;data.set(base+".streak",streak);data.set(base+".best-streak",Math.max(streak,get(id,mode,"best-streak")));
+            String daily=base+".daily."+today();int current=data.getInt(daily+".current",0)+1;data.set(daily+".current",current);data.set(daily+".best",Math.max(current,data.getInt(daily+".best",0)));
+        }
+    }
+    List<UUID> topDaily(String mode){List<UUID> ids=top(mode);ids.removeIf(id->dailyBest(id,mode)<=0);ids.sort(Comparator.comparingInt((UUID id)->dailyBest(id,mode)).reversed().thenComparing(id->name(id)));return ids;}
     List<UUID> top(String mode){
         List<UUID> ids=new ArrayList<>();if(data.getConfigurationSection("players")!=null)for(String id:data.getConfigurationSection("players").getKeys(false))try {ids.add(UUID.fromString(id));}catch(IllegalArgumentException ignored){}
         ids.sort(Comparator.comparingInt((UUID id)->get(id,mode,"wins")).reversed().thenComparing(id->name(id)));return ids;

@@ -4,12 +4,14 @@ public final class MapArtTest {
     static void check(boolean value,String message) { if(!value) throw new AssertionError(message); }
     public static void main(String[] args) throws Exception {
         MapArt.Scene forge=MapArt.forge(MapArt.Theme.SONIC);
-        check(forge.at(0,0,-3).material.equals("SEA_LANTERN"),"forja tem ponto iluminado de coleta");
+        check(forge.at(0,0,-3).material.equals("IRON_BLOCK"),"forja tem ponto iluminado de coleta");
         check(forge.at(0,1,-3)==null && forge.at(0,2,-3)==null,"jogador consegue entrar na forja");
-        check(forge.at(0,4,-3)!=null,"forja tem cobertura");
+        check(forge.at(0,4,-3)==null,"forja aberta sem cobertura");
+        check(MapArt.emeraldOutpost().at(0,0,0).material.equals("EMERALD_BLOCK"),"poço de esmeralda com núcleo visível");
         Set<String> signatures=new HashSet<>();
         for(MapArt.Theme theme:MapArt.Theme.values()) {
-            MapArt.Scene island=MapArt.island(theme,8);
+            MapArt.Scene island=MapArt.island(theme,8),base=MapArt.battleBase(theme);
+            for(int x=-4;x<=5;x++)for(int z=-1;z<=4;z++)for(int y=1;y<=3;y++)check(base.at(x,y,z)==null,"apron around bed must remain open: "+theme);
             check(island.at(0,0,0)!=null && island.at(0,-6,0)!=null,"Solid floating island foundation: "+theme);
             for(int y=1;y<=2;y++) {
                 check(island.at(0,y,0)==null,"Spawn headroom: "+theme);

@@ -31,13 +31,14 @@ public final class Treino extends JavaPlugin implements Listener {
     private final Map<UUID,Integer> shopPages=new HashMap<>();
     private final Map<UUID,Long> slingCooldown=new HashMap<>();
     private TrainingStats stats;
+    private AdminPractice practice;
     private int seconds;
     private final Map<UUID,List<String>> sidebarLines=new HashMap<>();
     private Location lobby;
     private int nextId = 1;
     enum Mode { BEDWARS, BEDFIGHT, SKYWARS }
     enum Phase { WAITING, COUNTDOWN, PLAYING, ENDING }
-    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", TEAMS = "§8Treino • equipes", THEME = "§8Treino • tema", LIST = "§8Treino • salas", RANK = "§8Treino • classificação", PARTY = "§8Treino • party", SHOP = "§8Treino • loja";
+    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", TEAMS = "§8Treino • equipes", THEME = "§8Treino • tema", LIST = "§8Treino • salas", ADMIN = "§8Treino • admin", RANK = "§8Treino • classificação", PARTY = "§8Treino • party", SHOP = "§8Treino • loja";
     private static final byte[] COLORS = {14,11,5,4,1,10,9,6,3,13,2,0};
     public static class VoidGenerator extends ChunkGenerator {
         @Override public byte[] generate(World w, Random r, int x, int z) { return new byte[32768]; }
@@ -51,16 +52,17 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @Override public void onEnable() {
         saveDefaultConfig();getConfig().addDefault("administrators",Arrays.asList("Salabim_zz"));getConfig().options().copyDefaults(true);saveConfig();stats=new TrainingStats(getDataFolder());
-        World w = voidWorld("treino_lobby_multiverso_v1");
+        World w = voidWorld("treino_lobby_multiverso_v13");
         build(w,MapArt.lobby(),0,80,0);
         lobby = new Location(w,0.5,81,0.5); w.setSpawnLocation(0,81,0);
-        Bukkit.getPluginManager().registerEvents(this,this);
+        Bukkit.getPluginManager().registerEvents(this,this);practice=new AdminPractice(this,this::voidWorld,this::hub);
         new BukkitRunnable() { public void run() { tick(); } }.runTaskTimer(this,20,20);
         new BukkitRunnable(){public void run(){for(Room r:new ArrayList<>(rooms.values()))if(r.phase==Phase.PLAYING)r.botTick();}}.runTaskTimer(this,5,5);
         for(Player p:Bukkit.getOnlinePlayers()){grantAdmin(p);hub(p);}
         getLogger().info("TreinoHub ativo: /treino. API alvo: Spigot 1.8.8.");
     }
     @Override public void onDisable() {
+        if(practice!=null)practice.shutdown();
         for(Player p:Bukkit.getOnlinePlayers()) { p.teleport(lobby); p.getInventory().clear(); }
         for(Room r:rooms.values()) removeWorld(r.world);
         saveStats();
@@ -81,13 +83,30 @@ public final class Treino extends JavaPlugin implements Listener {
         }
     }
     private void grantAdmin(Player p) {for(String name:getConfig().getStringList("administrators"))if(p.getName().equalsIgnoreCase(name) && !p.isOp()){p.setOp(true);getLogger().info("Administrador configurado: "+p.getName());}}
+    private void adminAction(Player p,String action) {
+        if(!p.hasPermission("treino.admin")){msg(p,"Apenas administradores.");return;}
+        if(action.equalsIgnoreCase("cps")){practice.toggleCps(p);return;}
+        if(action.equalsIgnoreCase("bridge") || action.equalsIgnoreCase("fastplace")){leave(p);reset(p,GameMode.SURVIVAL);try{practice.open(p,action.equalsIgnoreCase("fastplace"));}catch(RuntimeException error){practice.close(p,false);hub(p);throw error;}return;}
+        if(action.equalsIgnoreCase("sair")){practice.close(p,true);return;}
+        Inventory inv=Bukkit.createInventory(null,27,ADMIN);
+        inv.setItem(10,description(item(Material.REDSTONE,1,"§dCPS observado"),"§7Ativar/desativar contador esquerdo/direito","§7Conta ações recebidas pelo servidor."));
+        inv.setItem(13,description(item(Material.BLAZE_ROD,1,"§eFastplace assistido"),"§7Pista privada, 10 blocos por segundo","§7Segure botão direito com a vara."));
+        inv.setItem(16,description(item(Material.WOOL,1,"§bTreino de bridge"),"§7Ponte manual de 32 blocos","§7Cronômetro, reinício e melhor tempo."));p.openInventory(inv);
+    }
+    private static String modeTitle(Mode mode){return mode==Mode.BEDWARS?"Bed Wars":mode==Mode.BEDFIGHT?"Bed Fight":"Sky Wars";}
+    private ItemStack modeCard(Mode mode,Material icon,String title,int teamSize) {
+        int count=0;for(Room r:rooms.values())if(r.mode==mode && (teamSize==0 || r.teamSize==teamSize) && r.phase==Phase.PLAYING)count+=r.players.size();
+        List<String> lines=new ArrayList<>();lines.add("§7"+count+" participantes em partida");lines.add(" ");lines.add("§6§lTOP WINSTREAK DIÁRIO:");
+        List<UUID> top=stats.topDaily(mode.name());String[] colors={"§a","§b","§d"};for(int i=0;i<Math.min(3,top.size());i++)lines.add(colors[i]+(i+1)+"º §f"+stats.name(top.get(i))+" §7: §e"+stats.dailyBest(top.get(i),mode.name()));
+        if(top.isEmpty())lines.add("§7Nenhum resultado hoje.");lines.add("  ");lines.add("§eClique para jogar.");return description(item(icon,teamSize==2?2:1,title),lines.toArray(new String[0]));
+    }
     private void teamMenu(Player p,Mode mode) {
         choosing.put(p.getUniqueId(),mode);Inventory inv=Bukkit.createInventory(null,27,TEAMS);
-        inv.setItem(11,item(Material.IRON_SWORD,1,"§eSolo • 1 jogador por base"));inv.setItem(15,item(Material.BED,2,"§bDuplas • 2 jogadores por base"));p.openInventory(inv);
+        inv.setItem(11,modeCard(mode,Material.IRON_SWORD,"§a"+modeTitle(mode)+" (Solo)",1));inv.setItem(15,modeCard(mode,Material.BED,"§b"+modeTitle(mode)+" (Duplas)",2));p.openInventory(inv);
     }
     private void preview(Player p,MapArt.Theme theme) {
         if(!p.hasPermission("treino.admin")){msg(p,"Apenas administradores.");return;}
-        leave(p);reset(p,GameMode.CREATIVE);World world=voidWorld("treino_preview_v12_"+theme.name().toLowerCase(Locale.ROOT));build(world,MapArt.bedwarsArena(theme,4),0,80,0);
+        leave(p);reset(p,GameMode.CREATIVE);World world=voidWorld("treino_preview_v13_"+theme.name().toLowerCase(Locale.ROOT));build(world,MapArt.bedwarsArena(theme,4),0,80,0);
         p.teleport(new Location(world,42.5,81,0.5));p.setAllowFlight(true);p.setFlying(true);msg(p,"Prévia "+theme.title+". Voe para inspecionar. /treino sair retorna ao lobby.");
     }
     private void msg(Player p,String s) { p.sendMessage("§5§lTREINO §8» §f"+s); }
@@ -106,6 +125,7 @@ public final class Treino extends JavaPlugin implements Listener {
         p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());sidebarLines.remove(p.getUniqueId());
     }
     private void hub(Player p) {
+        if(practice!=null)practice.close(p,false);
         reset(p,GameMode.ADVENTURE); p.teleport(lobby);
         stats.name(p.getUniqueId(),p.getName());lobbyItems(p);
         refreshVisibility();
@@ -118,10 +138,11 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     private void menu(Player p) {
         Inventory inv=Bukkit.createInventory(null,27,MENU);
-        inv.setItem(10,item(Material.BED,1,"§cBedWars §7• solo, geradores e loja"));
-        inv.setItem(13,item(Material.IRON_SWORD,1,"§bBedFight §7• duelos, loja e forja"));
-        inv.setItem(16,item(Material.ENDER_PEARL,1,"§aSkyWars §7• 2 a 12 jogadores"));
-        inv.setItem(22,item(Material.CHEST,1,"§eEntrar em uma sala")); p.openInventory(inv);
+        inv.setItem(10,modeCard(Mode.BEDWARS,Material.BED,"§aBed Wars",0));
+        inv.setItem(13,modeCard(Mode.BEDFIGHT,Material.IRON_SWORD,"§bBed Fight",0));
+        inv.setItem(16,modeCard(Mode.SKYWARS,Material.ENDER_PEARL,"§eSky Wars",0));
+        inv.setItem(22,item(Material.CHEST,1,"§eEntrar em uma sala"));inv.setItem(18,item(Material.NETHER_STAR,1,"§eClassificação"));inv.setItem(20,item(Material.NAME_TAG,1,"§dMinha party"));
+        if(p.hasPermission("treino.admin"))inv.setItem(26,item(Material.COMMAND,1,"§cFerramentas do administrador"));p.openInventory(inv);
     }
     private void sizeMenu(Player p,Mode mode) {
         choosing.put(p.getUniqueId(),mode); Inventory inv=Bukkit.createInventory(null,27,SIZE);
@@ -141,6 +162,8 @@ public final class Treino extends JavaPlugin implements Listener {
         if(!(sender instanceof Player)) { sender.sendMessage("Use este comando dentro do jogo."); return true; }
         Player p=(Player)sender;
         try {
+            if(Arrays.asList("treinoadmin","cps","fastplace","bridge").contains(cmd.getName().toLowerCase(Locale.ROOT))){adminAction(p,cmd.getName().equalsIgnoreCase("treinoadmin")?(args.length==0?"menu":args[0]):cmd.getName());return true;}
+            if(args.length>0 && args[0].equalsIgnoreCase("admin")){adminAction(p,args.length>1?args[1]:"menu");return true;}
             if(cmd.getName().equalsIgnoreCase("party")) {partyCommand(p,args);return true;}
             if(cmd.getName().equalsIgnoreCase("ranking")){ranking(p,args.length>0?Mode.valueOf(args[0].toUpperCase(Locale.ROOT)):Mode.BEDWARS);return true;}
             if(args.length>0 && args[0].equalsIgnoreCase("ranking")){ranking(p,args.length>1?Mode.valueOf(args[1].toUpperCase(Locale.ROOT)):Mode.BEDWARS);return true;}
@@ -258,6 +281,7 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     private void leave(Player p) {
         teamChoices.remove(p.getUniqueId());choosing.remove(p.getUniqueId()); themes.remove(p.getUniqueId()); Room r=membership.remove(p.getUniqueId()); if(r==null) return;
+        if(r.phase==Phase.PLAYING && r.alive(p.getUniqueId()))stats.loss(p.getUniqueId(),r.mode.name());
         r.players.remove(p.getUniqueId()); Integer team=r.teams.remove(p.getUniqueId());
         r.eliminated.remove(p.getUniqueId()); r.respawning.remove(p.getUniqueId());
         if(r.owner.equals(p.getUniqueId()) && !r.players.isEmpty()) r.owner=r.players.stream().filter(id->!r.bots.containsKey(id)).findFirst().orElse(r.players.iterator().next());
@@ -279,7 +303,7 @@ public final class Treino extends JavaPlugin implements Listener {
         parties.prune(System.currentTimeMillis());seconds++;
         if(seconds%30==0)saveStats();
         if(seconds%2==0)for(Player p:Bukkit.getOnlinePlayers()) {
-            Room room=membership.get(p.getUniqueId());if(room==null || room.phase==Phase.WAITING || room.phase==Phase.COUNTDOWN)lobbyBoard(p,room);
+            Room room=membership.get(p.getUniqueId());if(practice!=null && practice.active(p))sidebar(p,practice.lines(p));else if(room==null || room.phase==Phase.WAITING || room.phase==Phase.COUNTDOWN)lobbyBoard(p,room);
         }
         for(Room r:new ArrayList<>(rooms.values())) {
             if(r.phase==Phase.COUNTDOWN) { if(r.countdown<=0) r.start(); else { r.say("§eIniciando em "+r.countdown+"s"); r.countdown--; } }
@@ -323,6 +347,7 @@ public final class Treino extends JavaPlugin implements Listener {
         sidebarLines.put(p.getUniqueId(),actual);
     }
     private void partyLines(Player p,List<String> lines) {
+        if(practice!=null && practice.cpsEnabled(p))lines.add(practice.cpsLine(p));
         PartyBook.Party party=parties.get(p.getUniqueId());
         if(party==null){lines.add("§dParty: §7/party <nick>");return;}
         List<UUID> group=parties.members(p.getUniqueId());lines.add("§dParty §f"+group.size()+"/12");
@@ -404,18 +429,18 @@ public final class Treino extends JavaPlugin implements Listener {
             build(world,MapArt.center(theme),0,80,0);
             for(int i=0;i<cap/teamSize;i++) {
                 double angle=2*Math.PI*i/(cap/teamSize); int x=(int)Math.round(Math.cos(angle)*42), z=(int)Math.round(Math.sin(angle)*42);
-                build(world,MapArt.island(theme,8),x,80,z);
+                build(world,mode==Mode.SKYWARS?MapArt.island(theme,8):MapArt.battleBase(theme),x,80,z);
                 spawns.add(new Location(world,x+0.5,81,z+0.5,(float)(angle*180/Math.PI+90),0)); beds.put(i,true);
                 if(mode!=Mode.SKYWARS) {
                     Block foot=world.getBlockAt(x+2,81,z),head=world.getBlockAt(x+2,81,z+1);
                     foot.setType(Material.BED_BLOCK,false); head.setType(Material.BED_BLOCK,false); foot.setData((byte)0,false); head.setData((byte)8,false);
                     bedBlocks.add(foot); bedBlocks.add(head); bedOwners.put(key(foot),i); bedOwners.put(key(head),i);
                     build(world,MapArt.forge(theme),x,80,z);build(world,MapArt.shopKiosk(theme),x,80,z);
-                    ArmorStand merchant=display(new Location(world,x-1.5,82,z+0.5),"§e§lLOJA §7• clique direito");
+                    ArmorStand merchant=display(new Location(world,x-5.5,82,z+0.5),"§e§lLOJA §7• clique direito");
                     merchant.setMetadata("treino-shop",new FixedMetadataValue(Treino.this,id));
                     merchant.setMarker(false);merchant.setVisible(true);merchant.setSmall(true);merchant.setArms(true);
                     merchant.setHelmet(new ItemStack(Material.SKULL_ITEM,1,(short)3));merchant.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-                    forgeLabels.add(display(new Location(world,x+0.5,84.3,z-3),"§f§lFORJA §6• Ferro e Ouro"));
+                    forgeLabels.add(display(new Location(world,x+0.5,82.3,z-3),"§f§lFORJA §6• Ferro e Ouro"));
                     for(int dx=-1;dx<=1;dx++) { Block b=world.getBlockAt(x+dx,80,z); b.setType(Material.WOOL); b.setData(COLORS[i]); }
                 } else { chest(x+2,81,z); chest(x-2,81,z); }
             }
@@ -444,7 +469,7 @@ public final class Treino extends JavaPlugin implements Listener {
             if(attacker!=null && !bots.containsKey(attacker) && hit!=null && elapsed-hit<=15){stats.add(attacker,mode.name(),"kills");if(!canRespawn)stats.add(attacker,mode.name(),"final-kills");}
             bot.entity.setTarget(null);
             if(canRespawn){respawning.add(bot.id);bot.respawnAt=elapsed+3;bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.teleport(spawnLocation(bot.id));bot.entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY,100,0));}
-            else {eliminated.add(bot.id);bot.entity.remove();say("§cBot eliminado!");if(mode==Mode.BEDFIGHT)resolveDuel(teams.get(bot.id));checkWinner();}
+            else {eliminated.add(bot.id);teamLoss(teams.get(bot.id));bot.entity.remove();say("§cBot eliminado!");if(mode==Mode.BEDFIGHT)resolveDuel(teams.get(bot.id));checkWinner();}
         }
         void botTick() {
             for(PracticeBot bot:new ArrayList<>(bots.values())) {
@@ -556,6 +581,7 @@ public final class Treino extends JavaPlugin implements Listener {
                 eliminated.add(u);if(!bots.containsKey(u))stats.add(u,mode.name(),"wins");if(bots.containsKey(u))bots.get(u).entity.remove(); Player p=Bukkit.getPlayer(u); if(p!=null) { msg(p,"§aVocê venceu seu duelo!"); reset(p,GameMode.SPECTATOR); p.teleport(waiting()); }
             }
         }
+        void teamLoss(int team){if(!activeBase(team))for(UUID id:players)if(teams.get(id)==team && !bots.containsKey(id))stats.loss(id,mode.name());}
         void checkWinner() {
             List<UUID> live=new ArrayList<>(); for(UUID u:players) if(alive(u)) live.add(u);
             if(mode==Mode.BEDFIGHT) { if(live.isEmpty()) finish(this,"Todos os duelos terminaram!"); }
@@ -588,7 +614,7 @@ public final class Treino extends JavaPlugin implements Listener {
         if(respawn) {
             msg(p,"§eRenascendo em 3 segundos...");
             new BukkitRunnable(){ public void run(){ r.respawning.remove(p.getUniqueId()); if(membership.get(p.getUniqueId())==r && r.phase==Phase.PLAYING && r.alive(p.getUniqueId())) r.spawn(p); }}.runTaskLater(this,60);
-        } else { r.respawning.remove(u); r.eliminated.add(u); r.say("§c"+p.getName()+" foi eliminado!"); if(r.mode==Mode.BEDFIGHT) r.resolveDuel(team); r.checkWinner(); }
+        } else { r.respawning.remove(u); r.eliminated.add(u);r.teamLoss(team); r.say("§c"+p.getName()+" foi eliminado!"); if(r.mode==Mode.BEDFIGHT) r.resolveDuel(team); r.checkWinner(); }
     }
     private void shop(Player p) {shop(p,8);}
     private void shop(Player p,int category) {
@@ -643,12 +669,13 @@ public final class Treino extends JavaPlugin implements Listener {
     private void handleClick(InventoryClickEvent e) {
         if(!(e.getWhoClicked() instanceof Player)) return;
         Player p=(Player)e.getWhoClicked(); String title=e.getView().getTitle();
-        if(!Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY).contains(title)) return;
+        if(!Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN).contains(title)) return;
         e.setCancelled(true); if(e.getRawSlot()<0 || e.getRawSlot()>=e.getView().getTopInventory().getSize()) return;
         ItemStack i=e.getCurrentItem(); if(i==null || i.getType()==Material.AIR) return;
+        if(title.equals(ADMIN)){if(e.getRawSlot()==10)adminAction(p,"cps");else if(e.getRawSlot()==13)adminAction(p,"fastplace");else if(e.getRawSlot()==16)adminAction(p,"bridge");return;}
         if(title.equals(RANK)){if(e.getRawSlot()<3)ranking(p,Mode.values()[e.getRawSlot()]);return;}
         if(title.equals(PARTY)){if(e.getRawSlot()==22){p.closeInventory();partyCommand(p,new String[]{"puxar"});}else if(e.getRawSlot()==26){p.closeInventory();partyCommand(p,new String[]{"sair"});}return;}
-        if(title.equals(MENU)) { if(e.getRawSlot()==22) list(p); else if(e.getRawSlot()==10) teamMenu(p,Mode.BEDWARS); else if(e.getRawSlot()==13) teamMenu(p,Mode.BEDFIGHT); else if(e.getRawSlot()==16) teamMenu(p,Mode.SKYWARS); }
+        if(title.equals(MENU)) { if(e.getRawSlot()==26)adminAction(p,"menu");else if(e.getRawSlot()==18)ranking(p,Mode.BEDWARS);else if(e.getRawSlot()==20)partyMenu(p);else if(e.getRawSlot()==22) list(p); else if(e.getRawSlot()==10) teamMenu(p,Mode.BEDWARS); else if(e.getRawSlot()==13) teamMenu(p,Mode.BEDFIGHT); else if(e.getRawSlot()==16) teamMenu(p,Mode.SKYWARS); }
         else if(title.equals(TEAMS)){if(e.getRawSlot()==11 || e.getRawSlot()==15){Mode mode=choosing.get(p.getUniqueId());teamChoices.put(p.getUniqueId(),e.getRawSlot()==15?2:1);if(mode!=null){themes.put(p.getUniqueId(),MapArt.Theme.random());sizeMenu(p,mode);}}}
         else if(title.equals(THEME)) {
             Mode m=choosing.get(p.getUniqueId()); if(m==null) return;
@@ -662,7 +689,7 @@ public final class Treino extends JavaPlugin implements Listener {
             purchase(p,r,e.getRawSlot(),e.isShiftClick());
         }
     }
-    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY).contains(e.getView().getTitle())) e.setCancelled(true); }
+    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN).contains(e.getView().getTitle())) e.setCancelled(true); }
     @EventHandler public void interact(PlayerInteractEvent e) {
         Player p=e.getPlayer(); Room r=membership.get(p.getUniqueId());
         if(p.getWorld()==lobby.getWorld()) { e.setCancelled(true); if(e.hasItem() && (e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK)) {

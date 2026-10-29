@@ -51,7 +51,7 @@ Ao atualizar, pare com `stop`, execute `git pull`, abra `bash menu.sh`, escolha 
 
 ## Direção visual 1.2
 
-Ilhas com contorno orgânico, corpo rochoso mais profundo, caminhos iluminados e praças. Pokémon ganhou jardins/entrada; Green Hill, cascata decorativa de vidro azul, flores e relevos quadriculados; Evangelion, sinalização industrial e luzes vermelhas; One Piece, cais e postes de lanterna. BedWars/BedFight incluem forja coberta e balcão temático. As decorações usam blocos nativos 1.8.8; a cascata é vidro, sem simular fluido.
+Ilhas com contorno orgânico, corpo rochoso mais profundo, caminhos iluminados e praças. Pokémon ganhou jardins/entrada; Green Hill, cascata decorativa de vidro azul, flores e relevos quadriculados; Evangelion, sinalização industrial e luzes vermelhas; One Piece, cais e postes de lanterna. BedWars/BedFight usam bases mais livres: gerador baixo, vendedor na lateral e detalhe temático pequeno ao fundo. As construções maiores ficam no centro e no lobby. As decorações usam blocos nativos 1.8.8; a cascata é vidro, sem simular fluido.
 
 Referências públicas encontradas para a direção visual: [Greenhill / Tails Workshop](https://www.planetminecraft.com/project/tails-workshop/), [Simple Pokecenter](https://www.planetminecraft.com/project/simple-pokecenter-pokemon-center/) e [PokéIsland](https://www.planetminecraft.com/project/pokisland/). São referências de composição e linguagem visual; nenhum mapa, schematic ou imagem desses autores foi incorporado ao projeto. Não se alega que este layout seja o mais popular ou uma cópia desses trabalhos.
 

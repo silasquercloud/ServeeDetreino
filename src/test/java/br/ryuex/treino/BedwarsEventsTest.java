@@ -151,6 +151,10 @@ public final class BedwarsEventsTest {
         TrainingStats stats=(TrainingStats)field(plugin,"stats");stats.name(me,"Tester");stats.add(me,"BEDWARS","wins");stats.save();
         TrainingStats loaded=new TrainingStats(temp.toFile());check(loaded.get(me,"BEDWARS","wins")==1 && loaded.get(me,"BEDWARS","beds")==1,"stats survive reload");
         stats.toggleFavorite(me,"item:FIREBALL");stats.save();check(!new TrainingStats(temp.toFile()).favorites(me).contains("item:FIREBALL"),"favorites survive reload");
+        UUID runner=UUID.randomUUID();stats.name(runner,"Runner");stats.add(me,"SKYWARS","wins");stats.add(me,"SKYWARS","wins");stats.add(runner,"SKYWARS","wins");
+        check(stats.topDaily("SKYWARS").get(0).equals(me) && stats.dailyBest(me,"SKYWARS")==2,"daily top orders actual consecutive wins");
+        stats.loss(me,"SKYWARS");stats.add(me,"SKYWARS","wins");check(stats.get(me,"SKYWARS","streak")==1 && stats.dailyBest(me,"SKYWARS")==2,"loss resets streak without deleting daily record");stats.save();
+        check(new TrainingStats(temp.toFile()).dailyBest(me,"SKYWARS")==2,"daily leaderboard persists");
         Files.deleteIfExists(temp.resolve("stats.yml"));Files.delete(temp);
         System.out.println("BedwarsEventsTest: OK — actual handlers: bed clicks/break, TNT protection, separate lobby, persistent stats, BedFight shop and PvP protection");
     }

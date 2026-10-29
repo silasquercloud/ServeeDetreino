@@ -14,7 +14,7 @@ FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 BOLD='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 WOOL=['#eee9df','#e5752b','#bc58c4','#74bbd6','#e1c638','#75b832','#dd88a7','#3b4145','#8b9192','#238c9a','#773fa8','#3258a6','#765238','#4e743a','#bf3544','#222834']
 CLAY=['#c7a98e','#c87944','#a3647a','#8c9eaa','#c3a14b','#8e9955','#bb7e7f','#615449','#9b8072','#668a8b','#805a8d','#515e7c','#76523c','#65714a','#a95340','#36353c']
-COLORS={'GRASS':'#6ba64b','DIRT':'#87603f','STONE':'#858b98','QUARTZ_BLOCK':'#e2e2e9','SMOOTH_BRICK':'#879095','SEA_LANTERN':'#c0eee0','GOLD_BLOCK':'#f6ce4f','LOG':'#94704a','LEAVES':'#458448','HAY_BLOCK':'#d6b148','CHEST':'#d59938','WORKBENCH':'#b88651','SANDSTONE':'#d9c794','WOOD':'#b88a53','FENCE':'#aa7e4d','BED_BLOCK':'#d84f67','IRON_BLOCK':'#d9dce1','DIAMOND_BLOCK':'#68dbdf','EMERALD_BLOCK':'#42c487','FURNACE':'#515a68','REDSTONE_BLOCK':'#bc303b','RED_ROSE':'#e34459','STAINED_GLASS':'#75c1cf'}
+COLORS={'GRASS':'#6ba64b','DIRT':'#87603f','STONE':'#858b98','QUARTZ_BLOCK':'#e2e2e9','SMOOTH_BRICK':'#879095','SEA_LANTERN':'#c0eee0','GOLD_BLOCK':'#f6ce4f','LOG':'#94704a','LEAVES':'#458448','HAY_BLOCK':'#d6b148','CHEST':'#d59938','WORKBENCH':'#b88651','STEP':'#8c929c','SANDSTONE':'#d9c794','WOOD':'#b88a53','FENCE':'#aa7e4d','BED_BLOCK':'#d84f67','IRON_BLOCK':'#d9dce1','DIAMOND_BLOCK':'#68dbdf','EMERALD_BLOCK':'#42c487','FURNACE':'#515a68','REDSTONE_BLOCK':'#bc303b','RED_ROSE':'#e34459','STAINED_GLASS':'#75c1cf'}
 THEMES={'pokemon':('POKÉMON','Centro Pokémon • Pokébola • árvores e ilhas de grama','#f28595'),'evangelion':('EVANGELION','Tokyo-3 • pirâmide • cabeça de EVA e detalhes verde-lima','#b6a0ff'),'sonic':('SONIC / GREEN HILL','Loop • argolas douradas • palmeiras e falésias quadriculadas','#7eb9ff'),'onepiece':('ONE PIECE','Navio pirata • vela e caveira • monumento do chapéu de palha','#f4c66f')}
 def font(n,bold=False):
     try:return ImageFont.truetype(BOLD if bold else FONT,n)
@@ -55,7 +55,8 @@ def render(name,filename,title,subtitle,accent,scale=None):
     im,d=card(title,subtitle,accent)
     for (x,y,z),(material,data) in sorted(blocks.items(),key=lambda b:(b[0][0]-b[0][2]+b[0][1],b[0][1])):
         col=color(material,data)
-        a=p(x,y+1,z);b=p(x+1,y+1,z);c=p(x+1,y+1,z+1);e=p(x,y+1,z+1)
+        height=.5 if material=='STEP' else 1
+        a=p(x,y+height,z);b=p(x+1,y+height,z);c=p(x+1,y+height,z+1);e=p(x,y+height,z+1)
         edge=shade(col,.56)
         if (x,y,z-1) not in blocks:d.polygon([a,b,p(x+1,y,z),p(x,y,z)],fill=shade(col,.78),outline=edge)
         if (x+1,y,z) not in blocks:d.polygon([b,c,p(x+1,y,z+1),p(x+1,y,z)],fill=shade(col,.58),outline=edge)
@@ -80,18 +81,41 @@ def menu():
     d.text((110,940),'Prévia da disposição real dos slots; não é screenshot do Minecraft.',font=font(19),fill='#919ab3')
     im.quantize(colors=256).save(OUT/'menu.png',optimize=True)
 
+def ui_panels():
+    im,d=card('MENU / INFORMAÇÕES DA PARTIDA','Estrutura do tooltip implementado • dados locais do servidor','#8fdbaf')
+    d.rounded_rectangle((235,270,1365,930),radius=20,fill='#140b1b',outline='#633b82',width=5)
+    rows=[('Bed Wars (Solo)','#75e65d',38),('0 participantes em partida','#aab0be',27),('','#aaa',24),('TOP WINSTREAK DIÁRIO:','#f0b842',32),('Nenhum resultado hoje.','#aeb5c7',28),('','#aaa',24),('Clique para jogar.','#eae867',35)]
+    y=320
+    for text,color,size in rows:
+        d.text((285,y),text,font=font(size,True),fill=color);y+=78
+    d.text((260,955),'Estado vazio real: o ranking só mostra nomes após vitórias registradas.',font=font(20),fill='#9dacc1')
+    im.quantize(colors=256).save(OUT/'menu-lobby.png',optimize=True)
+    im,d=card('ADMIN / PAINEL DE TESTES','Permissão treino.admin • Salabim_zz configurado como administrador','#bf9bfa')
+    cards=[('CPS OBSERVADO','Esquerdo / direito','Janela de 1 segundo','#e78aaa'),('FASTPLACE ASSISTIDO','Pista própria • 10 blocos/s','Botão direito com a vara','#e6c779'),('BRIDGE MANUAL','Ponte de 32 blocos','Tempo • reinício • recorde','#7ecdd7')]
+    for i,(title,a,b,color) in enumerate(cards):
+        x=85+i*490;d.rounded_rectangle((x,310,x+450,740),radius=18,fill='#1e2231',outline=color,width=3)
+        d.text((x+24,365),title,font=font(23,True),fill=color);d.text((x+24,470),a,font=font(21),fill='#e1e6f1');d.text((x+24,535),b,font=font(20),fill='#aeb9d0')
+        d.text((x+24,645),['/cps','/fastplace','/bridge'][i],font=font(29,True),fill='#e8e3ff')
+    d.text((100,855),'Slots reais do menu: CPS 10 • fastplace 13 • bridge 16. Layout acima é explicativo.',font=font(23),fill='#aeb9d0')
+    d.text((100,925),'O CPS representa ações recebidas no servidor; não mede cada clique físico.',font=font(22),fill='#aeb9d0')
+    im.quantize(colors=256).save(OUT/'admin-tools.png',optimize=True)
+
 if __name__=='__main__':
     OUT.mkdir(parents=True,exist_ok=True)
     subprocess.run(['python3',str(ROOT/'scripts/build.py')],check=True,cwd=ROOT)
     subprocess.run(['java','-cp',str(ROOT/'target/classes'),'br.ryuex.treino.MapArt',str(SCENES)],check=True,cwd=ROOT)
     for key,(title,sub,accent) in THEMES.items():
+        render('base-'+key,'base-'+key+'.json',title+' / BASE DE COMBATE','Cama e área frontal livres • gerador baixo • vendedor na lateral',accent)
         render(key,key+'.json',title+' / ILHA TEMÁTICA',sub,accent)
         render('arena-'+key,'arena-'+key+'.json',title+' / SKYWARS PARA 6','Seis bases temáticas • baús nas bases e centro • pontes construídas na partida',accent)
-    render('forge','forge.json','FORJA / RECURSOS DA BASE','Ferro e ouro • cobertura temática • piso iluminado • espaço livre para coletar','#79b9ff')
-    render('bedwars-sonic','bedwars-sonic.json','BEDWARS / GREEN HILL','Forjas cobertas • balcões • postos de diamantes • centro de esmeraldas','#79b9ff')
+    render('forge','forge.json','FORJA / MODELO BAIXO','Pedra e lajes • núcleo de ferro • detalhe de ouro • sem teto e sem colunas','#79b9ff')
+    render('emerald-generator','emerald-generator.json','GERADOR / ESMERALDA','Borda de pedra baixa • lajes de meio bloco • núcleo verde visível','#72dfb3')
+    render('admin-practice','admin-practice.json','ADMIN / PISTA DE BRIDGE','Partida vazia • 32 blocos de trajeto • começo e chegada iluminados','#bc9cf3')
+    render('admin-fastplace','admin-fastplace.json','ADMIN / FASTPLACE ASSISTIDO','Estado após a assistência construir os 31 blocos do vão • não é o estado inicial','#bc9cf3')
+    render('bedwars-sonic','bedwars-sonic.json','BEDWARS / GREEN HILL','Bases livres • poços de recursos • postos de diamantes • centro de esmeraldas','#79b9ff')
     render('lobby','lobby.json','LOBBY / QUATRO UNIVERSOS','Praça central • quatro alas temáticas • pontes iluminadas e portais coloridos','#c6afff')
     render('bedwars','bedwars.json','BEDWARS / POKÉMON','Quatro bases com cama • Centro Pokémon em cada ilha • loja e geradores',THEMES['pokemon'][2])
     render('bedfight','bedfight.json','BEDFIGHT / ONE PIECE','Duelo 1x1 entre ilhas piratas • kit pronto e camas • cenário de treino',THEMES['onepiece'][2])
     render('skywars','arena-sonic.json','SKYWARS / SONIC PARA 6','Seis ilhas Green Hill com loop, argolas, palmeiras e terreno quadriculado',THEMES['sonic'][2])
-    menu()
+    menu();ui_panels()
     print('Galeria atualizada com a geometria real do gerador; prévias técnicas, não screenshots.')

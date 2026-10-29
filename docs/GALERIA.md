@@ -4,11 +4,13 @@
 
 **Prévias técnicas das construções implementadas; não são screenshots do Minecraft.** As posições e materiais são exportados diretamente de `MapArt.java`, o mesmo gerador usado pelo plugin. O render usa cores e faces simplificadas, sem reproduzir texturas, transparências, HUD ou formas especiais de itens/cercas.
 
-## Forja e arena • versão 1.2
+## Geradores e bases • versão 1.3
 
-Forja coberta e iluminada, presente em BedWars e BedFight. Os contadores flutuantes e o vendedor são entidades adicionadas no jogo; as projeções abaixo mostram a geometria em blocos.
+Poços baixos de pedra, com núcleo de minério visível, presentes em BedWars e BedFight. Os contadores flutuantes e o vendedor são entidades adicionadas no jogo; as projeções abaixo mostram a geometria em blocos. A área da cama fica livre e os detalhes maiores ficam no centro/lobby.
 
-![Forja temática implementada](images/forge.png)
+![Forja baixa implementada](images/forge.png)
+
+![Gerador baixo de esmeralda](images/emerald-generator.png)
 
 ![BedWars Green Hill com forjas](images/bedwars-sonic.png)
 
@@ -24,6 +26,10 @@ Centro Pokémon com teto vermelho, cruz, porta e janelas; Pokébola em blocos, �
 
 ![Ilha Pokémon](images/pokemon.png)
 
+**Base de combate com cama e área frontal livre:**
+
+![Base pokemon](images/base-pokemon.png)
+
 <details><summary>Ver arena Pokémon para seis jogadores</summary>
 
 ![SkyWars Pokémon com seis bases](images/arena-pokemon.png)
@@ -35,6 +41,10 @@ Centro Pokémon com teto vermelho, cruz, porta e janelas; Pokébola em blocos, �
 Cidade industrial inspirada em Tokyo-3, pirâmide e escultura de cabeça de EVA, com roxo e verde-lima.
 
 ![Ilha Evangelion](images/evangelion.png)
+
+**Base de combate com cama e área frontal livre:**
+
+![Base evangelion](images/base-evangelion.png)
 
 <details><summary>Ver arena Evangelion para seis jogadores</summary>
 
@@ -48,6 +58,10 @@ Loop, argolas de ouro, palmeiras e terreno quadriculado.
 
 ![Ilha Sonic Green Hill](images/sonic.png)
 
+**Base de combate com cama e área frontal livre:**
+
+![Base sonic](images/base-sonic.png)
+
 <details><summary>Ver arena Sonic para seis jogadores</summary>
 
 ![SkyWars Sonic com seis bases](images/arena-sonic.png)
@@ -59,6 +73,10 @@ Loop, argolas de ouro, palmeiras e terreno quadriculado.
 Navio pirata, mastro, vela com caveira em blocos, monumento do chapéu de palha e palmeira.
 
 ![Ilha One Piece](images/onepiece.png)
+
+**Base de combate com cama e área frontal livre:**
+
+![Base onepiece](images/base-onepiece.png)
 
 <details><summary>Ver arena One Piece para seis jogadores</summary>
 
@@ -79,6 +97,20 @@ Exemplos das bases com cama. O tema também pode ser trocado pelo menu.
 ![BedWars Pokémon com quatro bases](images/bedwars.png)
 
 ![BedFight One Piece com duas bases](images/bedfight.png)
+
+## Menu do lobby e ferramentas do administrador
+
+Estas duas imagens são diagramas dos itens/textos implementados; não são capturas do cliente.
+
+![Tooltip do modo com ranking diário](images/menu-lobby.png)
+
+![Painel CPS, fastplace e bridge](images/admin-tools.png)
+
+![Pista manual de bridge](images/admin-practice.png)
+
+![Pista após fastplace assistido](images/admin-fastplace.png)
+
+[Comandos e limites das ferramentas →](ADMIN.md)
 
 ## Screenshots reais e regeneração
 

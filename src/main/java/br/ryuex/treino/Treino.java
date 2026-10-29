@@ -441,7 +441,7 @@ public final class Treino extends JavaPlugin implements Listener {
             for(int i=0;i<cap/teamSize;i++) {
                 double angle=2*Math.PI*i/(cap/teamSize); int x=(int)Math.round(Math.cos(angle)*42), z=(int)Math.round(Math.sin(angle)*42);
                 build(world,mode==Mode.SKYWARS?MapArt.island(theme,8):MapArt.battleBase(theme),x,80,z);
-                spawns.add(new Location(world,x+0.5,81,z+0.5,(float)(angle*180/Math.PI+90),0)); beds.put(i,true);
+                spawns.add(new Location(world,x+0.5,81,z+0.5,mode==Mode.BEDWARS?102f:(float)(angle*180/Math.PI+90),0)); beds.put(i,true);
                 if(mode!=Mode.SKYWARS) {
                     Block foot=world.getBlockAt(x+2,81,z),head=world.getBlockAt(x+2,81,z+1);
                     foot.setType(Material.BED_BLOCK,false); head.setType(Material.BED_BLOCK,false); foot.setData((byte)0,false); head.setData((byte)8,false);
@@ -598,7 +598,7 @@ public final class Treino extends JavaPlugin implements Listener {
         void spawn(Player p) {
             reset(p,GameMode.SURVIVAL); int t=teams.get(p.getUniqueId()); p.teleport(spawnLocation(p.getUniqueId()));p.setDisplayName("§"+"c9a6e5bdf2".charAt(t%10)+p.getName()+"§r");p.setMaximumNoDamageTicks(20);p.setNoDamageTicks(0);spawnProtection.put(p.getUniqueId(),elapsed+2);
             if(mode!=Mode.SKYWARS) {
-                p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD),new ItemStack(Material.WOOD_PICKAXE),new ItemStack(Material.COOKED_BEEF,16));
+                p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
                 p.getInventory().setChestplate(teamLeather(Material.LEATHER_CHESTPLATE,t));
                 p.getInventory().setHelmet(teamLeather(Material.LEATHER_HELMET,t));
                 p.getInventory().setLeggings(teamLeather(Material.LEATHER_LEGGINGS,t));

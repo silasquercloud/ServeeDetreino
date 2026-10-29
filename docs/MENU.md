@@ -107,3 +107,14 @@ O atualizador bloqueia atualização enquanto o launcher estiver ativo e detecta
 Parties e convites são temporários e precisam ser recriados depois que o servidor reiniciar.
 
 A parada de outro terminal funciona nas sessões iniciadas após esta atualização. Se o servidor já estava ligado com a versão antiga, use `stop` no console original nesta primeira vez. [BedWars, loja, classificação e detalhes da parada →](BEDWARS.md)
+
+## Recuperar uma atualização que falhou
+
+Se o menu ainda estiver aberto na versão antiga, feche-o com **0**. Nesta primeira recuperação, digite `stop` no console onde o Minecraft está rodando e aguarde encerrar. Depois execute, dentro do repositório:
+
+```bash
+git pull --ff-only
+bash scripts/update.sh
+```
+
+Ao concluir, abra `bash menu.sh` e escolha **3**. A atualização agora recarrega o atualizador e o ambiente após buscar o código, repara JARs ausentes, tolera um socket Playit antigo sem serviço respondendo e mostra a versão e o SHA-256 dos plugins instalados. Nas sessões com o launcher novo, solicita parada segura antes de atualizar; servidores antigos ainda exigem `stop` no console original. Código local modificado ou histórico divergente continua protegido, sem reset automático. Se houver erro, envie a mensagem completa do terminal.

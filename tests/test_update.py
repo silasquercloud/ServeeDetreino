@@ -47,14 +47,14 @@ class UpdateTests(unittest.TestCase):
             directory.mkdir()
             for name in ['TreinoHub-1.0.0.jar', 'TreinoAntiLag-1.0.0.jar']:
                 with zipfile.ZipFile(directory/name, 'w') as archive:
-                    archive.writestr('plugin.yml', 'name: '+name+'\n')
+                    archive.writestr('plugin.yml', 'name: '+name+'\nversion: 1.1.0\n')
         return SimpleNamespace(stdout='')
 
     def test_success_backs_up_plugin_and_preserves_local_data(self):
         props = (self.root/'server/server.properties').read_bytes()
         with patch.object(updater, 'execute', side_effect=self.fake_execute):
-            updater.update()
-        self.assertIn(['git', 'pull', '--ff-only'], self.commands)
+            updater.update(fetch=False)
+        self.assertTrue((self.root/'.private/update-installed.json').is_file())
         self.assertEqual((self.root/'server/server.properties').read_bytes(), props)
         self.assertEqual((self.root/'.private/playit.secret').read_text(), 'fake-test-fixture')
         self.assertEqual((self.root/'server/plugins/TreinoHub/config.yml').read_text(), 'max-rooms: 8\n')
@@ -72,9 +72,30 @@ class UpdateTests(unittest.TestCase):
             return result
         with patch.object(updater, 'execute', side_effect=invalid):
             with self.assertRaises(zipfile.BadZipFile):
-                updater.update()
+                updater.update(fetch=False)
         self.assertEqual(self.destination.read_bytes(), b'previous-plugin')
         self.assertFalse((self.destination.parent/'TreinoAntiLag-1.0.0.jar').exists())
+
+    def test_missing_old_plugin_is_repaired(self):
+        self.destination.unlink()
+        with patch.object(updater, 'execute', side_effect=self.fake_execute):
+            updater.update(fetch=False)
+        self.assertTrue(self.destination.is_file())
+
+    def test_pull_launches_new_updater_instead_of_installing_with_old_code(self):
+        with patch.object(updater, 'execute', side_effect=self.fake_execute):
+            updater.update()
+        self.assertIn(['git', 'pull', '--ff-only'], self.commands)
+        self.assertIn(['bash', str(self.root/'scripts/update.sh'), '--install-current'], self.commands)
+        self.assertNotIn([sys.executable, 'scripts/build.py'], self.commands)
+
+    def test_stale_playit_socket_does_not_block_update(self):
+        (self.root/'.tools').mkdir()
+        (self.root/'.tools/playit-cli').write_text('fixture')
+        (self.root/'.private/playit.sock').touch()
+        with patch.object(updater.subprocess, 'run', side_effect=subprocess.CalledProcessError(1, ['fixture'])), patch.object(updater, 'execute', side_effect=self.fake_execute):
+            updater.update(fetch=False)
+        self.assertTrue((self.destination.parent/'TreinoAntiLag-1.0.0.jar').exists())
 
     def test_build_failure_keeps_installed_plugin(self):
         def fail(args, capture=False):
@@ -83,7 +104,7 @@ class UpdateTests(unittest.TestCase):
             return SimpleNamespace(stdout='')
         with patch.object(updater, 'execute', side_effect=fail):
             with self.assertRaises(subprocess.CalledProcessError):
-                updater.update()
+                updater.update(fetch=False)
         self.assertEqual(self.destination.read_bytes(), b'previous-plugin')
 
     def test_dirty_source_is_not_reset_or_pulled(self):
@@ -91,7 +112,7 @@ class UpdateTests(unittest.TestCase):
             self.commands.append(args)
             return SimpleNamespace(stdout=' M README.md' if 'status' in args else '')
         with patch.object(updater, 'execute', side_effect=dirty):
-            with self.assertRaisesRegex(RuntimeError, 'modificados'):
+            with self.assertRaisesRegex(RuntimeError, 'modificado'):
                 updater.update()
         self.assertNotIn(['git', 'pull', '--ff-only'], self.commands)
         self.assertEqual(self.destination.read_bytes(), b'previous-plugin')
@@ -99,7 +120,7 @@ class UpdateTests(unittest.TestCase):
     def test_running_server_lock_prevents_update(self):
         with server_lock(self.root), patch.object(updater, 'execute') as execute:
             with self.assertRaisesRegex(RuntimeError, 'stop'):
-                updater.update()
+                updater.update(fetch=False)
             execute.assert_not_called()
 
 

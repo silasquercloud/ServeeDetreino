@@ -73,12 +73,14 @@ def install():
 
 
 def update_server():
-    if not installed():
+    if not (ROOT/'server/server.jar').is_file():
         print('Instale primeiro pela opção 2.')
         return
-    print('\nATUALIZAR SERVIDOR — pare com stop antes de continuar.')
+    print('\nATUALIZAR SERVIDOR — solicita parada segura nas sessões compatíveis.')
     print('A atualização preserva Playit, configurações e mundos; mantém Spigot 1.8.8.\n')
-    call(['bash', str(ROOT/'scripts/update.sh')])
+    if call(['bash', str(ROOT/'scripts/update.sh')]):
+        print('Reabrindo o menu atualizado...', flush=True)
+        os.execv(sys.executable, [sys.executable, str(ROOT/'scripts/menu.py')])
 
 
 def ensure_eula():

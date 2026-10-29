@@ -1,12 +1,12 @@
 # Ryuex Treino • Minecraft Java 1.8.9
 
-BedWars, BedFight e SkyWars para jogar com seus amigos. Plugin próprio, salas com vagas selecionáveis, lobby e mapas gerados automaticamente.
+BedWars, BedFight e SkyWars para jogar com seus amigos. **Ilhas inspiradas em Pokémon, Evangelion, Sonic e One Piece**, com lobby misturando os quatro universos. Plugin próprio, seleção de tema/vagas e construções geradas automaticamente.
 
 [![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
 **[Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
-![Visão técnica do SkyWars com seis bases](docs/images/skywars.png)
+![Lobby misto com quatro universos](docs/images/lobby.png)
 
 > As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
 
@@ -43,7 +43,7 @@ Esse comando inicia **Playit + Minecraft juntos**, mostra o endereço cadastrado
 
 **O Playit fornece o túnel/endereço; a máquina onde você executa o projeto hospeda o servidor.** Ele não mantém uma máquina desligada online. Codespaces deve ser usado para desenvolvimento/testes do projeto, conforme os [termos do GitHub](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces).
 
-## Escolha o modo e as vagas
+## Escolha o modo, o tema e as vagas
 
 | Modo | Vagas | O que está implementado |
 | --- | --- | --- |
@@ -51,10 +51,10 @@ Esse comando inicia **Playit + Minecraft juntos**, mostra o endereço cadastrado
 | **BedFight** | 2/4/6/8 | Pares de duelos 1x1, kit pronto, blocos, cama e respawn. Seis vagas = três duelos. |
 | **SkyWars** | 2–12 | Uma ilha por jogador, baús nas bases e no centro, espectador, vitória e reposição aos 3 minutos. |
 
-Use a bússola ou `/treino` para escolher. Exemplo para seis amigos:
+Use a bússola ou `/treino`: **modo → tema → vagas**. Todos os quatro temas estão disponíveis nos três modos. [Veja os mapas e comandos de cada tema](docs/TEMAS.md). Exemplo para seis amigos em One Piece:
 
 ```text
-/treino criar skywars 6
+/treino criar skywars 6 onepiece
 /treino entrar 1
 ```
 
@@ -64,7 +64,7 @@ O número da sala aparece no chat. Ela inicia ao encher; o dono pode antecipar c
 
 ![Disposição do menu implementado](docs/images/menu.png)
 
-Veja também [lobby, BedWars e BedFight na galeria](docs/GALERIA.md).
+Veja os quatro temas em detalhe e arenas para seis jogadores na [galeria completa](docs/GALERIA.md).
 
 ## Compatibilidade e estado dos testes
 
@@ -76,7 +76,7 @@ Veja também [lobby, BedWars e BedFight na galeria](docs/GALERIA.md).
 - Playit funciona como processo externo: não depende da versão da API Bukkit. O setup portátil suporta Linux x64 e ARM64; Java/Spigot em ARM64 não foram testados neste projeto.
 - Não há plugins BedWars1058/SkyWarsReloaded instalados: os três modos estão no TreinoHub. Clientes modernos e Bedrock não foram configurados.
 
-BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméticos, TNT/fireballs ou recursos de grandes redes. Não inclui bots. Os mapas são ilhas simples próprias; não são mapas copiados de servidores famosos.
+BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméticos, TNT/fireballs ou recursos de grandes redes. Não inclui bots. Os mapas são construções próprias em blocos, inspiradas nos quatro universos. Não são cópias de mapas de outros servidores, e não exigem resource pack. As áreas de spawn, camas, baús e pontes do lobby têm testes de geometria e materiais da 1.8.8.
 
 ## Onde está cada coisa
 
@@ -85,6 +85,7 @@ BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméti
 | [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, liberar amigos, comandos e teste em jogo. |
 | [docs/PLAYIT.md](docs/PLAYIT.md) | Conta, túnel, endereço público e diagnóstico. |
 | [docs/GALERIA.md](docs/GALERIA.md) | Prévias visuais e instruções para screenshots reais. |
+| [docs/TEMAS.md](docs/TEMAS.md) | Temas, construções, seleção e compatibilidade dos mapas. |
 | [scripts/setup.sh](scripts/setup.sh) | Playit primeiro, instalação depois. |
 | [scripts/start.sh](scripts/start.sh) | Inicia os dois processos juntos. |
 | [config/server.properties](config/server.properties) | Configuração padrão do servidor. |

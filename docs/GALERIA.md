@@ -1,49 +1,85 @@
-# Galeria do projeto
+# Galeria • Ryuex Multiverso
 
-[← Início](../README.md) · [Instalar](GUIA.md)
+[← Início](../README.md) · [Temas e comandos](TEMAS.md) · [Instalar](GUIA.md)
 
-**Estas imagens são prévias técnicas, não capturas do jogo.** Elas mostram a geometria atual dos mapas e a disposição dos slots implementados em `Treino.java`. Não usam uma arena inventada ou uma imagem de outro servidor para representar o projeto.
+**Prévias técnicas das construções implementadas; não são screenshots do Minecraft.** As posições e materiais são exportados diretamente de `MapArt.java`, o mesmo gerador usado pelo plugin. O render usa cores e faces simplificadas, sem reproduzir texturas, transparências, HUD ou formas especiais de itens/cercas.
 
-A projeção usa cores simplificadas e blocos esquemáticos; texturas, iluminação, itens, HUD e aparência final dependem do cliente Minecraft. A plataforma de espera acima das arenas não aparece nas vistas das partidas.
+## Lobby misto • quatro universos
 
-## Lobby
+Praça central, quatro alas decoradas, pontes iluminadas com bordas e arcos nas cores de cada tema. Explore tudo a pé e use a bússola para jogar.
 
-Plataforma de quartzo, iluminação na borda e bússola para abrir os modos.
+![Lobby misto com quatro alas](images/lobby.png)
 
-![Prévia técnica do lobby](images/lobby.png)
+## Pokémon
 
-## Menu
+Centro Pokémon com teto vermelho, cruz, porta e janelas; Pokébola em blocos, árvore e ilha de grama.
 
-Disposição dos slots BedWars, BedFight, SkyWars e lista de salas. As siglas ilustram os ícones; dentro do Minecraft são itens do inventário.
+![Ilha Pokémon](images/pokemon.png)
 
-![Reconstrução técnica do menu](images/menu.png)
+<details><summary>Ver arena Pokémon para seis jogadores</summary>
 
-## SkyWars com 6 jogadores
+![SkyWars Pokémon com seis bases](images/arena-pokemon.png)
 
-Seis bases, dois baús por base e baús no centro. As pontes são construídas durante a partida.
+</details>
 
-![Prévia técnica SkyWars 6](images/skywars.png)
+## Evangelion
 
-## BedWars com 4 jogadores
+Cidade industrial inspirada em Tokyo-3, pirâmide e escultura de cabeça de EVA, com roxo e verde-lima.
 
-Quatro ilhas individuais com cama e bancada/loja, além do centro.
+![Ilha Evangelion](images/evangelion.png)
 
-![Prévia técnica BedWars 4](images/bedwars.png)
+<details><summary>Ver arena Evangelion para seis jogadores</summary>
 
-## BedFight 1x1
+![SkyWars Evangelion com seis bases](images/arena-evangelion.png)
 
-Duas bases para treinar ponte, combate e quebra de cama.
+</details>
 
-![Prévia técnica BedFight](images/bedfight.png)
+## Sonic • Green Hill
 
-## Adicionar screenshots reais
+Loop, argolas de ouro, palmeiras e terreno quadriculado.
 
-Depois que o servidor estiver iniciado, entre com Minecraft Java 1.8.9 e use **F2** para capturar lobby, menu e cada arena. As imagens ficam na pasta `screenshots` da instância do seu launcher. Envie as capturas para `docs/images/` e identifique-as como screenshots reais nesta página.
+![Ilha Sonic Green Hill](images/sonic.png)
 
-Nenhuma captura real foi produzida ou validada nesta versão. Não há promessa de que a tipografia e as cores da prévia sejam a interface real do Minecraft.
+<details><summary>Ver arena Sonic para seis jogadores</summary>
 
-Para regenerar estas projeções técnicas, com Python 3 e Pillow instalados:
+![SkyWars Sonic com seis bases](images/arena-sonic.png)
+
+</details>
+
+## One Piece
+
+Navio pirata, mastro, vela com caveira em blocos, monumento do chapéu de palha e palmeira.
+
+![Ilha One Piece](images/onepiece.png)
+
+<details><summary>Ver arena One Piece para seis jogadores</summary>
+
+![SkyWars One Piece com seis bases](images/arena-onepiece.png)
+
+</details>
+
+## Menu de temas
+
+A sequência agora é **modo → tema → vagas**. As siglas da prévia representam os itens usados no inventário real: redstone, olho do Ender, ouro e barco.
+
+![Disposição do menu de temas](images/menu.png)
+
+## BedWars e BedFight
+
+Exemplos das bases com cama. O tema também pode ser trocado pelo menu.
+
+![BedWars Pokémon com quatro bases](images/bedwars.png)
+
+![BedFight One Piece com duas bases](images/bedfight.png)
+
+## Screenshots reais e regeneração
+
+Ainda não houve captura de uma partida real. Depois de iniciar o servidor, entre em Minecraft Java 1.8.9 e use **F2**. As capturas ficam na pasta `screenshots` da instância do seu launcher; podem ser adicionadas aqui com a identificação de screenshot real.
+
+Para reconstruir as projeções a partir do código atual, com Python 3, Pillow e Java 17 instalados:
 
 ```bash
 python3 scripts/render-previews.py
 ```
+
+O script compila e testa o plugin, exporta as cenas do gerador Java e renderiza as imagens. As vistas de arena não mostram a plataforma de espera suspensa acima do centro.

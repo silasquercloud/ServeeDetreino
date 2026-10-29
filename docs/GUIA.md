@@ -63,12 +63,14 @@ Não é necessário dar OP para abrir o menu ou criar salas.
 
 ## 5. Criar e jogar
 
-Use a bússola ou `/treino`. Escolha modo → vagas. Passe o ID da sala aos amigos.
+Use a bússola ou `/treino`. Escolha modo → tema → vagas. Passe o ID da sala aos amigos.
 
 | Comando | Função |
 | --- | --- |
 | `/treino` | Abre o menu. |
-| `/treino criar skywars 6` | Cria uma sala SkyWars de até 6 jogadores. |
+| `/treino criar skywars 6 onepiece` | SkyWars de até 6 jogadores com ilhas piratas. |
+| `/treino criar skywars 6 sonic` | SkyWars Green Hill com 6 vagas. |
+| `/treino criar bedwars 4 evangelion` | BedWars com 4 bases de Evangelion. |
 | `/treino criar bedwars 4` | Cria BedWars solo com 4 bases. |
 | `/treino criar bedfight 2` | Cria um duelo 1x1. |
 | `/treino entrar 1` | Entra na sala de ID 1, se disponível. |
@@ -76,6 +78,8 @@ Use a bússola ou `/treino`. Escolha modo → vagas. Passe o ID da sala aos amig
 | `/treino salas` | Lista salas abertas. |
 | `/treino loja` | Abre a loja durante BedWars. Também abre clicando na bancada. |
 | `/treino sair` | Sai da sala e volta ao lobby. |
+
+Temas: `pokemon`, `evangelion`, `sonic`, `onepiece`. O tema é opcional no comando; sem ele, usa Pokémon. O menu sempre oferece os quatro. Veja a [galeria](GALERIA.md).
 
 Máximo inicial: 4 salas simultâneas. Altere `server/plugins/TreinoHub/config.yml` com o servidor parado. Camas são removidas na morte súbita após 10 minutos; jogadores longe do centro recebem dano. Aos 15 minutos, empate. Desconectar elimina o jogador da partida.
 

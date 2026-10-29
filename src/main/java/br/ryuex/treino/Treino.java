@@ -21,11 +21,12 @@ public final class Treino extends JavaPlugin implements Listener {
     private final Map<Integer, Room> rooms = new LinkedHashMap<>();
     private final Map<UUID, Room> membership = new HashMap<>();
     private final Map<UUID, Mode> choosing = new HashMap<>();
+    private final Map<UUID, MapArt.Theme> themes = new HashMap<>();
     private Location lobby;
     private int nextId = 1;
     enum Mode { BEDWARS, BEDFIGHT, SKYWARS }
     enum Phase { WAITING, COUNTDOWN, PLAYING, ENDING }
-    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", LIST = "§8Treino • salas", SHOP = "§8Treino • loja";
+    private static final String MENU = "§8Treino • modos", SIZE = "§8Treino • vagas", THEME = "§8Treino • tema", LIST = "§8Treino • salas", SHOP = "§8Treino • loja";
     private static final byte[] COLORS = {14,11,5,4,1,10,9,6,3,13,2,0};
     public static class VoidGenerator extends ChunkGenerator {
         @Override public byte[] generate(World w, Random r, int x, int z) { return new byte[32768]; }
@@ -39,11 +40,8 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @Override public void onEnable() {
         saveDefaultConfig();
-        World w = voidWorld("treino_lobby");
-        for (int x=-12;x<=12;x++) for(int z=-12;z<=12;z++) {
-            w.getBlockAt(x,79,z).setType(Material.BEDROCK);
-            w.getBlockAt(x,80,z).setType((Math.abs(x)==12 || Math.abs(z)==12)?Material.SEA_LANTERN:Material.QUARTZ_BLOCK);
-        }
+        World w = voidWorld("treino_lobby_multiverso_v1");
+        build(w,MapArt.lobby(),0,80,0);
         lobby = new Location(w,0.5,81,0.5); w.setSpawnLocation(0,81,0);
         Bukkit.getPluginManager().registerEvents(this,this);
         new BukkitRunnable() { public void run() { tick(); } }.runTaskTimer(this,20,20);
@@ -61,6 +59,22 @@ public final class Treino extends JavaPlugin implements Listener {
         try(java.util.stream.Stream<java.nio.file.Path> paths=java.nio.file.Files.walk(folder.toPath())) {
             for(java.nio.file.Path path:(Iterable<java.nio.file.Path>)paths.sorted(Comparator.reverseOrder())::iterator) java.nio.file.Files.deleteIfExists(path);
         } catch(java.io.IOException ex) { getLogger().warning("Falha ao limpar arena: "+ex.getMessage()); }
+    }
+    private void build(World world,MapArt.Scene scene,int dx,int dy,int dz) {
+        for(MapArt.Cell cell:scene.cells()) {
+            Block block=world.getBlockAt(cell.x+dx,cell.y+dy,cell.z+dz);
+            block.setType(Material.valueOf(cell.material),false);
+            if(cell.data!=0) block.setData((byte)cell.data,false);
+        }
+    }
+    private void themeMenu(Player p,Mode mode) {
+        choosing.put(p.getUniqueId(),mode);
+        Inventory inv=Bukkit.createInventory(null,27,THEME);
+        inv.setItem(10,item(Material.REDSTONE,1,"§cPokémon §7• Centro Pokémon e Pokébola"));
+        inv.setItem(12,item(Material.EYE_OF_ENDER,1,"§5Evangelion §7• Tokyo-3 e EVA"));
+        inv.setItem(14,item(Material.GOLD_INGOT,1,"§9Sonic §7• Green Hill e argolas"));
+        inv.setItem(16,item(Material.BOAT,1,"§6One Piece §7• navio pirata"));
+        p.openInventory(inv);
     }
     private void msg(Player p,String s) { p.sendMessage("§5§lTREINO §8» §f"+s); }
     private ItemStack item(Material m,int count,String title) {
@@ -94,7 +108,7 @@ public final class Treino extends JavaPlugin implements Listener {
         Inventory inv=Bukkit.createInventory(null,54,LIST); int slot=0;
         for(Room r:rooms.values()) if(r.phase==Phase.WAITING || r.phase==Phase.COUNTDOWN) {
             if(slot>=54) break;
-            inv.setItem(slot++,item(Material.PAPER,1,"§d#"+r.id+" §f"+r.mode+" §7("+r.players.size()+"/"+r.capacity+")"));
+            inv.setItem(slot++,item(Material.PAPER,1,"§d#"+r.id+" §f"+r.mode+" / "+r.theme.title+" §7("+r.players.size()+"/"+r.capacity+")"));
         }
         p.openInventory(inv);
     }
@@ -103,8 +117,8 @@ public final class Treino extends JavaPlugin implements Listener {
         Player p=(Player)sender;
         try {
             if(args.length==0) menu(p);
-            else if(args[0].equalsIgnoreCase("criar") && args.length==3) {
-                Mode m=Mode.valueOf(args[1].toUpperCase(Locale.ROOT)); int n=Integer.parseInt(args[2]); create(p,m,n);
+            else if(args[0].equalsIgnoreCase("criar") && (args.length==3 || args.length==4)) {
+                Mode m=Mode.valueOf(args[1].toUpperCase(Locale.ROOT)); int n=Integer.parseInt(args[2]); create(p,m,n,args.length==4?MapArt.Theme.parse(args[3]):MapArt.Theme.POKEMON);
             } else if(args[0].equalsIgnoreCase("entrar") && args.length==2) join(p,rooms.get(Integer.parseInt(args[1])));
             else if(args[0].equalsIgnoreCase("sair")) { leave(p); hub(p); }
             else if(args[0].equalsIgnoreCase("salas")) list(p);
@@ -113,15 +127,15 @@ public final class Treino extends JavaPlugin implements Listener {
                 Room r=membership.get(p.getUniqueId());
                 if(r!=null && r.owner.equals(p.getUniqueId()) && r.phase==Phase.WAITING && Rules.canStart(r.mode.name(),r.players.size())) { r.phase=Phase.COUNTDOWN; r.countdown=5; }
                 else msg(p,"Só o dono pode iniciar; precisa de 2 jogadores e número par no BedFight.");
-            } else msg(p,"/treino criar <bedwars|bedfight|skywars> <vagas> | entrar <sala> | sair | salas | iniciar | loja");
+            } else msg(p,"/treino criar <bedwars|bedfight|skywars> <vagas> [pokemon|evangelion|sonic|onepiece] | entrar <sala> | sair | salas | iniciar | loja");
         } catch(IllegalArgumentException e) { msg(p,"Confira o modo, número de sala e vagas. Ex.: /treino criar skywars 6"); }
         return true;
     }
-    private void create(Player p,Mode mode,int n) {
+    private void create(Player p,Mode mode,int n,MapArt.Theme theme) {
         if(membership.containsKey(p.getUniqueId())) { msg(p,"Saia da sala atual primeiro: /treino sair"); return; }
         if(!Rules.validCapacity(mode.name(),n)) { msg(p,"Vagas: SkyWars 2–12, BedWars 2–8, BedFight 2/4/6/8."); return; }
         if(rooms.size()>=getConfig().getInt("max-rooms",4)) { msg(p,"Limite de salas atingido. Aguarde uma terminar."); return; }
-        int id=nextId++; Room r=new Room(id,mode,n,p.getUniqueId()); rooms.put(id,r); join(p,r);
+        int id=nextId++; Room r=new Room(id,mode,n,p.getUniqueId(),theme); rooms.put(id,r); join(p,r);
         msg(p,"Sala §d#"+id+"§f criada. Amigos: §d/treino entrar "+id);
     }
     private void join(Player p,Room r) {
@@ -133,7 +147,7 @@ public final class Treino extends JavaPlugin implements Listener {
         if(r.players.size()==r.capacity) { r.phase=Phase.COUNTDOWN; r.countdown=10; }
     }
     private void leave(Player p) {
-        choosing.remove(p.getUniqueId()); Room r=membership.remove(p.getUniqueId()); if(r==null) return;
+        choosing.remove(p.getUniqueId()); themes.remove(p.getUniqueId()); Room r=membership.remove(p.getUniqueId()); if(r==null) return;
         r.players.remove(p.getUniqueId()); Integer team=r.teams.remove(p.getUniqueId());
         r.eliminated.remove(p.getUniqueId()); r.respawning.remove(p.getUniqueId());
         if(r.owner.equals(p.getUniqueId()) && !r.players.isEmpty()) r.owner=r.players.iterator().next();
@@ -158,8 +172,8 @@ public final class Treino extends JavaPlugin implements Listener {
             r.elapsed++;
             for(UUID u:new ArrayList<>(r.players)) { Player p=Bukkit.getPlayer(u); if(p!=null && !r.eliminated.contains(u) && !r.respawning.contains(u) && p.getLocation().getY()<40) knockOut(p,r); }
             if(r.mode==Mode.BEDWARS) {
-                if(r.elapsed%2==0) for(int t=0;t<r.spawns.size();t++) r.world.dropItem(r.spawns.get(t).clone().add(0,0.2,2),new ItemStack(Material.IRON_INGOT));
-                if(r.elapsed%8==0) for(Location l:r.spawns) r.world.dropItem(l.clone().add(0,0.2,2),new ItemStack(Material.GOLD_INGOT));
+                if(r.elapsed%2==0) for(int t=0;t<r.spawns.size();t++) r.world.dropItem(r.spawns.get(t).clone().add(0,0.2,-2),new ItemStack(Material.IRON_INGOT));
+                if(r.elapsed%8==0) for(Location l:r.spawns) r.world.dropItem(l.clone().add(0,0.2,-2),new ItemStack(Material.GOLD_INGOT));
                 if(r.elapsed%20==0) r.world.dropItem(new Location(r.world,0.5,81,0.5),new ItemStack(Material.EMERALD));
             }
             if(r.mode==Mode.SKYWARS && r.elapsed==180) { r.fillChests(); r.say("§eBaús reabastecidos!"); }
@@ -174,20 +188,20 @@ public final class Treino extends JavaPlugin implements Listener {
         }
     }
     private final class Room {
-        final int id,capacity; final Mode mode; UUID owner; final World world;
+        final int id,capacity; final Mode mode; final MapArt.Theme theme; UUID owner; final World world;
         Phase phase=Phase.WAITING; int countdown,elapsed;
         final Set<UUID> players=new LinkedHashSet<>(),eliminated=new HashSet<>(),respawning=new HashSet<>();
         final Map<UUID,Integer> teams=new HashMap<>(); final Map<Integer,Boolean> beds=new HashMap<>();
         final List<Location> spawns=new ArrayList<>(); final List<Block> bedBlocks=new ArrayList<>();
         final Map<String,Integer> bedOwners=new HashMap<>(); final Set<String> placed=new HashSet<>(); final List<Block> chests=new ArrayList<>();
-        Room(int id,Mode mode,int cap,UUID owner) {
-            this.id=id; this.mode=mode; this.capacity=cap; this.owner=owner;
+        Room(int id,Mode mode,int cap,UUID owner,MapArt.Theme theme) {
+            this.id=id; this.mode=mode; this.capacity=cap; this.owner=owner; this.theme=theme;
             world=voidWorld("treino_room_"+System.currentTimeMillis()+"_"+id);
             platform(0,110,0,5,Material.GLASS);
-            platform(0,79,0,9,Material.STONE); platform(0,80,0,8,Material.GRASS);
+            build(world,MapArt.center(theme),0,80,0);
             for(int i=0;i<cap;i++) {
                 double angle=2*Math.PI*i/cap; int x=(int)Math.round(Math.cos(angle)*42), z=(int)Math.round(Math.sin(angle)*42);
-                platform(x,79,z,5,Material.STONE); platform(x,80,z,4,Material.GRASS);
+                build(world,MapArt.island(theme,8),x,80,z);
                 spawns.add(new Location(world,x+0.5,81,z+0.5,(float)(angle*180/Math.PI+90),0)); beds.put(i,true);
                 if(mode!=Mode.SKYWARS) {
                     Block foot=world.getBlockAt(x+2,81,z),head=world.getBlockAt(x+2,81,z+1);
@@ -244,7 +258,7 @@ public final class Treino extends JavaPlugin implements Listener {
             for(UUID u:players) { Player p=Bukkit.getPlayer(u); if(p==null) continue;
                 org.bukkit.scoreboard.Scoreboard s=Bukkit.getScoreboardManager().getNewScoreboard();
                 org.bukkit.scoreboard.Objective o=s.registerNewObjective("treino","dummy"); o.setDisplaySlot(org.bukkit.scoreboard.DisplaySlot.SIDEBAR); o.setDisplayName("§5§lRYUEX TREINO");
-                o.getScore("§f"+mode).setScore(5); o.getScore("§7Sala: §d#"+id).setScore(4); o.getScore("§7Vivos: §f"+live).setScore(3); o.getScore("§7Tempo: §f"+elapsed+"s").setScore(2);
+                o.getScore("§f"+mode+" / "+theme.title).setScore(5); o.getScore("§7Sala: §d#"+id).setScore(4); o.getScore("§7Vivos: §f"+live).setScore(3); o.getScore("§7Tempo: §f"+elapsed+"s").setScore(2);
                 Integer t=teams.get(u); o.getScore("§7Cama: "+(mode==Mode.SKYWARS?"§8—":Boolean.TRUE.equals(beds.get(t))?"§aOK":"§cX")).setScore(1); p.setScoreboard(s);
             }
         }
@@ -273,11 +287,16 @@ public final class Treino extends JavaPlugin implements Listener {
     @EventHandler public void click(InventoryClickEvent e) {
         if(!(e.getWhoClicked() instanceof Player)) return;
         Player p=(Player)e.getWhoClicked(); String title=e.getView().getTitle();
-        if(!Arrays.asList(MENU,SIZE,LIST,SHOP).contains(title)) return;
+        if(!Arrays.asList(MENU,THEME,SIZE,LIST,SHOP).contains(title)) return;
         e.setCancelled(true); if(e.getRawSlot()<0 || e.getRawSlot()>=e.getView().getTopInventory().getSize()) return;
         ItemStack i=e.getCurrentItem(); if(i==null || i.getType()==Material.AIR) return;
-        if(title.equals(MENU)) { if(e.getRawSlot()==22) list(p); else if(e.getRawSlot()==10) sizeMenu(p,Mode.BEDWARS); else if(e.getRawSlot()==13) sizeMenu(p,Mode.BEDFIGHT); else if(e.getRawSlot()==16) sizeMenu(p,Mode.SKYWARS); }
-        else if(title.equals(SIZE)) { Mode m=choosing.remove(p.getUniqueId()); if(m!=null) { p.closeInventory(); create(p,m,i.getAmount()); } }
+        if(title.equals(MENU)) { if(e.getRawSlot()==22) list(p); else if(e.getRawSlot()==10) themeMenu(p,Mode.BEDWARS); else if(e.getRawSlot()==13) themeMenu(p,Mode.BEDFIGHT); else if(e.getRawSlot()==16) themeMenu(p,Mode.SKYWARS); }
+        else if(title.equals(THEME)) {
+            Mode m=choosing.get(p.getUniqueId()); if(m==null) return;
+            int slot=e.getRawSlot(); MapArt.Theme t=slot==10?MapArt.Theme.POKEMON:slot==12?MapArt.Theme.EVANGELION:slot==14?MapArt.Theme.SONIC:slot==16?MapArt.Theme.ONEPIECE:null;
+            if(t!=null) { themes.put(p.getUniqueId(),t); sizeMenu(p,m); }
+        }
+        else if(title.equals(SIZE)) { Mode m=choosing.remove(p.getUniqueId()); MapArt.Theme t=themes.remove(p.getUniqueId()); if(m!=null && t!=null) { p.closeInventory(); create(p,m,i.getAmount(),t); } }
         else if(title.equals(LIST)) join(p,rooms.get(Integer.parseInt(ChatColor.stripColor(i.getItemMeta().getDisplayName()).split(" ")[0].substring(1))));
         else {
             Room r=membership.get(p.getUniqueId()); if(r==null || r.phase!=Phase.PLAYING || r.mode!=Mode.BEDWARS || !r.alive(p.getUniqueId()) || r.respawning.contains(p.getUniqueId())) return;
@@ -293,7 +312,7 @@ public final class Treino extends JavaPlugin implements Listener {
             p.getInventory().addItem(bought); msg(p,"§aCompra concluída.");
         }
     }
-    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,SIZE,LIST,SHOP).contains(e.getView().getTitle())) e.setCancelled(true); }
+    @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,THEME,SIZE,LIST,SHOP).contains(e.getView().getTitle())) e.setCancelled(true); }
     @EventHandler public void interact(PlayerInteractEvent e) {
         Player p=e.getPlayer(); Room r=membership.get(p.getUniqueId());
         if(r==null && p.getWorld()==lobby.getWorld()) { e.setCancelled(true); if(e.hasItem() && e.getItem().getType()==Material.COMPASS) menu(p); return; }

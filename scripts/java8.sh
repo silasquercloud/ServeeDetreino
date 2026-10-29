@@ -7,6 +7,7 @@ if [[ -z "${JAVA8_BIN:-}" ]]; then
   done
 fi
 JAVA8_BIN="${JAVA8_BIN:-java}"
+JAVA8_BIN="$(readlink -f -- "$(command -v -- "$JAVA8_BIN")")"
 if ! "$JAVA8_BIN" -version 2>&1 | head -1 | grep -q '"1\.8\.'; then
   echo 'É necessário Java 8. Configure JAVA8_BIN=/caminho/do/java8/bin/java.' >&2
   exit 1

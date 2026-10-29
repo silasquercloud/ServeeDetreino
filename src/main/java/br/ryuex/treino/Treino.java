@@ -32,7 +32,7 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     private World voidWorld(String name) {
         World w = Bukkit.createWorld(new WorldCreator(name).generator(new VoidGenerator()));
-        w.setAutoSave(false); w.setDifficulty(Difficulty.NORMAL); w.setTime(6000);
+        w.setAutoSave(false); w.setKeepSpawnInMemory(false); w.setDifficulty(Difficulty.NORMAL); w.setTime(6000);
         w.setGameRuleValue("doMobSpawning", "false"); w.setGameRuleValue("doDaylightCycle", "false");
         w.setGameRuleValue("doFireTick", "false"); w.setStorm(false);
         return w;
@@ -111,7 +111,7 @@ public final class Treino extends JavaPlugin implements Listener {
             else if(args[0].equalsIgnoreCase("loja")) shop(p);
             else if(args[0].equalsIgnoreCase("iniciar")) {
                 Room r=membership.get(p.getUniqueId());
-                if(r!=null && r.owner.equals(p.getUniqueId()) && r.phase==Phase.WAITING && r.players.size()>=2 && (r.mode!=Mode.BEDFIGHT || r.players.size()%2==0)) { r.phase=Phase.COUNTDOWN; r.countdown=5; }
+                if(r!=null && r.owner.equals(p.getUniqueId()) && r.phase==Phase.WAITING && Rules.canStart(r.mode.name(),r.players.size())) { r.phase=Phase.COUNTDOWN; r.countdown=5; }
                 else msg(p,"Só o dono pode iniciar; precisa de 2 jogadores e número par no BedFight.");
             } else msg(p,"/treino criar <bedwars|bedfight|skywars> <vagas> | entrar <sala> | sair | salas | iniciar | loja");
         } catch(IllegalArgumentException e) { msg(p,"Confira o modo, número de sala e vagas. Ex.: /treino criar skywars 6"); }
@@ -119,7 +119,7 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     private void create(Player p,Mode mode,int n) {
         if(membership.containsKey(p.getUniqueId())) { msg(p,"Saia da sala atual primeiro: /treino sair"); return; }
-        if(n<2 || n>(mode==Mode.SKYWARS?12:8) || (mode==Mode.BEDFIGHT && n%2!=0)) { msg(p,"Vagas: SkyWars 2–12, BedWars 2–8, BedFight 2/4/6/8."); return; }
+        if(!Rules.validCapacity(mode.name(),n)) { msg(p,"Vagas: SkyWars 2–12, BedWars 2–8, BedFight 2/4/6/8."); return; }
         if(rooms.size()>=getConfig().getInt("max-rooms",4)) { msg(p,"Limite de salas atingido. Aguarde uma terminar."); return; }
         int id=nextId++; Room r=new Room(id,mode,n,p.getUniqueId()); rooms.put(id,r); join(p,r);
         msg(p,"Sala §d#"+id+"§f criada. Amigos: §d/treino entrar "+id);
@@ -212,7 +212,7 @@ public final class Treino extends JavaPlugin implements Listener {
             }
         }
         void start() {
-            if(players.size()<2 || (mode==Mode.BEDFIGHT && players.size()%2!=0)) { phase=Phase.WAITING; return; }
+            if(!Rules.canStart(mode.name(),players.size())) { phase=Phase.WAITING; return; }
             phase=Phase.PLAYING; int i=0;
             for(UUID u:players) { teams.put(u,i++); Player p=Bukkit.getPlayer(u); if(p!=null) spawn(p); }
             say("§aValendo! §f"+(mode==Mode.BEDFIGHT?"Duelo contra a ilha oposta do seu par. Sem loja, kit pronto.":mode==Mode.BEDWARS?"Proteja sua cama. Clique na bancada para abrir a loja.":"Equipe-se nos baús e seja o último vivo."));
@@ -228,7 +228,7 @@ public final class Treino extends JavaPlugin implements Listener {
         }
         boolean alive(UUID u) { return players.contains(u) && !eliminated.contains(u); }
         void resolveDuel(int t) {
-            int opponent=t%2==0?t+1:t-1;
+            int opponent=Rules.opponent(t);
             boolean remaining=false; for(UUID u:players) if(teams.get(u)==t && alive(u)) remaining=true;
             if(!remaining) for(UUID u:players) if(teams.get(u)==opponent && alive(u)) {
                 eliminated.add(u); Player p=Bukkit.getPlayer(u); if(p!=null) { msg(p,"§aVocê venceu seu duelo!"); reset(p,GameMode.SPECTATOR); p.teleport(waiting()); }
@@ -314,7 +314,7 @@ public final class Treino extends JavaPlugin implements Listener {
         Integer target=r.bedOwners.get(key(b));
         if(target!=null && Boolean.TRUE.equals(r.beds.get(target))) {
             int own=r.teams.get(p.getUniqueId()); if(own==target) { msg(p,"Essa é sua cama!"); return; }
-            if(r.mode==Mode.BEDFIGHT && own/2!=target/2) { msg(p,"Ataque apenas o oponente do seu par."); return; }
+            if(r.mode==Mode.BEDFIGHT && !Rules.sameDuel(own,target)) { msg(p,"Ataque apenas o oponente do seu par."); return; }
             r.beds.put(target,false); for(Block bed:r.bedBlocks) if(r.bedOwners.get(key(bed)).equals(target)) bed.setType(Material.AIR);
             r.say("§c"+p.getName()+" destruiu a cama da base "+(target+1)+"!"); return;
         }
@@ -326,7 +326,7 @@ public final class Treino extends JavaPlugin implements Listener {
         if(r.phase!=Phase.PLAYING || !r.alive(p.getUniqueId()) || r.respawning.contains(p.getUniqueId())) { e.setCancelled(true); if(e.getCause()==EntityDamageEvent.DamageCause.VOID) p.teleport(r.waiting()); return; }
         if(e instanceof EntityDamageByEntityEvent) {
             Entity attacker=((EntityDamageByEntityEvent)e).getDamager(); Player source=attacker instanceof Player?(Player)attacker:attacker instanceof Projectile && ((Projectile)attacker).getShooter() instanceof Player?(Player)((Projectile)attacker).getShooter():null;
-            if(source!=null && (membership.get(source.getUniqueId())!=r || !r.alive(source.getUniqueId()) || r.respawning.contains(source.getUniqueId()) || (r.mode==Mode.BEDFIGHT && r.teams.get(source.getUniqueId())/2!=r.teams.get(p.getUniqueId())/2))) { e.setCancelled(true); return; }
+            if(source!=null && (membership.get(source.getUniqueId())!=r || !r.alive(source.getUniqueId()) || r.respawning.contains(source.getUniqueId()) || (r.mode==Mode.BEDFIGHT && !Rules.sameDuel(r.teams.get(source.getUniqueId()),r.teams.get(p.getUniqueId()))))) { e.setCancelled(true); return; }
         }
         if(e.getFinalDamage()>=p.getHealth() || e.getCause()==EntityDamageEvent.DamageCause.VOID) { e.setCancelled(true); knockOut(p,r); }
     }

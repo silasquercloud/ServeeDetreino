@@ -17,7 +17,7 @@ BedWars é uma implementação de treino enxuta: não inclui todos os upgrades, 
 
 - Plugin compilado contra **Spigot API 1.8.8-R0.1-20160221.082514-43**, bytecode Java 8. Dependências de compilação têm SHA-256 fixo.
 - Alvo do servidor: **Spigot 1.8.8 com Java 8 atualizado**. Minecraft Java 1.8.9 usa o mesmo protocolo da 1.8.8.
-- Compilação realizada neste projeto. **Uma partida multiplayer completa ainda precisa ser validada com jogadores.** Não confundir compilação com teste em jogo.
+- Compilação realizada localmente e aprovada no GitHub Actions. Testes automatizados de vagas, início e isolamento de pares também executados. **Uma partida multiplayer completa ainda precisa ser validada com jogadores.** Não confundir compilação com teste em jogo.
 - Não há BedWars1058, SkyWarsReloaded ou plugin BedFight de terceiros instalado: os três modos pertencem ao TreinoHub, evitando conflito entre plugins de minigames.
 - Clientes modernos e Bedrock não foram configurados nem validados.
 
@@ -98,6 +98,7 @@ Não instale junto de outros gerenciadores de lobby/minigames antes de verificar
 
 ## Referências oficiais
 
+- [Protocolos dos clientes (1.8.8 e 1.8.9: protocolo 47)](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json)
 - [BuildTools e versões Spigot](https://www.spigotmc.org/wiki/buildtools/)
 - [Portas no Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace)
 - [Termos do Codespaces](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces)

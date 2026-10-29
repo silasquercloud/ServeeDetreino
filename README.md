@@ -12,7 +12,9 @@ Servidor para jogar e treinar com amigos: **BedWars, BedFight e SkyWars**, solo/
 
 [Skins e compatibilidade](docs/SKINS.md)
 
-## Atualização 1.5.0
+## Atualização 1.5.1
+
+[Revisão de jogabilidade e comparação com o Mush](docs/COMPARACAO-MUSH.md)
 
 - Lobby neutro de 45 blocos de largura, com três seletores com skin e ranking.
 - **BedWars:** dois vendedores com skin fixos no balcão, loja/melhorias, favoritos em slots, editor de hotbar e uso de recursos dos baús.

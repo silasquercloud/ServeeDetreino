@@ -410,7 +410,7 @@ public final class Treino extends JavaPlugin implements Listener {
     @EventHandler public void visibility(PlayerChangedWorldEvent e) { refreshVisibility(); }
     private boolean playing(Player p,Room r) {return r!=null && r.phase==Phase.PLAYING && r.alive(p.getUniqueId()) && !r.respawning.contains(p.getUniqueId()) && p.getWorld()==r.world;}
     private static final class PracticeBot {
-        final Zombie entity;final UUID id;int respawnAt,nextAttack,stuck,lastShop,weapon=0;boolean scripted;
+        final Zombie entity;final UUID id;int respawnAt,nextAttack,stuck,lastShop,blocks,weapon=0;boolean scripted;
         final BotBrain.Memory memory=new BotBrain.Memory();
         Location previous;String mining;int miningProgress;UUID lockedTarget;BotBrain.State state=BotBrain.State.HUNT;
         final Map<Material,Integer> resources=new EnumMap<>(Material.class);
@@ -485,7 +485,7 @@ public final class Treino extends JavaPlugin implements Listener {
             PracticeBot bot=new PracticeBot(entity);entity.setCanPickupItems(false);bot.scripted=Native18.disableAI(entity);bots.put(bot.id,bot);players.add(bot.id);entity.setTarget(null);if(visuals!=null)visuals.register(entity,"BOT_"+id+"_"+bots.size(),getConfig().getString("skins.bot","Technoblade"));
         }
         void spawnBot(PracticeBot bot) {
-            bot.respawnAt=0;bot.mining=null;bot.miningProgress=0;bot.stuck=0;bot.weapon=0;bot.resources.clear();bot.lastShop=botClock;bot.nextAttack=botClock+20;respawning.remove(bot.id);bot.entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));bot.entity.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
+            bot.respawnAt=0;bot.mining=null;bot.miningProgress=0;bot.stuck=0;bot.weapon=0;bot.blocks=mode==Mode.BEDWARS?0:128;bot.resources.clear();bot.lastShop=botClock;bot.nextAttack=botClock+20;respawning.remove(bot.id);bot.entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));bot.entity.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
             bot.entity.teleport(spawnLocation(bot.id));bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.setFireTicks(0);bot.entity.setNoDamageTicks(0);bot.entity.getEquipment().setHelmet(teamLeather(Material.LEATHER_HELMET,teams.get(bot.id)));bot.entity.getEquipment().setChestplate(teamLeather(Material.LEATHER_CHESTPLATE,teams.get(bot.id)));bot.entity.getEquipment().setLeggings(teamLeather(Material.LEATHER_LEGGINGS,teams.get(bot.id)));bot.entity.getEquipment().setBoots(teamLeather(Material.LEATHER_BOOTS,teams.get(bot.id)));spawnProtection.put(bot.id,elapsed+2);
         }
         void botDown(PracticeBot bot) {
@@ -498,14 +498,15 @@ public final class Treino extends JavaPlugin implements Listener {
         }
         void anchorMerchants(){for(Map.Entry<Villager,Location> e:merchants.entrySet()){Villager v=e.getKey();if(v.isDead())continue;v.setVelocity(new Vector(0,0,0));if(v.getWorld()!=world || v.getLocation().distanceSquared(e.getValue())>0.0025)v.teleport(e.getValue());}}
         boolean botPlace(PracticeBot bot,int x,int y,int z) {
-            if(!BotBrain.validBridgeCell(x,y,z) || world.getBlockAt(x,y,z).getType()!=Material.AIR)return false;
-            Block block=world.getBlockAt(x,y,z);block.setType(Material.WOOL,false);block.setData(COLORS[teams.get(bot.id)],false);placed.add(key(block));placedTeams.put(key(block),teams.get(bot.id));return true;
+            if(bot.blocks<=0 || !BotBrain.validBridgeCell(x,y,z) || world.getBlockAt(x,y,z).getType()!=Material.AIR)return false;
+            Block block=world.getBlockAt(x,y,z);block.setType(Material.WOOL,false);block.setData(COLORS[teams.get(bot.id)],false);placed.add(key(block));placedTeams.put(key(block),teams.get(bot.id));bot.blocks--;return true;
         }
         void botResources(PracticeBot bot) {
             if(mode!=Mode.BEDWARS)return;
             for(Entity e:world.getNearbyEntities(bot.entity.getLocation(),1.4,1.5,1.4))if(e instanceof Item){ItemStack stack=((Item)e).getItemStack();Material type=stack.getType();
                 if(type==Material.IRON_INGOT || type==Material.GOLD_INGOT){bot.resources.put(type,bot.resources.getOrDefault(type,0)+stack.getAmount());e.remove();}
             }
+            while(bot.blocks<64 && bot.resources.getOrDefault(Material.IRON_INGOT,0)>=4){bot.resources.put(Material.IRON_INGOT,bot.resources.get(Material.IRON_INGOT)-4);bot.blocks+=16;}
             if(bot.weapon==0 && bot.resources.getOrDefault(Material.IRON_INGOT,0)>=10){bot.resources.put(Material.IRON_INGOT,bot.resources.get(Material.IRON_INGOT)-10);bot.weapon=1;bot.entity.getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD));}
             if(bot.weapon<2 && bot.resources.getOrDefault(Material.GOLD_INGOT,0)>=7){bot.resources.put(Material.GOLD_INGOT,bot.resources.get(Material.GOLD_INGOT)-7);bot.weapon=2;bot.entity.getEquipment().setItemInHand(new ItemStack(Material.IRON_SWORD));}
         }
@@ -517,8 +518,8 @@ public final class Treino extends JavaPlugin implements Listener {
                 if(mode==Mode.BEDFIGHT && (!placedTeams.containsKey(key(block)) || !Rules.sameDuel(teams.get(bot.id),placedTeams.get(key(block)))))return false;
                 if(!key(block).equals(bot.mining)){bot.mining=key(block);bot.miningProgress=0;}
                 bot.miningProgress+=2;Native18.swing(bot.entity);
-                bot.entity.getEquipment().setItemInHand(new ItemStack(block.getType()==Material.WOOL?Material.SHEARS:Material.WOOD_AXE));
-                if(bot.miningProgress>=BotBrain.mineTicks(block.getType().name(),true,true,false)){placed.remove(key(block));placedTeams.remove(key(block));block.setType(Material.AIR);bot.mining=null;bot.miningProgress=0;}
+                bot.entity.getEquipment().setItemInHand(new ItemStack(mode==Mode.BEDFIGHT?(block.getType()==Material.WOOL?Material.SHEARS:Material.WOOD_AXE):Material.WOOD_SWORD));
+                if(bot.miningProgress>=BotBrain.mineTicks(block.getType().name(),mode==Mode.BEDFIGHT,mode==Mode.BEDFIGHT,false)){placed.remove(key(block));placedTeams.remove(key(block));block.setType(Material.AIR);bot.mining=null;bot.miningProgress=0;}
                 return false;
             }
             bot.mining=null;bot.miningProgress=0;return true;
@@ -540,7 +541,7 @@ public final class Treino extends JavaPlugin implements Listener {
                 }
                 if(target==null){bot.entity.setTarget(null);continue;}bot.lockedTarget=target.getUniqueId();nearest=here.distanceSquared(target.getLocation());
                 int enemyTeam=teams.get(target.getUniqueId());boolean enemyBed=mode!=Mode.SKYWARS && Boolean.TRUE.equals(beds.get(enemyTeam));
-                boolean restock=mode==Mode.BEDWARS && bot.weapon==0 && botClock-bot.lastShop<140;
+                boolean restock=mode==Mode.BEDWARS && (bot.blocks<16 || (bot.weapon==0 && botClock-bot.lastShop<140));
                 boolean visible=!respawning.contains(target.getUniqueId()) && bot.entity.hasLineOfSight(target);
                 bot.state=BotBrain.state(visible?nearest:Math.max(50,nearest),enemyBed,restock);
                 Location goal=bot.state==BotBrain.State.RESUPPLY?spawns.get(teams.get(bot.id)).clone().add(0,0,-3):bot.state==BotBrain.State.RUSH_BED?bedBlocks.get(enemyTeam*2).getLocation().add(0.5,0,0.5):target.getLocation();
@@ -549,7 +550,7 @@ public final class Treino extends JavaPlugin implements Listener {
                     bot.memory.observe(nearest,bot.entity.getHealth(),botClock);
                     bot.mining=null;bot.miningProgress=0;bot.entity.getEquipment().setItemInHand(new ItemStack(bot.weapon==2?Material.IRON_SWORD:bot.weapon==1?Material.STONE_SWORD:Material.WOOD_SWORD));
                     if(bot.scripted && BotBrain.canHit(nearest,target.getLocation().getY()-here.getY(),bot.entity.hasLineOfSight(target),botClock,bot.nextAttack)){
-                        bot.nextAttack=botClock+10;Native18.swing(bot.entity);target.damage(5+bot.weapon,bot.entity);
+                        bot.nextAttack=botClock+10;Native18.swing(bot.entity);target.damage(4+bot.weapon,bot.entity);
                     }
                     double[] motion=BotBrain.movement(target.getLocation().getX()-here.getX(),target.getLocation().getZ()-here.getZ(),nearest,botClock,(bot.id.hashCode()&1)+bot.memory.side,true);
                     if(bot.memory.retreat(bot.entity.getHealth(),target.getHealth())){Vector away=here.toVector().subtract(target.getLocation().toVector()).setY(0);if(away.lengthSquared()>0.01){away.normalize().multiply(0.22);motion[0]=away.getX();motion[1]=away.getZ();}}
@@ -563,6 +564,8 @@ public final class Treino extends JavaPlugin implements Listener {
                 Vector direction=goal.toVector().subtract(here.toVector());direction.setY(0);if(direction.lengthSquared()<0.35){bot.entity.setVelocity(new Vector(0,bot.entity.getVelocity().getY(),0));continue;}direction.normalize();
                 int floorY=Math.min(80,here.getBlockY()-1);boolean bridging=false;
                 for(double distance:new double[]{0.3,0.9,1.4}){Location step=here.clone().add(direction.clone().multiply(distance));bridging|=botPlace(bot,step.getBlockX(),floorY,step.getBlockZ());}
+                Location support=here.clone().add(direction.clone().multiply(0.9));
+                if(bot.blocks==0 && !world.getBlockAt(support.getBlockX(),floorY,support.getBlockZ()).getType().isSolid()){bot.entity.setVelocity(new Vector(0,bot.entity.getVelocity().getY(),0));continue;}
                 Vector velocity=direction.clone().multiply(bridging?0.25:0.23);velocity.setY(bot.entity.getVelocity().getY());Location front=here.clone().add(direction.clone().multiply(0.9));
                 if(bot.previous!=null && bot.previous.getWorld()==world && bot.previous.distanceSquared(here)<0.01)bot.stuck+=2;else bot.stuck=0;bot.previous=here.clone();
                 if(front.getBlock().getType().isSolid() && bot.entity.isOnGround()){if(placed.contains(key(front.getBlock())))botMine(bot,front);velocity.setY(0.42);}
@@ -786,6 +789,7 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @EventHandler public void drag(InventoryDragEvent e) { if(Arrays.asList(MENU,TEAMS,THEME,SIZE,LIST,SHOP,RANK,PARTY,ADMIN,QUICK,HOTBAR).contains(e.getView().getTitle())) e.setCancelled(true); }
     @EventHandler public void interact(PlayerInteractEvent e) {
+        String view=e.getPlayer().getOpenInventory()==null?"":e.getPlayer().getOpenInventory().getTitle();if(view.startsWith(SHOP) || view.equals(QUICK) || view.equals(HOTBAR)){e.setCancelled(true);return;}
         Player p=e.getPlayer(); Room r=membership.get(p.getUniqueId());
         if(p.getWorld()==lobby.getWorld()) { e.setCancelled(true); if(e.hasItem() && (e.getAction()==Action.RIGHT_CLICK_AIR || e.getAction()==Action.RIGHT_CLICK_BLOCK)) {
             if(e.getItem().getType()==Material.COMPASS)menu(p);else if(e.getItem().getType()==Material.NETHER_STAR)ranking(p,Mode.BEDWARS);else if(e.getItem().getType()==Material.NAME_TAG)partyMenu(p);

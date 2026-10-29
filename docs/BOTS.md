@@ -1,4 +1,4 @@
-# Bots de treino • 1.5.0
+# Bots de treino • 1.5.1
 
 [← Início](../README.md) · [Modos e loja](BEDWARS.md)
 
@@ -33,3 +33,7 @@ A arquitetura suporta Spigot 1.8.8/Java 8; o adaptador foi conferido no código 
 ## Adaptação de combate em 1.5
 
 Ao sofrer dano, o bot troca o lado do strafe com intervalo mínimo para não oscilar a cada hit. Com pouca vida e desvantagem, tenta abrir distância verificando apoio no chão. Inimigos próximos da própria base recebem prioridade enquanto sua cama existe. Essa adaptação é feita por regras; não é aprendizado de máquina e não reproduz todas as decisões humanas.
+
+## Economia e limites de treino em 1.5.1
+
+Em BedWars, bots nascem sem lã e compram 16 blocos por 4 ferros coletados, priorizando até 64 blocos antes da espada. Cada bloco colocado consome uma unidade; quando faltam blocos, procuram a forja e evitam avançar sobre um vazio sem apoio. BedFight/SkyWars mantêm estoque de treino de 128 blocos por vida. Ferramentas gratuitas de mineração foram removidas do BedWars; BedFight mantém as ferramentas do kit. Dano-base das espadas dos bots: madeira 4, pedra 5, ferro 6, antes das reduções do alvo. Ainda não possuem todas as compras, inventário e navegação de um jogador.

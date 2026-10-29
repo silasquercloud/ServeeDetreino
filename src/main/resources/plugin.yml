@@ -1,0 +1,11 @@
+name: TreinoHub
+version: 1.0.0
+main: br.ryuex.treino.Treino
+author: Ryuex
+load: POSTWORLD
+description: Salas privadas de treino BedWars, BedFight e SkyWars.
+commands:
+  treino:
+    description: Abre o menu de modos e salas.
+    aliases: [jogar, sala, hubtreino]
+    usage: /treino

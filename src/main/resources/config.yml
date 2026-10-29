@@ -1,0 +1,4 @@
+# Limite de salas simultâneas. Cada sala usa um mundo independente.
+max-rooms: 4
+# Após esse tempo, camas somem e jogadores longe do centro recebem dano.
+sudden-death-seconds: 600

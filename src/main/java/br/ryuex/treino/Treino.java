@@ -33,6 +33,7 @@ public final class Treino extends JavaPlugin implements Listener {
     private final Map<UUID,Long> slingCooldown=new HashMap<>();
     private TrainingStats stats;
     private AdminPractice practice;
+    private PlayerVisuals visuals;
     private int seconds;
     private final Map<UUID,List<String>> sidebarLines=new HashMap<>();
     private final Map<Villager,Location> lobbyNpcs=new LinkedHashMap<>();
@@ -54,18 +55,19 @@ public final class Treino extends JavaPlugin implements Listener {
     }
     @Override public void onEnable() {
         saveDefaultConfig();getConfig().addDefault("administrators",Arrays.asList("Salabim_zz"));getConfig().options().copyDefaults(true);saveConfig();stats=new TrainingStats(getDataFolder());
+        visuals=new PlayerVisuals(this);for(Player online:Bukkit.getOnlinePlayers())visuals.attach(online);
         World w = voidWorld("treino_lobby_praca_v14");
         build(w,MapArt.lobby(),0,80,0);
         lobby = new Location(w,0.5,81,0.5); w.setSpawnLocation(0,81,0);
         lobbySelectors(w);
         Bukkit.getPluginManager().registerEvents(this,this);practice=new AdminPractice(this,this::voidWorld,this::hub);
         new BukkitRunnable() { public void run() { tick(); } }.runTaskTimer(this,20,20);
-        new BukkitRunnable(){public void run(){anchorLobby();for(Room r:new ArrayList<>(rooms.values())){r.anchorMerchants();if(r.phase==Phase.PLAYING)r.botTick();}}}.runTaskTimer(this,2,2);
+        new BukkitRunnable(){public void run(){if(visuals!=null)visuals.tick();anchorLobby();for(Room r:new ArrayList<>(rooms.values())){r.anchorMerchants();if(r.phase==Phase.PLAYING)r.botTick();}}}.runTaskTimer(this,2,2);
         for(Player p:Bukkit.getOnlinePlayers()){grantAdmin(p);hub(p);}
         getLogger().info("TreinoHub ativo: /treino. API alvo: Spigot 1.8.8.");
     }
     @Override public void onDisable() {
-        if(practice!=null)practice.shutdown();for(Villager npc:lobbyNpcs.keySet())npc.remove();lobbyNpcs.clear();
+        if(visuals!=null)visuals.close();if(practice!=null)practice.shutdown();for(Villager npc:lobbyNpcs.keySet())npc.remove();lobbyNpcs.clear();
         for(Player p:Bukkit.getOnlinePlayers()) { p.teleport(lobby); p.getInventory().clear(); }
         for(Room r:rooms.values()) removeWorld(r.world);
         saveStats();
@@ -90,7 +92,7 @@ public final class Treino extends JavaPlugin implements Listener {
         Location at=new Location(world,-12+i++*12+0.5,81,13.5,180,0);Villager npc=lobbyNpc(at,"§d§l"+modeTitle(mode)+" §7• clique");npc.setMetadata("treino-lobby-mode",new FixedMetadataValue(this,mode.name()));
         }lobbyNpc(new Location(world,0.5,81,-16.5,0,0),"§e§lCLASSIFICAÇÃO §7• clique").setMetadata("treino-lobby-rank",new FixedMetadataValue(this,true));
     }
-    private Villager lobbyNpc(Location at,String name){Villager npc=(Villager)at.getWorld().spawnEntity(at,EntityType.VILLAGER);npc.setAdult();npc.setCustomName(name);npc.setCustomNameVisible(true);npc.setRemoveWhenFarAway(false);npc.setMetadata("treino-display",new FixedMetadataValue(this,true));Native18.disableAI(npc);lobbyNpcs.put(npc,at);return npc;}
+    private Villager lobbyNpc(Location at,String name){Villager npc=(Villager)at.getWorld().spawnEntity(at,EntityType.VILLAGER);npc.setAdult();npc.setCustomName(name);npc.setCustomNameVisible(true);npc.setRemoveWhenFarAway(false);npc.setMetadata("treino-display",new FixedMetadataValue(this,true));Native18.disableAI(npc);lobbyNpcs.put(npc,at);if(visuals!=null)visuals.register(npc,"Guia_"+lobbyNpcs.size(),getConfig().getString("skins.shop","Notch"));return npc;}
     private void anchorLobby(){for(Map.Entry<Villager,Location> entry:lobbyNpcs.entrySet()){Villager npc=entry.getKey();if(npc.isDead())continue;npc.setVelocity(new Vector(0,0,0));if(npc.getWorld()!=entry.getValue().getWorld() || npc.getLocation().distanceSquared(entry.getValue())>0.0025)npc.teleport(entry.getValue());}}
     private void adminAction(Player p,String action) {
         if(!p.hasPermission("treino.admin")){msg(p,"Apenas administradores.");return;}
@@ -409,6 +411,7 @@ public final class Treino extends JavaPlugin implements Listener {
     private boolean playing(Player p,Room r) {return r!=null && r.phase==Phase.PLAYING && r.alive(p.getUniqueId()) && !r.respawning.contains(p.getUniqueId()) && p.getWorld()==r.world;}
     private static final class PracticeBot {
         final Zombie entity;final UUID id;int respawnAt,nextAttack,stuck,lastShop,weapon=0;boolean scripted;
+        final BotBrain.Memory memory=new BotBrain.Memory();
         Location previous;String mining;int miningProgress;UUID lockedTarget;BotBrain.State state=BotBrain.State.HUNT;
         final Map<Material,Integer> resources=new EnumMap<>(Material.class);
         PracticeBot(Zombie entity){this.entity=entity;this.id=entity.getUniqueId();}
@@ -470,7 +473,7 @@ public final class Treino extends JavaPlugin implements Listener {
             Villager villager=(Villager)world.spawnEntity(at,EntityType.VILLAGER);villager.setAdult();villager.setProfession(upgrades?Villager.Profession.PRIEST:Villager.Profession.FARMER);villager.setRemoveWhenFarAway(false);villager.setCanPickupItems(false);
             villager.setCustomName(upgrades?"§b§lMELHORIAS §7• clique":"§e§lLOJA §7• clique");villager.setCustomNameVisible(true);
             villager.setMetadata("treino-display",new FixedMetadataValue(Treino.this,id));villager.setMetadata("treino-shop",new FixedMetadataValue(Treino.this,id));
-            if(upgrades)villager.setMetadata("treino-upgrades",new FixedMetadataValue(Treino.this,true));Native18.disableAI(villager);merchants.put(villager,at.clone());
+            if(upgrades)villager.setMetadata("treino-upgrades",new FixedMetadataValue(Treino.this,true));Native18.disableAI(villager);merchants.put(villager,at.clone());if(visuals!=null)visuals.register(villager,(upgrades?"Melhorias_":"Loja_")+merchants.size(),getConfig().getString(upgrades?"skins.upgrades":"skins.shop",upgrades?"jeb_":"Notch"));
         }
         Inventory personalChest(UUID id){return personalChests.computeIfAbsent(id,key->Bukkit.createInventory(null,27,"§8Seu baú de recursos"));}
         Inventory teamChest(UUID id){return ((Chest)teamChests.get(teams.get(id)).getState()).getBlockInventory();}
@@ -479,11 +482,11 @@ public final class Treino extends JavaPlugin implements Listener {
             entity.setCustomName("§cBOT de treino "+(bots.size()+1));entity.setCustomNameVisible(true);entity.setMetadata("treino-bot",new FixedMetadataValue(Treino.this,id));
             entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));entity.getEquipment().setHelmet(new ItemStack(Material.LEATHER_HELMET));
             entity.getEquipment().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));entity.getEquipment().setItemInHandDropChance(0);entity.getEquipment().setHelmetDropChance(0);entity.getEquipment().setChestplateDropChance(0);
-            PracticeBot bot=new PracticeBot(entity);entity.setCanPickupItems(false);bot.scripted=Native18.disableAI(entity);bots.put(bot.id,bot);players.add(bot.id);entity.setTarget(null);
+            PracticeBot bot=new PracticeBot(entity);entity.setCanPickupItems(false);bot.scripted=Native18.disableAI(entity);bots.put(bot.id,bot);players.add(bot.id);entity.setTarget(null);if(visuals!=null)visuals.register(entity,"BOT_"+id+"_"+bots.size(),getConfig().getString("skins.bot","Technoblade"));
         }
         void spawnBot(PracticeBot bot) {
             bot.respawnAt=0;bot.mining=null;bot.miningProgress=0;bot.stuck=0;bot.weapon=0;bot.resources.clear();bot.lastShop=botClock;bot.nextAttack=botClock+20;respawning.remove(bot.id);bot.entity.getEquipment().setItemInHand(new ItemStack(Material.WOOD_SWORD));bot.entity.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
-            bot.entity.teleport(spawnLocation(bot.id));bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.setFireTicks(0);bot.entity.setNoDamageTicks(0);bot.entity.getEquipment().setHelmet(teamLeather(Material.LEATHER_HELMET,teams.get(bot.id)));bot.entity.getEquipment().setChestplate(teamLeather(Material.LEATHER_CHESTPLATE,teams.get(bot.id)));spawnProtection.put(bot.id,elapsed+2);
+            bot.entity.teleport(spawnLocation(bot.id));bot.entity.setHealth(bot.entity.getMaxHealth());bot.entity.setFireTicks(0);bot.entity.setNoDamageTicks(0);bot.entity.getEquipment().setHelmet(teamLeather(Material.LEATHER_HELMET,teams.get(bot.id)));bot.entity.getEquipment().setChestplate(teamLeather(Material.LEATHER_CHESTPLATE,teams.get(bot.id)));bot.entity.getEquipment().setLeggings(teamLeather(Material.LEATHER_LEGGINGS,teams.get(bot.id)));bot.entity.getEquipment().setBoots(teamLeather(Material.LEATHER_BOOTS,teams.get(bot.id)));spawnProtection.put(bot.id,elapsed+2);
         }
         void botDown(PracticeBot bot) {
             if(!alive(bot.id) || respawning.contains(bot.id) || phase!=Phase.PLAYING)return;
@@ -531,6 +534,7 @@ public final class Treino extends JavaPlugin implements Listener {
                 for(UUID id:players)if(enemies(bot.id,id) && alive(id)){
                     LivingEntity entity=bots.containsKey(id)?bots.get(id).entity:Bukkit.getPlayer(id);if(entity==null || entity.getWorld()!=world)continue;
                     double actual=here.distanceSquared(entity.getLocation());double score=actual;
+                    if(mode!=Mode.SKYWARS && Boolean.TRUE.equals(beds.get(teams.get(bot.id))) && entity.getLocation().distanceSquared(spawns.get(teams.get(bot.id)))<100)score*=0.35;
                     if(id.equals(aggressor) && actual<144)score*=0.65;else if(id.equals(bot.lockedTarget))score*=0.85;
                     if(score<nearest){nearest=score;target=entity;}
                 }
@@ -542,11 +546,13 @@ public final class Treino extends JavaPlugin implements Listener {
                 Location goal=bot.state==BotBrain.State.RESUPPLY?spawns.get(teams.get(bot.id)).clone().add(0,0,-3):bot.state==BotBrain.State.RUSH_BED?bedBlocks.get(enemyTeam*2).getLocation().add(0.5,0,0.5):target.getLocation();
                 if(!bot.scripted && !respawning.contains(target.getUniqueId()))bot.entity.setTarget(target);else bot.entity.setTarget(null);
                 if(bot.state==BotBrain.State.COMBAT){
+                    bot.memory.observe(nearest,bot.entity.getHealth(),botClock);
                     bot.mining=null;bot.miningProgress=0;bot.entity.getEquipment().setItemInHand(new ItemStack(bot.weapon==2?Material.IRON_SWORD:bot.weapon==1?Material.STONE_SWORD:Material.WOOD_SWORD));
                     if(bot.scripted && BotBrain.canHit(nearest,target.getLocation().getY()-here.getY(),bot.entity.hasLineOfSight(target),botClock,bot.nextAttack)){
                         bot.nextAttack=botClock+10;Native18.swing(bot.entity);target.damage(5+bot.weapon,bot.entity);
                     }
-                    double[] motion=BotBrain.movement(target.getLocation().getX()-here.getX(),target.getLocation().getZ()-here.getZ(),nearest,botClock,bot.id.hashCode()&1,true);
+                    double[] motion=BotBrain.movement(target.getLocation().getX()-here.getX(),target.getLocation().getZ()-here.getZ(),nearest,botClock,(bot.id.hashCode()&1)+bot.memory.side,true);
+                    if(bot.memory.retreat(bot.entity.getHealth(),target.getHealth())){Vector away=here.toVector().subtract(target.getLocation().toVector()).setY(0);if(away.lengthSquared()>0.01){away.normalize().multiply(0.22);motion[0]=away.getX();motion[1]=away.getZ();}}
                     Location next=here.clone().add(motion[0]*3,0,motion[1]*3);boolean supported=world.getBlockAt(next.getBlockX(),here.getBlockY()-1,next.getBlockZ()).getType().isSolid();
                     Vector velocity=new Vector(supported?motion[0]:0,bot.entity.getVelocity().getY(),supported?motion[1]:0);bot.entity.setVelocity(velocity);
                     Vector face=target.getLocation().toVector().subtract(here.toVector());Location looking=here.clone().setDirection(face);Native18.look(bot.entity,looking.getYaw(),looking.getPitch());continue;
@@ -877,9 +883,9 @@ public final class Treino extends JavaPlugin implements Listener {
     @EventHandler public void quit(PlayerQuitEvent e) {
         UUID id=e.getPlayer().getUniqueId();
         if(parties.get(id)!=null)partySay(id,e.getPlayer().getName()+" desconectou e saiu da party.");
-        parties.leave(id);leave(e.getPlayer());sidebarLines.remove(id);shopPages.remove(id);slingCooldown.remove(id);
+        if(visuals!=null)visuals.detach(e.getPlayer());parties.leave(id);leave(e.getPlayer());sidebarLines.remove(id);shopPages.remove(id);slingCooldown.remove(id);
     }
-    @EventHandler public void join(PlayerJoinEvent e) { grantAdmin(e.getPlayer());hub(e.getPlayer());repairVisibility(e.getPlayer()); }
+    @EventHandler public void join(PlayerJoinEvent e) { if(visuals!=null)visuals.attach(e.getPlayer());grantAdmin(e.getPlayer());hub(e.getPlayer());repairVisibility(e.getPlayer()); }
     @EventHandler public void food(FoodLevelChangeEvent e) { if(e.getEntity() instanceof Player && e.getEntity().getWorld().getName().startsWith("treino_")) e.setCancelled(true); }
     private void consume(Player p) {ItemStack item=p.getItemInHand();if(item.getAmount()<=1)p.setItemInHand(null);else {item.setAmount(item.getAmount()-1);p.setItemInHand(item);}}
     private Room roomWorld(World world) {for(Room r:rooms.values())if(r.world==world)return r;return null;}

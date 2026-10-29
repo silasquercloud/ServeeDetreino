@@ -13,6 +13,7 @@ final class BotBrainTest {
         check(near[0]<0 && far[0]>0,"spacing: retreat when too close, approach when far");
         check(BotBrain.mineTicks("WOOD",false,true,false)>1,"bed defenses take time to break");
         check(!BotBrain.validBridgeCell(66,80,0) && !BotBrain.validBridgeCell(0,59,0) && BotBrain.validBridgeCell(0,80,0),"bridge placements stay inside arena bounds");
+        BotBrain.Memory memory=new BotBrain.Memory();memory.observe(9,18,20);check(memory.side==1,"changes strafe after taking damage");memory.observe(9,16,22);check(memory.side==1,"does not oscillate every hit");check(memory.retreat(4,18) && !memory.retreat(12,18),"health disadvantage triggers spacing");
         Handle handle=new Handle();check(Native18.freezeHandle(handle) && handle.frozen,"NoAI adapter verifies the state it set");
         System.out.println("BotBrainTest: OK — combat priority, spacing, reach/cooldown, mining, bridge bounds, NoAI verification");
     }

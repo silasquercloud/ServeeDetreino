@@ -1,4 +1,4 @@
-# Bots de treino • 1.4.0
+# Bots de treino • 1.5.0
 
 [← Início](../README.md) · [Modos e loja](BEDWARS.md)
 
@@ -24,8 +24,12 @@ A decisão é atualizada a cada dois ticks. O bot prioriza combate próximo; lon
 
 ## Aparência e limites
 
-São **zumbis controlados**, não jogadores com skin, conta ou TAB falso. O adaptador 1.8.8 desliga a IA nativa para executar movimento/ataques programados; se indisponível, permanece a IA nativa como fallback, sem ataques programados duplicados.
+Os bots são exibidos como **jogadores com skin, armadura e animação de ataque**, identificados por nomes BOT. A entidade interna continua sendo um zumbi controlado: o adaptador troca os pacotes visuais e preserva o ID para dano e interação. Isso não cria contas reais. A colisão e alguns sons ainda vêm da entidade interna. O NoAI mantém os ataques programados; se o adaptador de IA falhar, permanece a IA nativa sem duplicar ataques. Se a camada visual falhar, registra aviso e mantém a aparência original.
 
 Não foi treinado um modelo de IA, não há reprodução completa da técnica humana de god bridge e não se garante vencer combates. Não organiza inventário como jogador, não usa todos os itens da loja, não lança todas as utilidades e não saqueia baús no SkyWars. Pode ficar preso em cenários complexos; tenta saltar ou desviar quando detecta pouca progressão. Os mapas são gerados de forma simétrica para reduzir obstáculos no percurso.
 
 A arquitetura suporta Spigot 1.8.8/Java 8; o adaptador foi conferido no código fonte dessa base. Os testes cobrem decisões, alcance, cooldown, tempo de mineração, limites de construção e retomada após respawn. **Movimento, animação, coleta e combate completos ainda precisam ser aferidos no servidor rodando com cliente 1.8.9.**
+
+## Adaptação de combate em 1.5
+
+Ao sofrer dano, o bot troca o lado do strafe com intervalo mínimo para não oscilar a cada hit. Com pouca vida e desvantagem, tenta abrir distância verificando apoio no chão. Inimigos próximos da própria base recebem prioridade enquanto sua cama existe. Essa adaptação é feita por regras; não é aprendizado de máquina e não reproduz todas as decisões humanas.

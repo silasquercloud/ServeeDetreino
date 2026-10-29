@@ -6,3 +6,9 @@ sudden-death-seconds: 600
 # Administradores autorizados pelo dono. Em modo offline, proteja esses nicks.
 administrators:
   - Salabim_zz
+
+# Skins públicas consultadas na Mojang, fora da thread do jogo.
+skins:
+  bot: Technoblade
+  shop: Notch
+  upgrades: jeb_

@@ -2,6 +2,14 @@ package br.ryuex.treino;
 
 /** Deterministic decision rules, independent of Bukkit's mob pathfinding. */
 final class BotBrain {
+    static final class Memory {
+        double previousHealth=20, previousDistance=100;int side, nextSwitch;
+        void observe(double distance,double health,int tick){
+            if(health<previousHealth && tick>=nextSwitch){side^=1;nextSwitch=tick+30;}
+            previousHealth=health;previousDistance=distance;
+        }
+        boolean retreat(double health,double enemyHealth){return health<=6 && enemyHealth>health+4;}
+    }
     enum State { COMBAT, RUSH_BED, HUNT, RESUPPLY }
     static State state(double enemyDistanceSquared,boolean enemyBed,boolean restocking){
         if(enemyDistanceSquared<=49)return State.COMBAT;

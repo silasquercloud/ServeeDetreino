@@ -8,14 +8,16 @@ Servidor para jogar e treinar com amigos: **BedWars, BedFight e SkyWars**, solo/
 
 ![Praça central do lobby](docs/images/lobby.png)
 
-> As imagens são projeções dos blocos implementados e diagramas de interface; não são capturas do cliente Minecraft. Os Villagers e hologramas são entidades criadas no servidor.
+> As imagens são projeções dos blocos implementados e diagramas de interface; não são capturas do cliente Minecraft. Os NPCs e hologramas são entidades criadas no servidor.
 
-## Atualização 1.4.0
+[Skins e compatibilidade](docs/SKINS.md)
 
-- Lobby neutro de 45 blocos de largura, com três seletores Villager e ranking.
-- **BedWars:** dois Villagers fixos no balcão, loja/melhorias, favoritos em slots, editor de hotbar e uso de recursos dos baús.
+## Atualização 1.5.0
+
+- Lobby neutro de 45 blocos de largura, com três seletores com skin e ranking.
+- **BedWars:** dois vendedores com skin fixos no balcão, loja/melhorias, favoritos em slots, editor de hotbar e uso de recursos dos baús.
 - **BedFight:** sem loja ou geradores; começa com kit e defesa de madeira na cama.
-- Bots com decisões de combate, espaçamento/strafe, pontes rápidas, mineração e coleta de recursos. São zumbis controlados, com limites documentados.
+- Bots com decisões de combate, espaçamento/strafe, pontes rápidas, mineração e coleta de recursos. Exibidos como jogadores com skin, com limites documentados.
 - Green Hill com casinha recuada, frente aberta e arco quadriculado/gramado no centro. Geometria própria inspirada na imagem oficial do fórum, sem copiar arquivos do Mush.
 
 ## Instalar ou atualizar
@@ -60,7 +62,7 @@ Bússola ou NPCs do lobby: **modo → solo/duplas → vagas**. O tema é sortead
 
 | Modo | Vagas | Regras |
 | --- | --- | --- |
-| BedWars | Solo 2–8; duplas 4/6/8 | Cama, respawn, loja Villager, geradores e melhorias do time. |
+| BedWars | Solo 2–8; duplas 4/6/8 | Cama, respawn, loja com NPC, geradores e melhorias do time. |
 | BedFight | Solo 2/4/6/8; duplas 4/8 | Pares 1x1 ou 2v2, kit pronto e cama protegida, sem economia. |
 | SkyWars | Solo 2–12; duplas pares 4–12 | Baús nas bases/centro, reposição e último time vivo. |
 
@@ -80,7 +82,7 @@ A party tem aceite clicável e barra lateral. Duplas usam uma base e cama por ti
 
 ## Loja e administração
 
-No **BedWars**, clique nos Villagers **LOJA** ou **MELHORIAS**. Esquerdo compra; Shift configura favorito; direito configura hotbar do item. Há editor por categoria e `/importarcomprarapida NICK`. A carteira procura recursos nos inventários/baús na ordem documentada. [Loja completa e limites →](docs/LOJA.md)
+No **BedWars**, clique nos NPCs **LOJA** ou **MELHORIAS**. Esquerdo compra; Shift configura favorito; direito configura hotbar do item. Há editor por categoria e `/importarcomprarapida NICK`. A carteira procura recursos nos inventários/baús na ordem documentada. [Loja completa e limites →](docs/LOJA.md)
 
 **Salabim_zz** está em `administrators` e recebe OP ao entrar após reiniciar. Use `/treinoadmin`, `/cps`, `/fastplace`, `/bridge` ou `/treino mapa sonic`. CPS é observado pelo servidor; fastplace assistido funciona em pista separada, sem alterar o cliente. [Admin →](docs/ADMIN.md)
 

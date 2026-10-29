@@ -16,15 +16,15 @@ Poços baixos de pedra, com núcleo de minério visível, presentes no BedWars; 
 
 ## Lobby neutro • praça central
 
-Praça de 45 blocos de largura, caminhos de quartzo/pedra, jardins, três seletores Villager de modo e pavilhão de ranking. Não há mais alas de quatro temas.
+Praça de 45 blocos de largura, caminhos de quartzo/pedra, jardins, três seletores com skin de modo e pavilhão de ranking. Não há mais alas de quatro temas.
 
 ![Lobby neutro de tamanho médio](images/lobby.png)
 
 ## Loja BedWars e BedFight com kit
 
-O balcão possui dois Villagers reais em tempo de jogo; esta projeção mostra somente a estrutura em blocos. Os menus abaixo são diagramas de slots, sem simular screenshot do cliente.
+O balcão possui dois NPCs com skin em tempo de jogo; esta projeção mostra somente a estrutura em blocos. Os menus abaixo são diagramas de slots, sem simular screenshot do cliente.
 
-![Balcão dos Villagers](images/shop-kiosk.png)
+![Balcão dos NPCs](images/shop-kiosk.png)
 
 ![Loja e categorias](images/shop-bedwars.png)
 
@@ -137,3 +137,5 @@ python3 scripts/render-previews.py
 ```
 
 O script compila e testa o plugin, exporta as cenas do gerador Java e renderiza as imagens. A espera agora ocorre no mundo separado do lobby; não há plataforma suspensa acima das arenas. Os postos de diamantes aparecem na prévia BedWars.
+
+As skins são carregadas em tempo de jogo e não aparecem nas projeções de blocos desta galeria. Consulte [Skins e compatibilidade](SKINS.md).

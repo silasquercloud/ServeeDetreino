@@ -1,12 +1,12 @@
-# Loja BedWars • 1.4.0
+# Loja BedWars • 1.5.0
 
 [← Início](../README.md) · [Galeria](GALERIA.md) · [Referências e diferenças](REFERENCIAS.md)
 
-A loja agora tem **dois Villagers reais** no balcão lateral: **LOJA** e **MELHORIAS**. Ambos ficam parados, têm dano protegido e abrem a interface do plugin, sem a negociação vanilla. São Villagers padrão do Minecraft, não NPCs humanos com skin. O servidor usa NoAI da base 1.8.8 e mantém a posição ancorada; não precisa de Citizens ou outro plugin de NPC.
+A loja possui **dois NPCs com aparência de jogador e skin** no balcão: **LOJA** e **MELHORIAS**. Ficam parados, protegidos e abrem a interface do plugin. O jogador nasce voltado para o balcão. O adaptador nativo 1.8_R3 mantém Villagers como entidades internas de interação, mas envia aparência humana ao cliente. Não precisa de Citizens.
 
-![Balcão em blocos; Villagers adicionados no jogo](images/shop-kiosk.png)
+![Balcão em blocos; NPCs adicionados no jogo](images/shop-kiosk.png)
 
-Abra pelo Villager, bancada ou `/treino loja`. A loja existe **somente em BedWars**. BedFight usa kit pronto e cama protegida; SkyWars usa baús.
+Abra pelo NPC, bancada ou `/treino loja`. A loja existe **somente em BedWars**. BedFight usa kit pronto e cama protegida; SkyWars usa baús.
 
 ## Interface
 
@@ -48,4 +48,4 @@ Ferramentas de nível igual/inferior e melhorias já adquiridas são recusadas. 
 
 ## Diferenças ainda existentes
 
-Não há todas as utilidades, armadilhas e níveis de melhorias do Mush, missões, cosméticos, skins humanas de vendedores ou sincronização de perfis com outra rede. A loja não é uma cópia 100%. A disposição e os fluxos implementados acima foram inspirados nas funcionalidades públicas e estão documentados para teste.
+Não há todas as utilidades, armadilhas e níveis de melhorias do Mush, missões, cosméticos, sincronização de perfis com outra rede. A loja não é uma cópia 100%. A disposição e os fluxos implementados acima foram inspirados nas funcionalidades públicas e estão documentados para teste.

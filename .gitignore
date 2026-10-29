@@ -3,3 +3,9 @@ target/
 server/
 *.log
 __pycache__/
+.tools/
+.private/
+.env
+.env.*
+playit.toml
+playit-secret.txt

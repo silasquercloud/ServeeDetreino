@@ -1,104 +1,95 @@
-# Ryuex Treino
+# Ryuex Treino • Minecraft Java 1.8.9
 
-Servidor Minecraft **Java 1.8.8 / clientes 1.8.9**, com um plugin próprio: **TreinoHub 1.0.0**.
-Menus em português, lobby, salas independentes e mapas de ilhas gerados automaticamente. Não exige baixar um mapa nem configurar coordenadas.
+BedWars, BedFight e SkyWars para jogar com seus amigos. Plugin próprio, salas com vagas selecionáveis, lobby e mapas gerados automaticamente.
 
-## Modos disponíveis
+[![Compilar plugin](https://github.com/silasquercloud/ServeeDetreino/actions/workflows/build.yml/badge.svg)](https://github.com/silasquercloud/ServeeDetreino/actions)
 
-| Modo | Vagas | Regras desta versão |
-| --- | --- | --- |
-| BedWars | 2–8 | Solo, uma base por jogador, cama, respawn, loja na bancada, ferro/ouro nas bases e esmeralda no centro. |
-| BedFight | 2/4/6/8 | Pares de duelos **1x1 independentes**, kit com blocos, espada, picareta e tesoura. Cada jogador tem uma cama. Vencedores assistem até os outros duelos acabarem. |
-| SkyWars | 2–12 | Solo, baús com equipamentos, ilhas e centro. Último jogador vivo vence. Reposição de baús aos 3 minutos. |
+**[Guia completo](docs/GUIA.md) · [Configurar Playit](docs/PLAYIT.md) · [Ver imagens](docs/GALERIA.md) · [Criar Codespace](https://codespaces.new/silasquercloud/ServeeDetreino)**
 
-BedWars é uma implementação de treino enxuta: não inclui todos os upgrades, cosméticos, TNT/fireballs ou recursos de grandes redes. BedFight com 6 vagas cria três duelos; não é 3x3. Os mapas são arenas simples próprias, não cópias de mapas famosos. Esta versão não inclui bots.
+![Visão técnica do SkyWars com seis bases](docs/images/skywars.png)
 
-## Compatibilidade e validação
+> As imagens são projeções técnicas do mapa e do menu implementados, não screenshots de uma partida. [Galeria e limites das prévias →](docs/GALERIA.md)
 
-- Plugin compilado contra **Spigot API 1.8.8-R0.1-20160221.082514-43**, bytecode Java 8. Dependências de compilação têm SHA-256 fixo.
-- Alvo do servidor: **Spigot 1.8.8 com Java 8 atualizado**. Minecraft Java 1.8.9 usa o mesmo protocolo da 1.8.8.
-- Compilação realizada localmente e aprovada no GitHub Actions. Testes automatizados de vagas, início e isolamento de pares também executados. **Uma partida multiplayer completa ainda precisa ser validada com jogadores.** Não confundir compilação com teste em jogo.
-- Não há BedWars1058, SkyWarsReloaded ou plugin BedFight de terceiros instalado: os três modos pertencem ao TreinoHub, evitando conflito entre plugins de minigames.
-- Clientes modernos e Bedrock não foram configurados nem validados.
+## Comece por aqui
 
-## Abrir no Codespaces
-
-[**Criar Codespace deste repositório**](https://codespaces.new/silasquercloud/ServeeDetreino)
-
-O contêiner instala Java 17 para compilar o plugin e Java 8 para o servidor. O plugin compila automaticamente ao criar o ambiente.
-
-No terminal:
+No Linux ou no terminal do Codespace:
 
 ```bash
-bash scripts/install.sh
+bash scripts/setup.sh
 ```
 
-A primeira instalação compila o Spigot original com BuildTools oficial e pode demorar vários minutos. Sem downloads de servidores de procedência desconhecida. Leia a [EULA do Minecraft](https://aka.ms/MinecraftEULA). Se concordar:
+O assistente segue esta ordem:
+
+1. Baixa **Playit 1.1.0 oficial**, com SHA-256 verificado, sem exigir root/systemd.
+2. Mostra o link para você vincular o agente à sua conta.
+3. Orienta a criação de um túnel **Minecraft Java → 127.0.0.1:25565** e solicita o endereço público.
+4. Só então compila o plugin e instala o **Spigot 1.8.8**.
+
+A instalação direta do servidor é bloqueada enquanto o setup do Playit estiver incompleto. Não coloque tokens ou chaves no GitHub.
+
+Depois, leia a [EULA do Minecraft](https://aka.ms/MinecraftEULA). Se concordar:
 
 ```bash
 ACCEPT_EULA=true bash scripts/start.sh
 ```
 
-Próximas inicializações: `bash scripts/start.sh`. Desligue pelo comando `stop` no console. Para alterar RAM: `SERVER_RAM=3G bash scripts/start.sh`.
-
-**Codespaces é ambiente de desenvolvimento/teste, não hospedagem permanente.** Os termos do GitHub limitam atividades fora do desenvolvimento/teste do projeto. O encaminhamento público no navegador usa HTTP/HTTPS: uma URL `app.github.dev` **não é IP Minecraft**. A configuração não cria um endereço público jogável para seus amigos.
-
-Para testar localmente com GitHub CLI, em **seu computador** autenticado:
+Nas próximas vezes:
 
 ```bash
-gh codespace ports forward 25565:25565 --codespace NOME_DO_CODESPACE
+bash scripts/start.sh
 ```
 
-Mantenha o comando aberto e conecte em `localhost:25565`. Isso é um teste local autenticado, não acesso público para amigos. Para jogar regularmente, instale numa host Minecraft com porta TCP ou em seu PC com conectividade adequada.
+Esse comando inicia **Playit + Minecraft juntos**, mostra o endereço cadastrado e encerra o agente quando o servidor para. Não é necessário deixar dois terminais abertos. No console, use `stop` para desligar.
 
-## Liberar acesso e jogar
+**O Playit fornece o túnel/endereço; a máquina onde você executa o projeto hospeda o servidor.** Ele não mantém uma máquina desligada online. Codespaces deve ser usado para desenvolvimento/testes do projeto, conforme os [termos do GitHub](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces).
 
-O servidor inicia com autenticação Microsoft e whitelist ligadas. No **console do servidor**, sem `/`:
+## Escolha o modo e as vagas
 
-```text
-whitelist add SEU_NICK
-whitelist add NICK_DO_AMIGO
-```
+| Modo | Vagas | O que está implementado |
+| --- | --- | --- |
+| **BedWars** | 2–8 | Solo, camas, respawn, loja na bancada, geradores de ferro/ouro e esmeralda no centro. |
+| **BedFight** | 2/4/6/8 | Pares de duelos 1x1, kit pronto, blocos, cama e respawn. Seis vagas = três duelos. |
+| **SkyWars** | 2–12 | Uma ilha por jogador, baús nas bases e no centro, espectador, vitória e reposição aos 3 minutos. |
 
-Os menus não exigem OP. Não é necessário dar OP a todos.
-
-No jogo, use a bússola ou `/treino`. Selecione o modo, depois a quantidade de vagas. A sala começa ao encher, com contagem de 10 segundos. O dono pode antecipar com pelo menos 2 jogadores; BedFight exige quantidade par.
+Use a bússola ou `/treino` para escolher. Exemplo para seis amigos:
 
 ```text
 /treino criar skywars 6
 /treino entrar 1
-/treino iniciar
-/treino salas
-/treino loja
-/treino sair
 ```
 
-O exemplo cria uma sala SkyWars com **6 vagas máximas**. Passe aos amigos o número mostrado no chat. Há até 4 salas simultâneas, ajustável em `server/plugins/TreinoHub/config.yml` depois da primeira inicialização. Partidas não persistem após desligar.
+O número da sala aparece no chat. Ela inicia ao encher; o dono pode antecipar com `/treino iniciar` se houver pelo menos dois jogadores. BedFight exige número par.
 
-Aos 10 minutos começa a morte súbita: camas são destruídas e quem estiver a mais de 25 blocos do centro recebe dano. Após mais 5 minutos, empate. Sair/desconectar elimina o jogador e pode encerrar uma partida. Há proteção de blocos do mapa, lobby e salas em espera.
+## Imagens do projeto
 
-## Instalar numa host Minecraft
+![Disposição do menu implementado](docs/images/menu.png)
 
-1. Escolha **Spigot 1.8.8, Java 8**. Se a host só oferecer outra versão, a compatibilidade deve ser conferida antes de instalar.
-2. Compile com `python3 scripts/build.py` ou baixe o artefato na aba **Actions → Compilar plugin** do GitHub.
-3. Envie `TreinoHub-1.0.0.jar` para a pasta `plugins/`.
-4. Com o servidor parado, ajuste as propriedades usando `config/server.properties` como referência. Preserve a porta e o IP exigidos pela host.
-5. Inicie, adicione seus amigos à whitelist e use `/treino`.
+Veja também [lobby, BedWars e BedFight na galeria](docs/GALERIA.md).
 
-Não instale junto de outros gerenciadores de lobby/minigames antes de verificar conflitos. Para atualizar este plugin, pare o servidor, substitua o JAR e inicie novamente; não use `/reload`.
+## Compatibilidade e estado dos testes
 
-## Roteiro do primeiro teste em jogo
+- **Cliente principal: Minecraft Java 1.8.9.** Spigot 1.8.8 e cliente 1.8.9 usam o protocolo 47; não precisa ViaVersion para essa combinação.
+- **Servidor: Spigot 1.8.8, Java 8 atualizado.** BuildTools oficial compilado com sucesso neste projeto.
+- Plugin: **TreinoHub 1.0.0**, compilado contra a API 1.8.8 com bytecode Java 8 e dependências verificadas por hash.
+- Compilação do plugin e testes de vagas/início/pares aprovados. Os scripts Playit têm testes de pré-requisitos e encerramento de processos.
+- **Ainda não foi validada uma partida multiplayer completa.** Vincular sua conta, criar o túnel e testar uma conexão pública são etapas que dependem do seu setup.
+- Playit funciona como processo externo: não depende da versão da API Bukkit. O setup portátil suporta Linux x64 e ARM64; Java/Spigot em ARM64 não foram testados neste projeto.
+- Não há plugins BedWars1058/SkyWarsReloaded instalados: os três modos estão no TreinoHub. Clientes modernos e Bedrock não foram configurados.
 
-- Dois jogadores: entrar no lobby, abrir menu, criar sala, entrar pelo ID e iniciar.
-- BedWars: coletar ferro/ouro, comprar, construir, quebrar cama inimiga, morrer com e sem cama, conferir vencedor.
-- BedFight: 2 e 4 jogadores; confirmar isolamento entre pares, respawn e vencedor de cada duelo.
-- SkyWars: 6 jogadores; baús, quedas, dano, espectador, vitória e saída para lobby.
-- Sair durante contagem e durante partida; confirmar que não fica uma sala presa.
-- Jogar outra partida: arena deve estar limpa, sem blocos da anterior.
+BedWars é uma versão enxuta de treino. Não inclui todos os upgrades, cosméticos, TNT/fireballs ou recursos de grandes redes. Não inclui bots. Os mapas são ilhas simples próprias; não são mapas copiados de servidores famosos.
 
-## Referências oficiais
+## Onde está cada coisa
 
-- [Protocolos dos clientes (1.8.8 e 1.8.9: protocolo 47)](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json)
-- [BuildTools e versões Spigot](https://www.spigotmc.org/wiki/buildtools/)
-- [Portas no Codespaces](https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace)
-- [Termos do Codespaces](https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features#codespaces)
+| Pasta/arquivo | Conteúdo |
+| --- | --- |
+| [docs/GUIA.md](docs/GUIA.md) | Instalar, iniciar, liberar amigos, comandos e teste em jogo. |
+| [docs/PLAYIT.md](docs/PLAYIT.md) | Conta, túnel, endereço público e diagnóstico. |
+| [docs/GALERIA.md](docs/GALERIA.md) | Prévias visuais e instruções para screenshots reais. |
+| [scripts/setup.sh](scripts/setup.sh) | Playit primeiro, instalação depois. |
+| [scripts/start.sh](scripts/start.sh) | Inicia os dois processos juntos. |
+| [config/server.properties](config/server.properties) | Configuração padrão do servidor. |
+| [src/main/java](src/main/java) | Código do plugin. |
+
+## Referências
+
+[Spigot BuildTools](https://www.spigotmc.org/wiki/buildtools/) · [Protocolos 1.8.8/1.8.9](https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/common/protocolVersions.json) · [Playit oficial](https://playit.gg/) · [Código e release fixada do Playit](https://github.com/playit-cloud/playit-agent/releases/tag/v1.1.0)

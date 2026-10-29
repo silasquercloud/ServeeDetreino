@@ -10,7 +10,7 @@
       "jdkDistro": "tem"
     }
   },
-  "postCreateCommand": "python3 scripts/build.py",
+  "postCreateCommand": "bash scripts/welcome.sh",
   "portsAttributes": {
     "25565": {
       "label": "Minecraft TCP — não é URL HTTP",

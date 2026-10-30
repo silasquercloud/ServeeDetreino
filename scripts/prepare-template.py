@@ -31,6 +31,26 @@ def download(url,target):
             if size>64*1024*1024:raise ValueError('Download excede 64 MiB')
             out.write(data)
 
+def download_citizens(url, target):
+    """Try the individual artifact, then Jenkins' archive of the SAME build."""
+    try:
+        download(url, target)
+        return
+    except Exception as direct_error:
+        print('Citizens: download direto indisponível; tentando ZIP oficial do build 3478.', flush=True)
+        archive = target.with_suffix('.zip')
+        try:
+            download('https://ci.citizensnpcs.co/job/Citizens2/3478/artifact/*zip*/archive.zip', archive)
+            with zipfile.ZipFile(archive) as z:
+                matches = [i for i in z.infolist() if pathlib.PurePosixPath(i.filename).name == 'Citizens-2.0.35-b3478.jar']
+                if len(matches) != 1 or matches[0].file_size > 64*1024*1024:
+                    raise ValueError('ZIP oficial sem o JAR esperado ou tamanho inválido')
+                target.write_bytes(z.read(matches[0]))
+        except Exception as archive_error:
+            raise ValueError(f'Direto: {direct_error}; ZIP oficial: {archive_error}') from archive_error
+        finally:
+            archive.unlink(missing_ok=True)
+
 def dependencies(root,offline=False):
     installed={descriptor(p)[0] for p in (root/'plugins').glob('*.jar')}
     issues=[]
@@ -50,7 +70,8 @@ def dependencies(root,offline=False):
                         with urllib.request.urlopen(api,timeout=25) as r:meta=json.load(r)
                         if not any(v == '1.8' or v.startswith('1.8.') for v in meta.get('platformDependencies',{}).get('PAPER',[])):raise ValueError('Hangar não confirma suporte 1.8 nesta versão')
                         url=meta['downloads']['PAPER']['downloadUrl']
-                    download(url,candidate)
+                    if name=='Citizens':download_citizens(url,candidate)
+                    else:download(url,candidate)
                 actual,ver,_,files=descriptor(candidate)
                 if actual!=name or version not in ver:raise ValueError(f'Esperado {name} {version}, recebido {actual} {ver}')
                 if name=='Citizens' and not any('v1_8_R3' in f for f in files):raise ValueError('Citizens sem adaptador 1.8_R3')

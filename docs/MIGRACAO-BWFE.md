@@ -64,3 +64,7 @@ O importador procura mundos com nomes correspondentes às configurações e exig
 **A ativação é feita pelo novo `atualizar.sh` somente após as verificações.** Não copie os JARs de TreinoHub para o template. Depois de receber mapas/dependências, validar inicialização, NPCs, lojas e uma partida antes de substituir `server/`.
 
 O server.jar fornecido no ZIP é **PandaSpigot Paperclip 1.8.8**. Seu hash foi conferido; ele prepara o servidor final no primeiro início e pode precisar baixar o JAR original da Mojang. Não foi trocado silenciosamente por Spigot.
+
+### Download alternativo do Citizens
+
+O atualizador tenta o JAR individual e, se falhar, o ZIP oficial dos artefatos do mesmo build 3478. Extrai apenas `Citizens-2.0.35-b3478.jar` e valida o plugin e o adaptador `v1_8_R3` antes de instalar. Se o acesso ao site oficial estiver bloqueado por completo, ambos podem falhar: nesse caso coloque o JAR em `imports/plugins/` e execute novamente. O ZIP é uma alternativa de transporte, não outra versão do plugin.

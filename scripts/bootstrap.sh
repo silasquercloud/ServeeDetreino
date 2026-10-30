@@ -5,7 +5,7 @@ TREINO_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
 base_ready() {
   local tool
-  for tool in python3 git curl tar gzip unzip zip; do
+  for tool in python3 gh git curl tar gzip unzip zip; do
     command -v "$tool" >/dev/null 2>&1 || return 1
   done
   [[ -s /etc/ssl/certs/ca-certificates.crt ]] || return 1
@@ -24,9 +24,9 @@ if ! base_ready; then
   fi
   if command -v apt-get >/dev/null 2>&1; then
     "${TREINO_PRIVILEGE[@]}" apt-get update
-    "${TREINO_PRIVILEGE[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 python3-venv python3-pip python3-pil git curl ca-certificates tar gzip unzip zip libstdc++6 zlib1g libfreetype6 fontconfig fonts-dejavu-core
+    "${TREINO_PRIVILEGE[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 python3-venv python3-pip python3-pil gh git curl ca-certificates tar gzip unzip zip libstdc++6 zlib1g libfreetype6 fontconfig fonts-dejavu-core
   elif command -v pacman >/dev/null 2>&1; then
-    "${TREINO_PRIVILEGE[@]}" pacman -S --needed --noconfirm python python-pip python-pillow git curl ca-certificates tar gzip unzip zip gcc-libs zlib freetype2 fontconfig ttf-dejavu
+    "${TREINO_PRIVILEGE[@]}" pacman -S --needed --noconfirm python python-pip python-pillow github-cli git curl ca-certificates tar gzip unzip zip gcc-libs zlib freetype2 fontconfig ttf-dejavu
   else
     echo 'Instalação automática disponível em Ubuntu/Debian e Arch/CachyOS. Gerenciador de pacotes não encontrado.' >&2
     exit 1

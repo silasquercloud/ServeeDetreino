@@ -1,0 +1,11 @@
+name: RyuexModes
+version: 1.0.0
+main: br.ryuex.modes.ExtraModes
+author: Ryuex
+commands:
+  jogos:
+    description: Menu de The Bridge e HG; /jogos sair para voltar.
+  bridge:
+    description: The Bridge solo ou dupla; /bridge sair.
+  hg:
+    description: Hunger Games; /hg kit e /hg sair.

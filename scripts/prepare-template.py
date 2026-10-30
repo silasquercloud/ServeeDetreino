@@ -139,6 +139,9 @@ def prepare(offline=False,archive=None):
                     for item in src.infolist():
                         if pathlib.PurePosixPath(item.filename).parts[0] in status['mapas_ausentes']:out.writestr(item,src.read(item))
                 template.add_maps(subset, root)
+        build = subprocess.run([sys.executable, str(ROOT/'scripts/build-modes.py')])
+        if build.returncode:raise ValueError('Falha ao compilar The Bridge/HG; instalação anterior preservada')
+        shutil.copy2(ROOT/'target/RyuexModes-1.0.0.jar',root/'plugins/RyuexModes-1.0.0.jar')
         issues=dependencies(root,offline)+hard_dependencies(root)
         status=template.report(root)
         if status['mapas_ausentes']:issues.append('Mapas ausentes: '+str(len(status['mapas_ausentes'])))

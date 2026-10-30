@@ -1,6 +1,8 @@
+**Novos modos — The Bridge e HG:** instalação incluída em `bash atualizar.sh`. No lobby: `/jogos`, `/bridge solo`, `/bridge dupla`, `/hg` e `/hg kit`. [Guia, mapas e limites atuais](docs/THE-BRIDGE-E-HG.md). São modos próprios para 1.8.8/cliente 1.8.9, com mapas gerados automaticamente; ainda precisam de teste de partida no template.
+
 **Atualizar e preparar para testar:** envie o ZIP BWFE para `imports/` no Codespace e execute `git pull --ff-only` seguido de `bash atualizar.sh`. O script importa mapas, verifica dependências e prepara o template sem iniciar Minecraft. [Instruções](docs/MIGRACAO-BWFE.md).
 
-> **Reconstrução BWFE em andamento.** Foram criadas e importadas 46 arenas originais: [baixar mapas e instruções](maps/README.md). O lobby já acompanha o template. Ainda faltam Citizens, Parties e LastLoginAPI e a validação completa em execução. A instalação antiga permanece ativa até concluir a migração.
+> **Reconstrução BWFE em andamento.** Foram criadas e importadas 46 arenas originais: [baixar mapas e instruções](maps/README.md). O lobby já acompanha o template. O atualizador obtém Citizens (incluindo alternativa GitHub Actions), Parties e LastLoginAPI. A validação completa em execução ainda está pendente. A instalação antiga permanece ativa até concluir a migração.
 
 # Ryuex Treino • Minecraft Java 1.8.9
 

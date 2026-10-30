@@ -2,7 +2,11 @@
 
 O arquivo fornecido pelo usuário foi inspecionado. Contém `Server Files.zip`, lobby `spawn`, servidor e plugins/configurações. O núcleo é **BedWars2023 1.3.0**, não o TreinoHub anterior. O README do autor exige servidor **1.8.8 com NMS** e **Java 17 ou superior**. O funcionamento de todas as dependências ainda não foi validado em execução.
 
-## Bloqueios confirmados
+## Mapas originais disponíveis
+
+Foram gerados 46 mundos originais compatíveis com as posições cadastradas. Use `python3 scripts/template.py maps maps/arenas-bwfe-original.zip`. Consulte [mapas e validação](../maps/README.md). Na instalação de preparação, o relatório agora mostra **zero mapas ausentes**. Os nomes correspondem às configurações, não a cópias das construções originais.
+
+## Auditoria do ZIP original e bloqueios restantes
 
 - 46 arquivos de configuração de arenas, mas nenhum dos 46 mundos de partida acompanha o ZIP.
 - O autor indica os mundos em https://cxstudios.in/download/bwfe-arenas — a tentativa de acesso retornou HTTP 503.

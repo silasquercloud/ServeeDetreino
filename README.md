@@ -1,4 +1,4 @@
-> **Reconstrução com template BWFE em andamento.** O ZIP foi auditado e importado separadamente. O lobby está incluído, mas os 46 mundos de partidas e três plugins necessários estão ausentes. A versão antiga abaixo continua sendo a instalada até concluir a migração. [Estado e instruções](docs/MIGRACAO-BWFE.md).
+> **Reconstrução BWFE em andamento.** Foram criadas e importadas 46 arenas originais: [baixar mapas e instruções](maps/README.md). O lobby já acompanha o template. Ainda faltam Citizens, Parties e LastLoginAPI e a validação completa em execução. A instalação antiga permanece ativa até concluir a migração.
 
 # Ryuex Treino • Minecraft Java 1.8.9
 

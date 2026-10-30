@@ -15,3 +15,5 @@ template-server/
 .bwfe-import-*/
 .bwfe-maps-*/
 imports/
+
+generated-arenas/

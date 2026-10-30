@@ -1,0 +1,370 @@
+[
+  {
+    "arena": "acropolis1v1",
+    "theme": "Jardins",
+    "teams": 8,
+    "blocks": 20308,
+    "chunks": 74,
+    "sha256_config": "4fadd4fc831e37ec95e529a4ef84c78d5c77dfa5b3693e060926fd61c5f8fe1d"
+  },
+  {
+    "arena": "acropolis2v2",
+    "theme": "Deserto",
+    "teams": 8,
+    "blocks": 20678,
+    "chunks": 75,
+    "sha256_config": "ec467a149f694cfc8d553e9561c66262546207576c9bb7923567effd7bf91d4d"
+  },
+  {
+    "arena": "amazon1v1",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 22716,
+    "chunks": 78,
+    "sha256_config": "88b47ced41bd78c53e5c43f27523afcf075de17e17d961ba904f211344f5e4a5"
+  },
+  {
+    "arena": "amazon2v2",
+    "theme": "Templo",
+    "teams": 8,
+    "blocks": 23098,
+    "chunks": 78,
+    "sha256_config": "1f85b20964c1e5b715492d0f02f574b4fd3eff1aedc8d5f3484a36805f4818df"
+  },
+  {
+    "arena": "aquarium3v3v3v3",
+    "theme": "Bosque",
+    "teams": 4,
+    "blocks": 9287,
+    "chunks": 32,
+    "sha256_config": "278296e30d851439a88dbddc416943651dbd5b16e3abb7023d90e43f08b2d305"
+  },
+  {
+    "arena": "aquarium4v4v4v4",
+    "theme": "Quartzo",
+    "teams": 4,
+    "blocks": 9618,
+    "chunks": 32,
+    "sha256_config": "5dd7091b6e44fa5b07181bee05f8a664628b5413d940dc6fa53b89f1b19e9e41"
+  },
+  {
+    "arena": "ashfire1v1",
+    "theme": "Jardins",
+    "teams": 8,
+    "blocks": 19429,
+    "chunks": 72,
+    "sha256_config": "0eff57379ee1a8495b89072ff1b987745a360194017d14ff74a20cfd742e2448"
+  },
+  {
+    "arena": "ashfire1v1rush",
+    "theme": "Deserto",
+    "teams": 8,
+    "blocks": 19809,
+    "chunks": 72,
+    "sha256_config": "6a40d69b6ed4b0b6dcbd91b981b8e27071428d09eba3cc43014d4c5959ec066d"
+  },
+  {
+    "arena": "ashfire2v2",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 18723,
+    "chunks": 72,
+    "sha256_config": "e93adf59a0e7b6c2acbf8507034d3670b8bba88983665fcab386ad86d3c39157"
+  },
+  {
+    "arena": "ashfiregh",
+    "theme": "Templo",
+    "teams": 8,
+    "blocks": 19315,
+    "chunks": 72,
+    "sha256_config": "e3b245f0b4c90946a26cb955729787197f7cfbd6b7af81e4971a6f9f2b683b75"
+  },
+  {
+    "arena": "ashore3v3v3v3",
+    "theme": "Bosque",
+    "teams": 4,
+    "blocks": 13042,
+    "chunks": 45,
+    "sha256_config": "14f79ea33f2e71ff839395294a4e3222809db8e86a9744df686adfd65cecd843"
+  },
+  {
+    "arena": "ashore4v4v4v4",
+    "theme": "Quartzo",
+    "teams": 4,
+    "blocks": 13441,
+    "chunks": 46,
+    "sha256_config": "fbd7acae1b8a6a46b18a1e44ce514b1ac804ab277bded601dca0a674a0106fcf"
+  },
+  {
+    "arena": "boletum3v3v3v3",
+    "theme": "Jardins",
+    "teams": 4,
+    "blocks": 11327,
+    "chunks": 33,
+    "sha256_config": "f1c67132b754a752b6b4b5eda273b531d2e836f692ca56c25eb490f7e1b09dd3"
+  },
+  {
+    "arena": "boletum4v4v4v4",
+    "theme": "Deserto",
+    "teams": 4,
+    "blocks": 11666,
+    "chunks": 33,
+    "sha256_config": "5056e12ed81f0b225ec57027e83177fa49844d0940e0fd5bc6deae16d66fad38"
+  },
+  {
+    "arena": "carapace3v3v3v3",
+    "theme": "Glacial",
+    "teams": 4,
+    "blocks": 12549,
+    "chunks": 46,
+    "sha256_config": "35b6b969af23e5b07fcf12fbb9b9febc008e34b479125654aadf00af14eb5900"
+  },
+  {
+    "arena": "carapace4v4v4v4",
+    "theme": "Templo",
+    "teams": 4,
+    "blocks": 12953,
+    "chunks": 50,
+    "sha256_config": "f469bd830603e648ab810260d801dcbd9b9f37aef5dd0bb5d239ffad435c853c"
+  },
+  {
+    "arena": "cauldron3v3v3v3",
+    "theme": "Bosque",
+    "teams": 4,
+    "blocks": 11239,
+    "chunks": 24,
+    "sha256_config": "f02392a56741f8c84d478b513904cc6de81e90702a377fd4e0b9628e431424d6"
+  },
+  {
+    "arena": "cauldron4v4v4v4",
+    "theme": "Quartzo",
+    "teams": 4,
+    "blocks": 11566,
+    "chunks": 24,
+    "sha256_config": "24e66163deb162deed5281a3effe4860c906aa99037416d28a73903c90fd4fc5"
+  },
+  {
+    "arena": "chained3v3v3v3",
+    "theme": "Jardins",
+    "teams": 4,
+    "blocks": 13997,
+    "chunks": 36,
+    "sha256_config": "3df8e0ee5a53ff1c735ab11a9d6d19ab1f872b87b69296ded14df56d4f13e0a6"
+  },
+  {
+    "arena": "dreamgrove3v3v3v3",
+    "theme": "Deserto",
+    "teams": 4,
+    "blocks": 14025,
+    "chunks": 44,
+    "sha256_config": "283c3c75d8f666ddde87fb474047ad4a931b10fed0bb2aaadd6ee65d48e8d662"
+  },
+  {
+    "arena": "eggrun3v3v3v3",
+    "theme": "Glacial",
+    "teams": 4,
+    "blocks": 13659,
+    "chunks": 40,
+    "sha256_config": "1ee5870cac1f45a2ad65537a58e1667c3e331d19695bb500de81b377a882087f"
+  },
+  {
+    "arena": "fortdoon3v3v3v3",
+    "theme": "Templo",
+    "teams": 4,
+    "blocks": 12203,
+    "chunks": 24,
+    "sha256_config": "9c7983e8e21a9720fb5d9208b3fd1b181fa523d62aa91c18f65a590be4b99ed4"
+  },
+  {
+    "arena": "glacier1v1",
+    "theme": "Bosque",
+    "teams": 8,
+    "blocks": 20232,
+    "chunks": 80,
+    "sha256_config": "c4b449a8db778edda282430a8483799b3b5b5fefac42ec9e673368f4808f67b3"
+  },
+  {
+    "arena": "glacier2v2",
+    "theme": "Quartzo",
+    "teams": 8,
+    "blocks": 20610,
+    "chunks": 80,
+    "sha256_config": "cdb914c1fcb3142671b61dbae07a06d7e00c57d01b4ab4b0c1e628675f2c7a72"
+  },
+  {
+    "arena": "helltemple3v3v3v3",
+    "theme": "Jardins",
+    "teams": 4,
+    "blocks": 11216,
+    "chunks": 35,
+    "sha256_config": "fb8b6fe4518a0e34132fca200646a51e8afed2960ca9a1b9329a39e338f0c229"
+  },
+  {
+    "arena": "inca1v1",
+    "theme": "Deserto",
+    "teams": 8,
+    "blocks": 22713,
+    "chunks": 66,
+    "sha256_config": "39fc9608c69342886f76599ddff2c78ab1e74fd835d6216de963ef1b9e6e2243"
+  },
+  {
+    "arena": "inca2v2",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 23073,
+    "chunks": 66,
+    "sha256_config": "867febd2bbac6ffdc3fb58062c35d61a4ad10d0892a0ac83ba4982070cc53df2"
+  },
+  {
+    "arena": "invasion4v4v4v4",
+    "theme": "Templo",
+    "teams": 4,
+    "blocks": 12064,
+    "chunks": 43,
+    "sha256_config": "8ca189cd38c47f22b01d99dc38b5e58a4b5716e26693f823b2eead117c7193a6"
+  },
+  {
+    "arena": "lighthouse1v1",
+    "theme": "Bosque",
+    "teams": 8,
+    "blocks": 19428,
+    "chunks": 61,
+    "sha256_config": "92932ef541381c06afa585d9ff487c968bba3bd6c0c51c8abb6e6da57f21c79e"
+  },
+  {
+    "arena": "lighthouse2v2",
+    "theme": "Quartzo",
+    "teams": 8,
+    "blocks": 19776,
+    "chunks": 61,
+    "sha256_config": "004da34835c2d6a75acc381f4f7c2d7532cb3873940805997b3d05f890e754e8"
+  },
+  {
+    "arena": "lightstone1v1",
+    "theme": "Jardins",
+    "teams": 8,
+    "blocks": 21222,
+    "chunks": 58,
+    "sha256_config": "3415d3036c5ce36357986c572a4a73061cf90329675ca316a31b70c22c547f89"
+  },
+  {
+    "arena": "lionstemple",
+    "theme": "Deserto",
+    "teams": 2,
+    "blocks": 8994,
+    "chunks": 27,
+    "sha256_config": "698df09b7913b63221b2532cf7fe07a02647fbbdff9027288e47d5dc124c4289"
+  },
+  {
+    "arena": "nutcracker1v1",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 21772,
+    "chunks": 59,
+    "sha256_config": "7d16bbb236d3c8c311472adb376972bd5dced16c16ce144ff881a6483dff519c"
+  },
+  {
+    "arena": "orchestra1v1",
+    "theme": "Templo",
+    "teams": 8,
+    "blocks": 23849,
+    "chunks": 74,
+    "sha256_config": "549624f470aa3c98e5f1c3ec684519d1104791ff025c8cc795a44acea33f9107"
+  },
+  {
+    "arena": "pernicious1v1",
+    "theme": "Bosque",
+    "teams": 8,
+    "blocks": 21233,
+    "chunks": 70,
+    "sha256_config": "a05cf03df7484891d7458fb3bdaafed08d2f04d18846423905641b91b316b1ae"
+  },
+  {
+    "arena": "polemus2v2voidless",
+    "theme": "Quartzo",
+    "teams": 8,
+    "blocks": 18246,
+    "chunks": 74,
+    "sha256_config": "d18062994191cb092f6ed5c3b88e3bf4cf3a694612f4cbd540c722586a37efb3"
+  },
+  {
+    "arena": "sandcastle4v4v4v4",
+    "theme": "Jardins",
+    "teams": 4,
+    "blocks": 11656,
+    "chunks": 24,
+    "sha256_config": "d44e8bd00e0fc9b8560088f76cfe248b80eb622f1fc4f5829b0ece9580712e15"
+  },
+  {
+    "arena": "speedway2v2",
+    "theme": "Deserto",
+    "teams": 8,
+    "blocks": 20106,
+    "chunks": 55,
+    "sha256_config": "22ba69ecc51acc871fc515f52649d08470768809956048840c2d5a70c31360a5"
+  },
+  {
+    "arena": "submerged2v2",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 19715,
+    "chunks": 71,
+    "sha256_config": "cc23bf93ee75809ee8125fbf3df191c28aa8d2b4bdf6c895d3b53ab1bdefc6da"
+  },
+  {
+    "arena": "swashbuckle4v4v4v4",
+    "theme": "Templo",
+    "teams": 4,
+    "blocks": 13595,
+    "chunks": 41,
+    "sha256_config": "307fcc52528612d1c54058fc8d7a6633291ede3e23ce76f62d943bd2bff5758e"
+  },
+  {
+    "arena": "toro",
+    "theme": "Bosque",
+    "teams": 8,
+    "blocks": 19499,
+    "chunks": 62,
+    "sha256_config": "d834066c5bb4c7801b4d2e2f4886aef13c9e069a10e29bc4ab0d6491811e7be7"
+  },
+  {
+    "arena": "treenan4v4v4v4",
+    "theme": "Quartzo",
+    "teams": 4,
+    "blocks": 12243,
+    "chunks": 45,
+    "sha256_config": "de3e0f0eadc1e570661d68cf26596d5e7ba6112c434fa9aa06bf7bf67cee68c7"
+  },
+  {
+    "arena": "unchained4v4v4v4",
+    "theme": "Jardins",
+    "teams": 4,
+    "blocks": 13997,
+    "chunks": 36,
+    "sha256_config": "a8ffed3622c9c99f44369cd43a570d80e235aa4cf3384484d20b72f655d6aad6"
+  },
+  {
+    "arena": "waterfall2v2",
+    "theme": "Deserto",
+    "teams": 8,
+    "blocks": 17577,
+    "chunks": 72,
+    "sha256_config": "eab9dad5a8147477a5521fe493157e8393c877e762e5500c9f0aef85178ebae0"
+  },
+  {
+    "arena": "waterfallgh",
+    "theme": "Glacial",
+    "teams": 8,
+    "blocks": 16609,
+    "chunks": 70,
+    "sha256_config": "fc5b8f673d5b30161a4ec2d0ddf90dbfa6a237f421e526a609eba42a1d83aff9"
+  },
+  {
+    "arena": "zarzul2v2",
+    "theme": "Templo",
+    "teams": 8,
+    "blocks": 25665,
+    "chunks": 72,
+    "sha256_config": "9330301a399f8fad32d08a8340e9d13cbf27f5497372b7a6421195c1c8801a73"
+  }
+]

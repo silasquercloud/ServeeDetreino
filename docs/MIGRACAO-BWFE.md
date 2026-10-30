@@ -1,3 +1,24 @@
+# Atualização automática para o template
+
+Com o ZIP BWFE original dentro de `imports/` no Codespace, execute na raiz:
+
+```bash
+git pull --ff-only
+bash atualizar.sh
+```
+
+O anexo enviado ao chat não é transferido automaticamente para o Codespace. Só é necessário enviar o ZIP uma vez; uma importação anterior em `template-server/` é reutilizada.
+
+O comando busca alterações sem reset, prepara dependências do ambiente, encerra com segurança o launcher gerenciado, verifica Java 17, importa mapas ausentes, tenta baixar Citizens 2.0.35 build 3478, Parties 3.2.14 e LastLoginAPI 1.7.4 dos distribuidores oficiais. São versões fixadas para esta migração, não necessariamente as mais recentes. Valida conteúdo dos JARs, versão de bytecode, adaptador Citizens 1.8_R3, plugins duplicados, dependências obrigatórias, mapas, lobby, NMS do servidor (ou hash do launcher PandaSpigot 1.8.8 original do template) e configuração Playit. Não inicia o Minecraft.
+
+Se um download falhar, informa a pendência. Alternativamente coloque os três JARs nas versões indicadas em `imports/plugins/` e repita. Não existe bypass de autenticação ou download de fontes não oficiais.
+
+Quando os requisitos passam, move `server/` para um backup datado dentro de `.private/` e promove `template-server/` para `server/`. Preserva credenciais Playit e não mistura TreinoHub/TreinoAntiLag com BWFE. O launcher seleciona Java 17 para BWFE. Depois use `bash menu.sh`, opção 3; a EULA é tratada no início como antes. A configuração de arquivos não substitui um teste real dos plugins e partidas.
+
+A opção 5 usa o novo comando. O instalador legado recusa sobrescrever um BWFE já ativo.
+
+---
+
 # Reconstrução com BWFE 25.1.0
 
 O arquivo fornecido pelo usuário foi inspecionado. Contém `Server Files.zip`, lobby `spawn`, servidor e plugins/configurações. O núcleo é **BedWars2023 1.3.0**, não o TreinoHub anterior. O README do autor exige servidor **1.8.8 com NMS** e **Java 17 ou superior**. O funcionamento de todas as dependências ainda não foi validado em execução.
@@ -40,4 +61,6 @@ python3 scripts/template.py check
 
 O importador procura mundos com nomes correspondentes às configurações e exige dados de região. Ele recusa colisões de arquivos. O relatório lista mapas e dependências ausentes, sem dizer que o servidor está pronto por apenas existir um JAR.
 
-**A ativação definitiva e a migração do launcher ainda estão pendentes.** As opções 2, 3 e 5 do menu continuam operando a instalação antiga. Não copie os JARs de TreinoHub para o template. Depois de receber mapas/dependências, validar inicialização, NPCs, lojas e uma partida antes de substituir `server/`.
+**A ativação é feita pelo novo `atualizar.sh` somente após as verificações.** Não copie os JARs de TreinoHub para o template. Depois de receber mapas/dependências, validar inicialização, NPCs, lojas e uma partida antes de substituir `server/`.
+
+O server.jar fornecido no ZIP é **PandaSpigot Paperclip 1.8.8**. Seu hash foi conferido; ele prepara o servidor final no primeiro início e pode precisar baixar o JAR original da Mojang. Não foi trocado silenciosamente por Spigot.

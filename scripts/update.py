@@ -76,6 +76,9 @@ def update(fetch=True):
         # Start the NEW updater/environment, not the Python code loaded before pull.
         execute(['bash', str(ROOT/'scripts/update.sh'), '--install-current'])
         return
+    if (ROOT/'server/.bwfe-template.json').exists():
+        execute([sys.executable, 'scripts/prepare-template.py'])
+        return
     with server_lock(ROOT):
         check_processes()
         (ROOT/'server/plugins').mkdir(exist_ok=True)

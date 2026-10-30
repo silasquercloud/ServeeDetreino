@@ -23,7 +23,7 @@ def playit_state():
 
 
 def installed():
-    return (ROOT/'server/server.jar').is_file() and (ROOT/'server/plugins/TreinoHub-1.0.0.jar').is_file() and (ROOT/'server/server.properties').is_file()
+    return (ROOT/'server/server.jar').is_file() and ((ROOT/'server/plugins/TreinoHub-1.0.0.jar').is_file() or (ROOT/'server/.bwfe-template.json').is_file()) and (ROOT/'server/server.properties').is_file()
 
 
 def dashboard():
@@ -68,18 +68,15 @@ def install():
         print('Conclua primeiro a opção 1: configurar Playit.')
         return
     print('\nPASSO 2 — INSTALAR SERVIDOR COMPLETO')
-    print('Inclui Spigot 1.8.8, TreinoHub, mapas, lobby, salas e server.properties.')
-    print('A primeira compilação pode demorar vários minutos. Aguarde o resultado.\n')
-    call(['bash', str(ROOT/'scripts/install.sh')])
+    print('Prepara o template BWFE com arenas e verifica as dependências.')
+    print('Coloque o ZIP BWFE em imports/ se ainda não importou.\n')
+    call(['bash', str(ROOT/'atualizar.sh')])
 
 
 def update_server():
-    if not (ROOT/'server/server.jar').is_file():
-        print('Instale primeiro pela opção 2.')
-        return
     print('\nATUALIZAR SERVIDOR — solicita parada segura nas sessões compatíveis.')
-    print('A atualização preserva Playit, configurações e mundos; mantém Spigot 1.8.8.\n')
-    if call(['bash', str(ROOT/'scripts/update.sh')]):
+    print('Prepara BWFE em separado, verifica requisitos e preserva backup antes da troca.\n')
+    if call(['bash', str(ROOT/'atualizar.sh')]):
         print('Reabrindo o menu atualizado...', flush=True)
         os.execv(sys.executable, [sys.executable, str(ROOT/'scripts/menu.py')])
 
@@ -128,7 +125,7 @@ def details():
         return
     print('\nENDEREÇO CADASTRADO — a exibição não indica que o servidor esteja online.\n')
     playit.print_connection(data)
-    print('Cliente: Minecraft Java 1.8.9 | local: Spigot 1.8.8 / Java 8')
+    print('Cliente: Minecraft Java 1.8.9 | BWFE: PandaSpigot 1.8.8 / Java 17')
     print('Modo configurado pelo instalador: online-mode=false (originais e não originais).')
     print('O Playit deve ficar ativo junto com o Minecraft para aceitar conexões públicas.')
 

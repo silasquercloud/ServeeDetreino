@@ -1,3 +1,5 @@
+**Atualizar e preparar para testar:** envie o ZIP BWFE para `imports/` no Codespace e execute `git pull --ff-only` seguido de `bash atualizar.sh`. O script importa mapas, verifica dependências e prepara o template sem iniciar Minecraft. [Instruções](docs/MIGRACAO-BWFE.md).
+
 > **Reconstrução BWFE em andamento.** Foram criadas e importadas 46 arenas originais: [baixar mapas e instruções](maps/README.md). O lobby já acompanha o template. Ainda faltam Citizens, Parties e LastLoginAPI e a validação completa em execução. A instalação antiga permanece ativa até concluir a migração.
 
 # Ryuex Treino • Minecraft Java 1.8.9

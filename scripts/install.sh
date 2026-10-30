@@ -4,6 +4,9 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 bash scripts/bootstrap.sh
 source scripts/env.sh
+if [[ -f server/.bwfe-template.json ]]; then
+  echo "Template BWFE ativo. Use bash atualizar.sh para verificar/atualizar."; exit 1
+fi
 python3 scripts/playit.py check
 python3 scripts/build.py
 source scripts/java8.sh

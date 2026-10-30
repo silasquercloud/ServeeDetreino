@@ -1,3 +1,5 @@
+> **Reconstrução com template BWFE em andamento.** O ZIP foi auditado e importado separadamente. O lobby está incluído, mas os 46 mundos de partidas e três plugins necessários estão ausentes. A versão antiga abaixo continua sendo a instalada até concluir a migração. [Estado e instruções](docs/MIGRACAO-BWFE.md).
+
 # Ryuex Treino • Minecraft Java 1.8.9
 
 Servidor para jogar e treinar com amigos: **BedWars, BedFight e SkyWars**, solo/duplas, party, bots de treino e mapas próprios inspirados em Pokémon, Evangelion, Sonic/Green Hill e One Piece. O lobby é uma praça neutra de tamanho médio, separada das arenas.

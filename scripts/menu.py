@@ -40,6 +40,7 @@ def dashboard():
     print('  4  Ver endereço salvo e configuração')
     print('  5  Atualizar servidor (preservar dados)')
     print('  6  Parar servidor com segurança')
+    print('  7  Importar/verificar novo template BWFE')
     print('  0  Sair')
     print(paint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
     if ready:
@@ -132,8 +133,19 @@ def details():
     print('O Playit deve ficar ativo junto com o Minecraft para aceitar conexões públicas.')
 
 
+def template_menu():
+    stage = ROOT/'template-server'
+    if stage.exists():
+        call([sys.executable, str(ROOT/'scripts/template.py'), 'check'])
+    else:
+        archive = input('Caminho do ZIP BWFE 25.1.0: ').strip()
+        if archive:
+            call([sys.executable, str(ROOT/'scripts/template.py'), 'import', archive])
+    print('A importação prepara uma instalação separada. Consulte docs/MIGRACAO-BWFE.md.')
+
+
 def main():
-    actions = {'1': configure, '2': install, '3': start, '4': details, '5': update_server, '6': lambda: call(['bash', str(ROOT/'scripts/stop.sh')])}
+    actions = {'7': template_menu, '1': configure, '2': install, '3': start, '4': details, '5': update_server, '6': lambda: call(['bash', str(ROOT/'scripts/stop.sh')])}
     while True:
         try:
             dashboard()
@@ -142,7 +154,7 @@ def main():
                 print('Menu encerrado.')
                 return 0
             if choice not in actions:
-                print('Opção inválida. Use 1, 2, 3, 4, 5, 6 ou 0.')
+                print('Opção inválida. Use 1, 2, 3, 4, 5, 6, 7 ou 0.')
                 continue
             actions[choice]()
         except EOFError:

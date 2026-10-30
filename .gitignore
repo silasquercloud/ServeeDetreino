@@ -10,3 +10,8 @@ __pycache__/
 playit.toml
 playit-secret.txt
 .toolchains/
+
+template-server/
+.bwfe-import-*/
+.bwfe-maps-*/
+imports/

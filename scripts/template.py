@@ -60,16 +60,17 @@ def prepare(archive):
         shutil.move(str(server),STAGE)
     print(json.dumps(report(STAGE),indent=2,ensure_ascii=False))
 
-def add_maps(archive):
-    if not STAGE.exists():raise ValueError('Importe primeiro o BWFE')
-    expected={p.stem for p in (STAGE/'plugins/BedWars2023/Arenas').glob('*.yml')}
+def add_maps(archive, root=None):
+    root = STAGE if root is None else root
+    if not root.exists():raise ValueError('Importe primeiro o BWFE')
+    expected={p.stem for p in (root/'plugins/BedWars2023/Arenas').glob('*.yml')}
     with tempfile.TemporaryDirectory(dir=ROOT,prefix='.bwfe-maps-') as temporary:
         temp=pathlib.Path(temporary);extract(archive,temp)
         found=[p.parent for p in temp.rglob('level.dat') if p.parent.name in expected]
         if not found:raise ValueError('ZIP sem mundos correspondentes às arenas configuradas')
-        if any((STAGE/p.name).exists() for p in found):raise ValueError('Um dos mapas já existe; arquivos preservados')
-        for p in found:shutil.copytree(p,STAGE/p.name)
-    print(json.dumps(report(STAGE),indent=2,ensure_ascii=False))
+        if any((root/p.name).exists() for p in found):raise ValueError('Um dos mapas já existe; arquivos preservados')
+        for p in found:shutil.copytree(p,root/p.name)
+    print(json.dumps(report(root),indent=2,ensure_ascii=False))
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('action',choices=['import','maps','check']);parser.add_argument('archive',nargs='?');a=parser.parse_args()
@@ -84,3 +85,4 @@ def main():
         return 0
     except (OSError,ValueError,RuntimeError,zipfile.BadZipFile) as e:print('Não concluído:',e);return 1
 if __name__=='__main__':raise SystemExit(main())
+

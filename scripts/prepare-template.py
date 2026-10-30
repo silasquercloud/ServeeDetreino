@@ -47,9 +47,30 @@ def download_citizens(url, target):
                     raise ValueError('ZIP oficial sem o JAR esperado ou tamanho inválido')
                 target.write_bytes(z.read(matches[0]))
         except Exception as archive_error:
-            raise ValueError(f'Direto: {direct_error}; ZIP oficial: {archive_error}') from archive_error
+            try:
+                download_citizens_actions(target)
+            except Exception as actions_error:
+                raise ValueError(f'Direto: {direct_error}; ZIP oficial: {archive_error}; GitHub: {actions_error}') from actions_error
         finally:
             archive.unlink(missing_ok=True)
+
+def download_citizens_actions(target):
+    if not shutil.which('gh'):
+        raise ValueError('GitHub CLI (gh) ausente; use o Codespace ou imports/plugins/')
+    repo='silasquercloud/ServeeDetreino'
+    result=subprocess.run(['gh','api',f'repos/{repo}/actions/workflows/citizens-cache.yml/runs?status=success&branch=main&per_page=1'],capture_output=True,text=True,timeout=30)
+    if result.returncode:raise ValueError('Sem acesso ao artefato GitHub; confira gh auth status')
+    runs=json.loads(result.stdout).get('workflow_runs',[])
+    if not runs:raise ValueError('Ainda não existe download bem-sucedido no Actions; consulte a aba Actions do repositório')
+    with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+        result=subprocess.run(['gh','run','download',str(runs[0]['id']),'-R',repo,'-n','citizens-2.0.35-b3478','-D',tmp],capture_output=True,text=True,timeout=120)
+        if result.returncode:raise ValueError('Não foi possível baixar o artefato do Actions')
+        candidate=pathlib.Path(tmp)/'Citizens-2.0.35-b3478.jar'
+        actual,version,_,files=descriptor(candidate)
+        if actual!='Citizens' or '2.0.35' not in version or '3478' not in version or not any('v1_8_R3' in f for f in files):
+            raise ValueError('Artefato não corresponde ao Citizens 3478 com suporte 1.8.8')
+        shutil.copy2(candidate,target)
+        print('Citizens obtido pelo GitHub Actions.',flush=True)
 
 def dependencies(root,offline=False):
     installed={descriptor(p)[0] for p in (root/'plugins').glob('*.jar')}
@@ -107,15 +128,17 @@ def prepare(offline=False,archive=None):
             if chosen is None or not chosen.is_file():raise ValueError('Envie BWFE (25.1.0).zip para imports/ no Codespace e execute novamente. O anexo do chat não aparece automaticamente no Codespace.')
             template.prepare(chosen)
         status=template.report(root)
+        if status['arenas_configuradas'] != 46:
+            raise ValueError('Esperadas 46 configurações BWFE; encontradas '+str(status['arenas_configuradas']))
+        print('Arenas: '+str(46-len(status['mapas_ausentes']))+'/46 presentes; importando as ausentes.',flush=True)
         if status['mapas_ausentes']:
-            if active:raise ValueError('Mapas ausentes na instalação ativa; preserve os mundos e repare antes de iniciar.')
             archive_path=ROOT/'maps/arenas-bwfe-original.zip'
             with zipfile.ZipFile(archive_path) as src,tempfile.TemporaryDirectory(dir=ROOT) as tmp:
                 subset=pathlib.Path(tmp)/'missing.zip'
                 with zipfile.ZipFile(subset,'w',zipfile.ZIP_DEFLATED) as out:
                     for item in src.infolist():
                         if pathlib.PurePosixPath(item.filename).parts[0] in status['mapas_ausentes']:out.writestr(item,src.read(item))
-                template.add_maps(subset)
+                template.add_maps(subset, root)
         issues=dependencies(root,offline)+hard_dependencies(root)
         status=template.report(root)
         if status['mapas_ausentes']:issues.append('Mapas ausentes: '+str(len(status['mapas_ausentes'])))
@@ -149,3 +172,4 @@ def main():
     try:return prepare(a.offline,a.archive)
     except Exception as e:print('PREPARAÇÃO NÃO CONCLUÍDA: '+str(e));return 1
 if __name__=='__main__':raise SystemExit(main())
+

@@ -1,0 +1,31 @@
+name: Obter Citizens 3478
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/citizens-cache.yml']
+permissions:
+  contents: read
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Baixar build oficial e verificar adaptador 1.8.8
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 --max-time 60 --output Citizens-2.0.35-b3478.jar 'https://ci.citizensnpcs.co/job/Citizens2/3478/artifact/dist/target/Citizens-2.0.35-b3478.jar'
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('Citizens-2.0.35-b3478.jar') as z:
+              assert z.testzip() is None
+              descriptor=z.read('plugin.yml').decode()
+              assert '2.0.35' in descriptor and '3478' in descriptor
+              assert any('v1_8_R3' in f for f in z.namelist())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: citizens-2.0.35-b3478
+          path: Citizens-2.0.35-b3478.jar
+          retention-days: 90
+          if-no-files-found: error
